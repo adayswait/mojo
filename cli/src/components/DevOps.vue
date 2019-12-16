@@ -8,7 +8,7 @@
             <p class="menu-label">General</p>
             <ul class="menu-list">
               <li>
-                <a>主页</a>
+                <router-link to="/devops/home">主页</router-link>
               </li>
             </ul>
             <p class="menu-label">Transactions</p>

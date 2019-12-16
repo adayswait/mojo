@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Home from "@/components/Home.vue"
 import DevOps from "@/components/DevOps.vue";
+import OpsHome from "@/components/DevOps/Home.vue"
 import QueryOps from "@/components/DevOps/QueryOps.vue";
 import QueryUsr from "@/components/DevOps/QueryUsr.vue";
 import NewDep from "@/components/DevOps/NewDep.vue";
@@ -28,30 +29,34 @@ const router = new Router({
             component: DevOps,
             children: [
                 {
+                    path: "home",
+                    component: OpsHome
+                },
+                {
                     path: "queryops",
                     component: QueryOps
                 },
                 {
-                    path:"queryusr",
-                    component:QueryUsr
+                    path: "queryusr",
+                    component: QueryUsr
                 },
                 {
-                    path:"newdep",
-                    component:NewDep
+                    path: "newdep",
+                    component: NewDep
                 },
                 {
-                    path:"newini",
-                    component:NewIni
+                    path: "newini",
+                    component: NewIni
                 },
                 {
-                    path:"newusr",
-                    component:NewUsr
+                    path: "newusr",
+                    component: NewUsr
                 },
                 {
-                    path:"otherops",
-                    component:OtherOps
+                    path: "otherops",
+                    component: OtherOps
                 }
-                
+
             ]
         },
         {
