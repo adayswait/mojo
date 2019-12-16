@@ -1,5 +1,7 @@
 <template>
-  <footer font color="red">{{this.$store.state.footer}}</footer>
+  <div v-if="this.$store.state.visible.Footer">
+    <footer font color="red">{{this.$store.state.footer}}</footer>
+  </div>
 </template>
 
 <script>

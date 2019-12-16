@@ -25,12 +25,6 @@
                 </li>
               </ul>
             </li>
-            <li>
-              <a>Transfers</a>
-            </li>
-            <li>
-              <a>Balance</a>
-            </li>
           </ul>
           <p class="menu-label">Administration</p>
           <ul class="menu-list">
@@ -52,18 +46,29 @@
               <a>权限管理</a>
             </li>
           </ul>
+
+          <p class="menu-label">Others</p>
+          <ul class="menu-list">
+            <li>
+              <a>其他操作</a>
+            </li>
+          </ul>
         </aside>
       </div>
-      <div class="column is-10" style="background-color:#97FFFF">haha</div>
+      <Query />
     </div>
   </div>
 </template>
 
 <script>
+import Query from "./Home/Query.vue";
 export default {
   name: "Home",
   data: function() {
     return {};
+  },
+  components: {
+    Query
   }
 };
 </script>

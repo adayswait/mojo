@@ -6,9 +6,10 @@ Vue.use(Vuex)
 const state = {
     visible: {
         Login: false,
-        Home: true
+        Home: true,
+        Footer: false
     },
-    footer:"Copyrights Reserved. All materials not authorized may not be redirected or for other usages."
+    footer: "Copyrights Reserved. All materials not authorized may not be redirected or for other usages."
 };
 const mutations = {//包含多个更新status函数的对象
     setVisible(state, payload) {

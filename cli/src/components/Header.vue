@@ -6,10 +6,10 @@
           <a href="../index.html">Home</a>
         </li>
         <li>
-          <a href="../Lab/index.html">Lab</a>
+          <a href="../Lab/index.html">DevOps</a>
         </li>
         <li>
-          <a href="../Buzz/index.html">Buzz</a>
+          <a href="../Buzz/index.html">Data</a>
         </li>
         <li>
           <a href="../About/index.html">About</a>
