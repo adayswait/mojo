@@ -18,10 +18,10 @@
 
 <script>
 export default {
-  name: "Data",
+  name: "NewIni",
   data: function() {
     return {
-      title: "Data"
+      title: "NewIni"
     };
   }
 };

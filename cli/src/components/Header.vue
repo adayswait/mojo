@@ -19,7 +19,7 @@
 
 <script>
 export default {
-  name: "Login",
+  name: "Header",
   data: function() {
     return {
       title: "Header"

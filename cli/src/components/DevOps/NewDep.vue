@@ -18,10 +18,10 @@
 
 <script>
 export default {
-  name: "Data",
+  name: "NewDep",
   data: function() {
     return {
-      title: "Data"
+      title: "NewDep"
     };
   }
 };
