@@ -3,17 +3,15 @@
     <div id="headermenu">
       <ul>
         <li>
-          <a href="../index.html">Home</a>
+          <router-link to="/home">Home</router-link>
         </li>
         <li>
-          <a href="../Lab/index.html">DevOps</a>
+          <router-link to="/devops">DevOps</router-link>
         </li>
         <li>
-          <a href="../Buzz/index.html">Data</a>
+           <router-link to="/data">Data</router-link>
         </li>
-        <li>
-          <a href="../About/index.html">About</a>
-        </li>
+        <li></li>
       </ul>
     </div>
   </header>
@@ -37,32 +35,27 @@ header {
   height: 40px;
   width: 100%;
 }
-#headermenu
-{
-	margin:0px 10%;
+#headermenu {
+  margin: 0px 10%;
 }
-#headermenu li
-{
-	float:left;
-	background-color: #333333;
-	border-bottom:4px solid #333333;
-	margin:0 30px 0 0;
-	line-height:36px;
-	list-style:none;
+#headermenu li {
+  float: left;
+  background-color: #333333;
+  border-bottom: 4px solid #333333;
+  margin: 0 30px 0 0;
+  line-height: 36px;
+  list-style: none;
 }
-#headermenu li:hover
-{
-	border-bottom:4px solid #6DC2E9;
+#headermenu li:hover {
+  border-bottom: 4px solid #6dc2e9;
 }
-#headermenu a
-{
-	display: block;
-	color:#ffffff;
-	font-size: 1.1em;
-	text-decoration: none;
+#headermenu a {
+  display: block;
+  color: #ffffff;
+  font-size: 1.1em;
+  text-decoration: none;
 }
-#headermenu a:hover
-{
-	color:#6DC2E9;
+#headermenu a:hover {
+  color: #6dc2e9;
 }
 </style>

@@ -15,6 +15,7 @@
       <br />
       <a class="button is-light is-fullwidth">注册</a>
       <br />
+      无脑点登录
     </div>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <div>404</div>
+  <div>404 Page</div>
 </template>
 
 <script>

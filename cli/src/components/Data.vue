@@ -8,20 +8,20 @@
     <br />
     <article class="message">
       <div class="message-header">
-        <p>Homepage</p>
+        <p>Data Page</p>
         <button class="delete" aria-label="delete"></button>
       </div>
-      <div class="message-body">Homepage under developing</div>
+      <div class="message-body">Date Page under developing</div>
     </article>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Home",
+  name: "Data",
   data: function() {
     return {
-      title: "Home"
+      title: "Data"
     };
   }
 };
