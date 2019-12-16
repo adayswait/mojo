@@ -1,5 +1,8 @@
 <template>
-  <div class="column is-2 is-offset-5" v-if="visible">
+  <div class="column is-2 is-offset-5" v-if="this.$store.state.visible.Login">
+    <br />
+    <br />
+    <br />
     <div class="box">
       <br />
       <input class="input" type="text" placeholder="账号" v-model="usr" />
@@ -29,7 +32,14 @@ export default {
   },
   methods: {
     login: function() {
-      this.visible=false;
+      this.$store.commit("setVisible", {
+        name: "Login",
+        visible: false
+      });
+      this.$store.commit("setVisible", {
+        name: "Home",
+        visible: true
+      });
     }
   }
 };

@@ -1,5 +1,5 @@
 <template>
-  <footer>copyrights reserved</footer>
+  <footer font color="red">{{this.$store.state.footer}}</footer>
 </template>
 
 <script>
@@ -19,9 +19,9 @@ footer {
   position: absolute; /*设定footer绝对位置在底部*/
   bottom: 0;
   width: 100%; /*展开footer宽度*/
-  background-color:#000000;
+  background-color: #000000;
   line-height: 40px;
-  display: flex; 
+  display: flex;
   justify-content: center;
 }
 </style>

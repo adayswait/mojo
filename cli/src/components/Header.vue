@@ -6,12 +6,6 @@
           <a href="../index.html">Home</a>
         </li>
         <li>
-          <a href="index.html">Tech</a>
-        </li>
-        <li>
-          <a href="../Miscellanea/index.html">Miscellanea</a>
-        </li>
-        <li>
           <a href="../Lab/index.html">Lab</a>
         </li>
         <li>

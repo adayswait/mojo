@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <Header />
+    <br/>
     <Login />
     <Home />
     <Footer/>
@@ -12,7 +13,6 @@ import Header from "./components/Header.vue";
 import Login from "./components/Login.vue";
 import Home from "./components/Home.vue";
 import Footer from "./components/Footer.vue"
-
 export default {
   name: "app",
   components: {
