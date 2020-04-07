@@ -18,10 +18,10 @@
 
 <script>
 export default {
-  name: "OtherIos",
+  name: "OtherOps",
   data: function() {
     return {
-      title: "OtherIos"
+      title: "OtherOps"
     };
   }
 };

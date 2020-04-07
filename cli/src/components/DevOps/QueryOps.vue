@@ -25,7 +25,7 @@
         </th>
       </tr>
     </thead>
-    <tbody class>
+    <tbody>
       <tr v-for="item in this.$store.state.mock.query" :key="item[0]">
         <th>{{item[0]}}</th>
         <td>{{item[1]}}</td>
