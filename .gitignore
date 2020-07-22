@@ -1,6 +1,8 @@
 .DS_Store
 cli/node_modules
 cli/dist
+svr/mojo
+svr/*.db
 
 # local env files
 .env.local
