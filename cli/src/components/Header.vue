@@ -14,6 +14,12 @@
         <li></li>
       </ul>
     </div>
+    <div v-if="this.$store.state.visible.UsrInfo">
+      <li id="usrinfo">
+        <router-link to="/usrinfo">modu</router-link>
+      </li>
+    </div>
+    
   </header>
 </template>
 
@@ -45,6 +51,19 @@ header {
   margin: 0 30px 0 0;
   line-height: 36px;
   list-style: none;
+}
+#usrinfo {
+  float:right;
+  border-bottom: 4px solid #333333;
+  margin: 0 30px 0 0;
+  line-height: 36px;
+  list-style: none;
+}
+#usrinfo a {
+  display: block;
+  color: #ffffff;
+  font-size: 1.1em;
+  text-decoration: none;
 }
 #headermenu li:hover {
   border-bottom: 4px solid #6dc2e9;

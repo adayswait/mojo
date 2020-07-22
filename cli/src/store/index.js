@@ -7,10 +7,11 @@ const state = {
     visible: {
         Login: true,
         Home: false,
-        Footer: true
+        Footer: true,
+        UsrInfo: false
     },
     mock: {
-        query:[
+        query: [
             [1, 'crespo', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
             [2, 'messi', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
             [3, 'rui costa', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
@@ -21,7 +22,7 @@ const state = {
             [8, 'rui costa', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
             [9, 'cocacola', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
             [10, 'inzaghi', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-        ] 
+        ]
     },
     footer: "Copyrights Reserved. All materials not authorized may not be redirected or for other usages."
 };

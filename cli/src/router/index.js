@@ -11,6 +11,7 @@ import NewUsr from "@/components/DevOps/NewUsr.vue";
 import OtherOps from "@/components/DevOps/OtherOps.vue";
 import Data from "@/components/Data.vue";
 import e404 from '@/components/E404.vue';
+import UsrInfo from '@/components/UsrInfo.vue';
 
 Vue.use(Router)
 
@@ -62,6 +63,10 @@ const router = new Router({
         {
             path: "/data",
             component: Data
+        },
+        {
+            path: "/usrinfo",
+            component: UsrInfo
         },
         {
             path: '*',

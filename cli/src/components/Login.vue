@@ -41,6 +41,10 @@ export default {
         name: "Home",
         visible: true
       });
+      this.$store.commit("setVisible", {
+        name: "UsrInfo",
+        visible: true
+      });
     }
   }
 };
