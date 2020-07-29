@@ -1,35 +1,32 @@
 package main
 
-import "log"
+import "fmt"
 import "github.com/gofiber/fiber"
 import "github.com/gofiber/cors"
-import "github.com/gofiber/session"
-import "github.com/gofiber/websocket"
-import "github.com/boltdb/bolt"
+import "github.com/adayswait/mojo/utils"
+import "github.com/adayswait/mojo/db"
+import "github.com/adayswait/mojo/global"
+import "github.com/adayswait/mojo/router"
+import "github.com/adayswait/mojo/ws"
 
 func main() {
 	app := fiber.New()
-	sessions := session.New()
-	app.Use("/ws", func(c *fiber.Ctx) {
-		// IsWebSocketUpgrade returns true if the client
-		// requested upgrade to the WebSocket protocol.
-		if websocket.IsWebSocketUpgrade(c) {
-			c.Locals("allowed", true)
-			c.Next()
-		}
-	})
-
 	app.Use(cors.New())
-	app.Get("/", func(c *fiber.Ctx) {
-		store := sessions.Get(c) // get/create new session
-		defer store.Save()
-		c.Send("mojo")
+	router.Route(app)
+	app.Static("/", "../view/")
+
+	// Optional middleware
+	app.Use("/ws", ws.New())
+
+	// Upgraded websocket request
+	
+	app.Use(func(c *fiber.Ctx) {
+		c.SendStatus(404)
 	})
 
-	db, err := bolt.Open("mojo.db", 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	app.Listen(3000)
+	// db.Set(global.BUCKET_USER,"jesse","value")
+	value, _ := db.Get(global.BUCKET_USER, "jesse")
+	fmt.Println("ends")
+	fmt.Println(string(value))
+	app.Listen(int(utils.GetListeningPort()))
 }

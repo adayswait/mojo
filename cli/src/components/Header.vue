@@ -1,80 +1,83 @@
 <template>
   <header>
-    <div id="headermenu">
-      <ul>
-        <li>
-          <router-link to="/home">Home</router-link>
-        </li>
-        <li>
-          <router-link to="/devops">DevOps</router-link>
-        </li>
-        <li>
-           <router-link to="/data">Data</router-link>
-        </li>
-        <li></li>
-      </ul>
-    </div>
-    <div v-if="this.$store.state.visible.UsrInfo">
-      <li id="usrinfo">
-        <router-link to="/usrinfo">modu</router-link>
-      </li>
-    </div>
-    
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="https://github.com/adayswait">
+          <img src="./../assets/logo.png" width="33" height="33" />
+        </a>
+
+        <a
+          role="button"
+          class="navbar-burger burger"
+          aria-label="menu"
+          aria-expanded="false"
+          data-target="navbarDataTarget"
+          @click="showSmallMenu"
+        >
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="navbarDataTarget" class="navbar-menu">
+        <div class="navbar-start">
+          <a class="navbar-item">Home</a>
+
+          <a class="navbar-item">Documentation</a>
+
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">More</a>
+
+            <div class="navbar-dropdown">
+              <a class="navbar-item">About</a>
+              <a class="navbar-item">Jobs</a>
+              <a class="navbar-item">Contact</a>
+              <hr class="navbar-divider" />
+              <a class="navbar-item">Report an issue</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="navbar-item">
+          <!-- <div class="dropdown is-active">
+            <div class="dropdown-trigger">
+              <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                <span>个人信息</span>
+                <span class="icon is-small">
+                  <i class="fas fa-angle-down" aria-hidden="true"></i>
+                </span>
+              </button>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+              <div class="dropdown-content">
+                <a href="#" class="dropdown-item">Dropdown item</a>
+                <a class="dropdown-item">Other dropdown item</a>
+                <a href="#" class="dropdown-item is-active">Active dropdown item</a>
+                <a href="#" class="dropdown-item">Other dropdown item</a>
+                <hr class="dropdown-divider" />
+                <a href="#" class="dropdown-item">With a divider</a>
+              </div>
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </nav>
   </header>
 </template>
 
 <script>
 export default {
   name: "Header",
-  data: function() {
+  data: function () {
     return {
-      title: "Header"
+      title: "Header",
     };
-  }
+  },
+  methods: {
+    showSmallMenu: async function () {
+      window.console.log("显示小菜单");
+    },
+  },
 };
 </script>
-
-<style scoped>
-header {
-  font-family: Helvetica;
-  background-color: #333333;
-  height: 40px;
-  width: 100%;
-}
-#headermenu {
-  margin: 0px 10%;
-}
-#headermenu li {
-  float: left;
-  background-color: #333333;
-  border-bottom: 4px solid #333333;
-  margin: 0 30px 0 0;
-  line-height: 36px;
-  list-style: none;
-}
-#usrinfo {
-  float:right;
-  border-bottom: 4px solid #333333;
-  margin: 0 30px 0 0;
-  line-height: 36px;
-  list-style: none;
-}
-#usrinfo a {
-  display: block;
-  color: #ffffff;
-  font-size: 1.1em;
-  text-decoration: none;
-}
-#headermenu li:hover {
-  border-bottom: 4px solid #6dc2e9;
-}
-#headermenu a {
-  display: block;
-  color: #ffffff;
-  font-size: 1.1em;
-  text-decoration: none;
-}
-#headermenu a:hover {
-  color: #6dc2e9;
-}
-</style>

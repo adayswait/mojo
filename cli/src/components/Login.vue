@@ -1,5 +1,5 @@
 <template>
-  <div class="column is-2 is-offset-5" v-if="this.$store.state.visible.Login">
+  <div class="column is-one-fifth-desktop is-offset-5" v-if="this.$store.state.visible.Login">
     <br />
     <br />
     <br />
@@ -14,8 +14,7 @@
       <a class="button is-primary is-fullwidth" @click="login">登陆</a>
       <br />
       <a class="button is-light is-fullwidth">注册</a>
-      <br />
-      无脑点登录
+      <br />无脑点登录
     </div>
   </div>
 </template>
@@ -23,29 +22,35 @@
 <script>
 export default {
   name: "Login",
-  data: function() {
+  data: function () {
     return {
       title: "Login",
       usr: "",
       passwd: "",
-      visible: true
+      visible: true,
     };
   },
   methods: {
-    login: function() {
+    login: async function () {
       this.$store.commit("setVisible", {
         name: "Login",
-        visible: false
+        visible: false,
       });
       this.$store.commit("setVisible", {
         name: "Home",
-        visible: true
+        visible: true,
       });
       this.$store.commit("setVisible", {
         name: "UsrInfo",
-        visible: true
+        visible: true,
       });
-    }
-  }
+      try {
+        const ret = await this.$httpc.get("");
+        window.console.log("登录成功",ret);
+      } catch (e) {
+        window.console.log("登录失败");
+      }
+    },
+  },
 };
 </script>
