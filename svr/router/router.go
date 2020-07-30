@@ -1,14 +1,22 @@
 package router
 
-import "github.com/adayswait/mojo/handler"
-import "github.com/gofiber/websocket"
 import "github.com/gofiber/fiber"
+import "github.com/gofiber/websocket"
+import "github.com/adayswait/mojo/handler"
 
 func Route(app *fiber.App) {
+	app.Static("/", "../view/")
 	app.Get("/ws", websocket.New(handler.Websocket))
+	app.Get("/test", func(c *fiber.Ctx) {
+		c.Send("test")
+	})
 	api := app.Group("/api")
-	api.Get("/", handler.Hello)
+	web := app.Group("/web")
 
-	auth := api.Group("/auth")
-	auth.Get("/login", handler.Login)
+	authApi := api.Group("/auth")
+	authApi.Get("/login", handler.Login)
+	authApi.Get("/logout", handler.Logout)
+	authApi.Get("/register", handler.Register)
+	authWeb := web.Group("/auth")
+	authWeb.Get("/login", handler.Login)
 }
