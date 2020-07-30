@@ -5,7 +5,7 @@ import "github.com/gofiber/websocket"
 import "github.com/adayswait/mojo/handler"
 
 func Route(app *fiber.App) {
-	app.Static("/", "../view/")
+	app.Static("/", "../cli/")
 	app.Get("/ws", websocket.New(handler.Websocket))
 	app.Get("/test", func(c *fiber.Ctx) {
 		c.Send("test")

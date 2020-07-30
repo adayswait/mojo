@@ -12,6 +12,7 @@ type UserInfo struct {
 }
 
 func Register(user, passwd string) error {
+	writeLock.Lock()
 	registerErr := localDB.Update(func(tx *bolt.Tx) error {
 		bup := tx.Bucket([]byte(global.BUCKET_USR_PASSWD))
 		existUser := bup.Get([]byte(user))
@@ -39,10 +40,12 @@ func Register(user, passwd string) error {
 		eut := but.Put([]byte(user), []byte(token))
 		return eut
 	})
+	defer writeLock.Unlock()
 	return registerErr
 }
 
 func Auth(user, passwd string) error {
+	writeLock.Lock()
 	authErr := localDB.Update(func(tx *bolt.Tx) error {
 		bup := tx.Bucket([]byte(global.BUCKET_USR_PASSWD))
 		passwdInDb := string(bup.Get([]byte(user)))
@@ -55,6 +58,7 @@ func Auth(user, passwd string) error {
 		// eut := but.Put([]byte(user), []byte(token))
 		// return eut
 	})
+	defer writeLock.Unlock()
 	return authErr
 }
 
