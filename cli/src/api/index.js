@@ -4,7 +4,8 @@ import axios from 'axios'
 const httpClient = axios.create({
     baseURL: 'http://10.1.1.248:3000/',
     timeout: 1000,
-    headers: { 'X-Custom-Header': 'mojo' }
+    headers: { 'X-Custom-Header': 'mojo' },
+    withCredentials:true
 });
 
 // request拦截器
@@ -29,11 +30,11 @@ httpClient.interceptors.response.use(
         // 统一处理状态
         const res = response.data;
         window.console.log(res);
-        if (res.Code != 0) { // 需自定义
+        if (res.code != 0) { // 需自定义
             // 返回异常
-            return Promise.reject(res.Code);
+            return Promise.reject(res);
         } else {
-            return res.Message;
+            return res;
         }
     },
     // 处理处理

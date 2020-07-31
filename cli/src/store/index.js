@@ -4,6 +4,10 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 //状态对象
 const state = {
+    userInfo: {
+        user: undefined,
+        group: undefined
+    },
     visible: {
         Login: true,
         Home: false,
@@ -29,6 +33,12 @@ const state = {
 const mutations = {//包含多个更新status函数的对象
     setVisible(state, { name, visible }) {
         state.visible[name] = visible;
+    },
+    setUserInfo(state, { user, group }) {
+        state.userInfo = {
+            user: user,
+            group: group
+        }
     }
 };
 const actions = {//包含多个对应事件回调函数的对象

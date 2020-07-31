@@ -24,7 +24,7 @@
         <div class="navbar-start">
           <a class="navbar-item">Home</a>
 
-          <a class="navbar-item">Documentation</a>
+          <a class="navbar-item" href="http://10.1.1.248:3000/fs">Documentation</a>
 
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">More</a>
@@ -39,27 +39,22 @@
           </div>
         </div>
 
-        <div class="navbar-item">
-          <!-- <div class="dropdown is-active">
-            <div class="dropdown-trigger">
-              <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                <span>个人信息</span>
-                <span class="icon is-small">
-                  <i class="fas fa-angle-down" aria-hidden="true"></i>
-                </span>
-              </button>
+        <div class="navbar-end">
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              <p>
+                <strong>{{this.$store.state.userInfo.user}}</strong>
+                <small>@{{this.GROUP[this.$store.state.userInfo.group]}}</small>
+              </p>
+            </a>
+            <div class="navbar-dropdown">
+              <a class="navbar-item">About</a>
+              <a class="navbar-item">Edit</a>
+              <a class="navbar-item">Message</a>
+              <hr class="navbar-divider" />
+              <a href="./" class="navbar-item" @click="logout">退出</a>
             </div>
-            <div class="dropdown-menu" id="dropdown-menu" role="menu">
-              <div class="dropdown-content">
-                <a href="#" class="dropdown-item">Dropdown item</a>
-                <a class="dropdown-item">Other dropdown item</a>
-                <a href="#" class="dropdown-item is-active">Active dropdown item</a>
-                <a href="#" class="dropdown-item">Other dropdown item</a>
-                <hr class="dropdown-divider" />
-                <a href="#" class="dropdown-item">With a divider</a>
-              </div>
-            </div>
-          </div> -->
+          </div>
         </div>
       </div>
     </nav>
@@ -72,11 +67,39 @@ export default {
   data: function () {
     return {
       title: "Header",
+      GROUP: {
+        0: "未激活",
+        1: "管理员",
+        2: "未定义",
+      },
     };
   },
   methods: {
     showSmallMenu: async function () {
       window.console.log("显示小菜单");
+    },
+    logout: async function () {
+      try {
+        await this.$httpc.get("/web/auth/logout");
+        this.$store.commit("setUserInfo", {
+          user: undefined,
+          group: undefined,
+        });
+        this.$store.commit("setVisible", {
+          name: "Login",
+          visible: true,
+        });
+        this.$store.commit("setVisible", {
+          name: "Home",
+          visible: false,
+        });
+        this.$store.commit("setVisible", {
+          name: "UsrInfo",
+          visible: false,
+        });
+      } catch (e) {
+        this.err = e.data;
+      }
     },
   },
 };

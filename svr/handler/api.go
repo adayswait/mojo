@@ -38,6 +38,12 @@ func Login(c *fiber.Ctx) {
 	if len(accessToken) == 0 {
 		//用户名密码验证未成功, 再尝试使用access_token进行验证
 		accessToken = c.Cookies(global.ACCESS_TOKEN)
+	} else {
+		cookie := new(fiber.Cookie)
+		cookie.Name = global.ACCESS_TOKEN
+		cookie.Expires = time.Now().Add(24 * time.Hour)
+		cookie.Value = accessToken
+		c.Cookie(cookie)
 	}
 
 	if len(accessToken) == 0 {
@@ -88,7 +94,7 @@ func Register(c *fiber.Ctx) {
 		c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": edb.Error()})
 		return
 	}
-	token, etk := db.GetAccessToken(secInfo.User)
+	accessToken, etk := db.GetAccessToken(secInfo.User)
 	if etk != nil {
 		c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": etk.Error()})
 		return
@@ -96,7 +102,7 @@ func Register(c *fiber.Ctx) {
 	cookie := new(fiber.Cookie)
 	cookie.Name = global.ACCESS_TOKEN
 	cookie.Expires = time.Now().Add(24 * time.Hour)
-	cookie.Value = token
+	cookie.Value = accessToken
 	c.Cookie(cookie)
 	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
