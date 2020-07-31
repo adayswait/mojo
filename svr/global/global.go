@@ -5,9 +5,9 @@ type RetCode int
 
 //用户权限组
 const (
-	ADMIN GroupType = iota
-	USER
-	UNDEF
+	GROUP_ADMIN GroupType = iota
+	GROUP_USER
+	GROUP_UNDEF
 )
 
 //api返回code枚举
@@ -19,6 +19,8 @@ const (
 	RET_ERR_USER_PASSWD
 	RET_ERR_ACCESS_TOKEN
 	RET_ERR_CREATE_TOKEN
+	RET_ERR_NO_RIGHT
+	RET_ERR_SESSION_INVALID
 )
 
 //数据库表名
@@ -28,3 +30,7 @@ const BUCKET_USER_TOKEN = "user:token"
 
 //cookie名
 const ACCESS_TOKEN = "access_token"
+
+//session key
+const SESSION_KEY_USER = "user"
+const SESSION_KEY_GROUP = "group"

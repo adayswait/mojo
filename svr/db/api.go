@@ -23,7 +23,7 @@ func Register(user, passwd string) error {
 		if eup != nil {
 			return eup
 		}
-		info := UserInfo{User: user, Group: int(global.UNDEF)}
+		info := UserInfo{User: user, Group: int(global.GROUP_UNDEF)}
 
 		infoData, ejn := json.Marshal(info)
 		if ejn != nil {
@@ -81,4 +81,31 @@ func GetAccessToken(user string) (string, error) {
 }
 func SetTokenInfo(token, info string) error {
 	return Set(global.BUCKET_TOKEN_INFO, token, info)
+}
+
+func Buckets() []string {
+	ret := []string{}
+	localDB.View(func(tx *bolt.Tx) error {
+		return tx.ForEach(func(name []byte, _ *bolt.Bucket) error {
+			b := []string{string(name)}
+			ret = append(ret, b...)
+			return nil
+		})
+	})
+	return ret
+}
+func Keys(bucketName string) []string {
+	ret := []string{}
+	localDB.View(func(tx *bolt.Tx) error {
+		// Assume bucket exists and has keys
+		b := tx.Bucket([]byte(bucketName))
+
+		b.ForEach(func(k, v []byte) error {
+			ret = append(ret, string(k))
+			ret = append(ret, string(v))
+			return nil
+		})
+		return nil
+	})
+	return ret
 }

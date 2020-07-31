@@ -1,6 +1,5 @@
 package handler
 
-// import "fmt"
 import "time"
 import "encoding/json"
 import "github.com/gofiber/fiber"
@@ -61,8 +60,8 @@ func Login(c *fiber.Ctx) {
 	//create session
 	(func() {
 		store := sessions.Get(c)
-		store.Set("user", userInfo.User)
-		store.Set("group", userInfo.Group)
+		store.Set(global.SESSION_KEY_USER, userInfo.User)
+		store.Set(global.SESSION_KEY_GROUP, userInfo.Group)
 		defer store.Save()
 	})()
 }
@@ -105,4 +104,40 @@ func Register(c *fiber.Ctx) {
 	cookie.Value = accessToken
 	c.Cookie(cookie)
 	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+}
+
+func ShowAllDB(c *fiber.Ctx) {
+	store := sessions.Get(c)
+	// user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID, "data": "session invalid"})
+		return
+	}
+	if int(group.(int64)) > int(global.GROUP_UNDEF) {
+		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT, "data": "no right to do this"})
+		return
+	}
+	ret := db.Buckets()
+	c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
+}
+
+func ShowAllKV(c *fiber.Ctx) {
+	store := sessions.Get(c)
+	// user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID, "data": "session invalid"})
+		return
+	}
+	if int(group.(int64)) > int(global.GROUP_UNDEF) {
+		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT, "data": "no right to do this"})
+		return
+	}
+	table := c.Params("table")
+	key := c.Params("key")
+	if len(key) == 0 {
+		ret := db.Keys(table)
+		c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
+	}
 }

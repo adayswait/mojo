@@ -23,12 +23,9 @@
       <div id="navbarDataTarget" class="navbar-menu">
         <div class="navbar-start">
           <a class="navbar-item">Home</a>
-
           <a class="navbar-item" href="http://10.1.1.248:3000/fs">Documentation</a>
-
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">More</a>
-
             <div class="navbar-dropdown">
               <a class="navbar-item">About</a>
               <a class="navbar-item">Jobs</a>
@@ -39,7 +36,7 @@
           </div>
         </div>
 
-        <div class="navbar-end">
+        <div class="navbar-end" v-if="!this.$store.state.visible.Login">
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
               <p>
@@ -47,7 +44,7 @@
                 <small>@{{this.GROUP[this.$store.state.userInfo.group]}}</small>
               </p>
             </a>
-            <div class="navbar-dropdown">
+            <div class="navbar-dropdown is-right">
               <a class="navbar-item">About</a>
               <a class="navbar-item">Edit</a>
               <a class="navbar-item">Message</a>

@@ -49,7 +49,7 @@
             <p class="menu-label">Others</p>
             <ul class="menu-list">
               <li>
-                <router-link to="/devops/otherops">其他操作</router-link>
+                <router-link to="/devops/dbview">DB View</router-link>
               </li>
             </ul>
           </aside>

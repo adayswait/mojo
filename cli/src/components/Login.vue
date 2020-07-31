@@ -3,8 +3,6 @@
     <br />
     <br />
     <br />
-    <br />
-    <br />
     <div class="box">
       <div v-if="!this.loginBoxVisible">
         <br />
@@ -20,17 +18,23 @@
       </div>
       <div v-if="this.loginBoxVisible">
         <br />
-        <input class="input" type="text" placeholder="账号" v-model="usr" />
+        <input class="input is-primary" type="text" placeholder="账号" v-model="usr" />
         <br />
         <br />
-        <input class="input" type="text" placeholder="密码" v-model="passwd" />
+        <input class="input is-danger" type="password" placeholder="密码" v-model="passwd" />
         <br />
         <br />
-        <a class="button is-primary is-fullwidth" @click="login">登陆</a>
+        <a class="button is-primary is-fullwidth" @click="login" v-if="this.loginButtonVisible">登陆</a>
+        <div v-if="!this.loginButtonVisible">
+          <input class="input is-danger" type="password" placeholder="再次输入密码" v-model="repasswd" />
+          <br />
+        </div>
         <br />
-        <a class="button is-light is-fullwidth">注册</a>
+        <a class="button is-warning is-fullwidth" @click="register">注册</a>
         <br />
-        <p class="help is-danger">{{this.err}}</p>
+        <strong>
+          <p class="help is-danger">{{this.err}}</p>
+        </strong>
       </div>
     </div>
   </div>
@@ -45,7 +49,9 @@ export default {
       title: "Login",
       usr: "",
       passwd: "",
+      repasswd: "",
       loginBoxVisible: false,
+      loginButtonVisible: true,
       err: "",
     };
   },
@@ -75,8 +81,35 @@ export default {
           visible: true,
         });
       } catch (e) {
-        this.err = e.data || "network error";
+        this.err = e.data || "network error, try later";
         this.loginBoxVisible = true;
+      }
+    },
+    register: async function () {
+      try {
+        if (this.loginButtonVisible === true) {
+          this.loginButtonVisible = false;
+          return;
+        }
+        if (this.usr.length === 0) {
+          this.err = "username can't be empty";
+          return;
+        }
+        if (this.passwd.length < 6) {
+          this.err = "password length < 6";
+          return;
+        }
+        if (this.passwd !== this.repasswd) {
+          this.err = "ensure your password is the same";
+          return;
+        }
+        await this.$httpc.get("/web/auth/register", {
+          user: this.usr,
+          passwd: this.passwd,
+        });
+        this.login();
+      } catch (e) {
+        this.err = e.data || "register error, try later";
       }
     },
   },

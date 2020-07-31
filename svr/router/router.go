@@ -34,4 +34,9 @@ func Route(app *fiber.App) {
 	authWeb.Get("/login", handler.Login)
 	authWeb.Get("/logout", handler.Logout)
 	authWeb.Get("/register", handler.Register)
+
+	//db工具
+	dbWeb := web.Group("/db")
+	dbWeb.Get("/", handler.ShowAllDB)
+	dbWeb.Get("/:table/:key?", handler.ShowAllKV)
 }

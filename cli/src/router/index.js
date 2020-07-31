@@ -8,7 +8,7 @@ import QueryUsr from "@/components/DevOps/QueryUsr.vue";
 import NewDep from "@/components/DevOps/NewDep.vue";
 import NewIni from "@/components/DevOps/NewIni.vue";
 import NewUsr from "@/components/DevOps/NewUsr.vue";
-import OtherOps from "@/components/DevOps/OtherOps.vue";
+import DBview from "@/components/DevOps/DBview.vue";
 import Data from "@/components/Data.vue";
 import e404 from '@/components/E404.vue';
 import UsrInfo from '@/components/UsrInfo.vue';
@@ -54,8 +54,8 @@ const router = new Router({
                     component: NewUsr
                 },
                 {
-                    path: "otherops",
-                    component: OtherOps
+                    path: "dbview",
+                    component: DBview
                 }
 
             ]
