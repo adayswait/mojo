@@ -107,7 +107,7 @@ export default {
           this.tableList.push([key]);
         }
       } catch (e) {
-        window.alert(e);
+        this.$store.commit("pushMessage", `获取数据库表错误 : ${e}`);
       }
     },
     viewTable: async function (tableName) {
@@ -120,7 +120,6 @@ export default {
         tempList[i / 2] = [ret.data[i], ret.data[i + 1]];
       }
       this.keyValueList = tempList;
-      window.console.log(this.keyValueList);
     },
     changeKey: async function (kv) {
       try {
@@ -128,7 +127,7 @@ export default {
           value: kv[1],
         });
       } catch (e) {
-        window.console.log(e);
+        this.$store.commit("pushMessage", `修改数据库值错误 : ${e}`);
       }
     },
     deleteKey: async function (kv) {
@@ -148,22 +147,18 @@ export default {
           this.keyValueList.splice(delIndex, 1);
         }
       } catch (e) {
-        window.console.log(e);
+        this.$store.commit("pushMessage", `删除键值对错误 : ${e}`);
       }
     },
     deleteTable: async function (tableName) {
-      window.console.log("删除", tableName);
+      this.$store.commit("pushMessage", `删除表${tableName}错误 : 尚未实现`);
     },
     setDepth: function (depth) {
-      window.console.log("depth", depth);
       this.depth = depth;
     },
     newKv: function () {
       this.keyValueList = this.keyValueList.concat([[]]);
     },
-    // copyValue: function (value) {
-    //   window.console.log("depth", value);
-    // },
   },
 };
 </script>

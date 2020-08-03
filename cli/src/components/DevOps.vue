@@ -5,13 +5,13 @@
       <div class="columns">
         <div class="column is-2">
           <aside class="menu">
-            <p class="menu-label">General</p>
+            <p class="menu-label">HOME</p>
             <ul class="menu-list">
               <li>
                 <router-link to="/devops/home">主页</router-link>
               </li>
             </ul>
-            <p class="menu-label">Transactions</p>
+            <p class="menu-label">CI/CD</p>
             <ul class="menu-list">
               <li>
                 <a>部署</a>
@@ -29,24 +29,24 @@
                 </ul>
               </li>
             </ul>
-            <p class="menu-label">Administration</p>
+            <p class="menu-label">Configuration</p>
             <ul class="menu-list">
               <li>
                 <router-link to="/devops/newini">项目配置</router-link>
               </li>
+            </ul>
+            <p class="menu-label">Configuration</p>
+            <ul class="menu-list">
               <li>
                 <a>成员管理</a>
                 <ul>
                   <li>
                     <router-link to="/devops/queryusr">所有成员</router-link>
                   </li>
-                  <li>
-                    <router-link to="/devops/newusr">新建角色</router-link>
-                  </li>
                 </ul>
               </li>
             </ul>
-            <p class="menu-label">Others</p>
+            <p class="menu-label">Tools</p>
             <ul class="menu-list">
               <li>
                 <router-link to="/devops/dbview">DataView</router-link>
@@ -64,11 +64,11 @@
 import Login from "@/components/Login.vue";
 export default {
   name: "DevOps",
-  data: function() {
+  data: function () {
     return {};
   },
   components: {
-    Login
-  }
+    Login,
+  },
 };
 </script>

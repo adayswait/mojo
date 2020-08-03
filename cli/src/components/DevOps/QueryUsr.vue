@@ -52,7 +52,7 @@ export default {
         }
         this.userList = tempList;
       } catch (e) {
-        window.alert(e);
+        this.$store.commit("pushMessage", `获取所有注册用户错误 : ${e}`);
       }
     },
     changeRight: async function (b, kv) {
@@ -68,7 +68,10 @@ export default {
         });
       } else {
         kv[1].group = oldGroup;
-        window.alert(`invalid group:${kv[1].group}`);
+        this.$store.commit(
+          "pushMessage",
+          `改变用户权限组错误 : invalid group:${kv[1].group}`
+        );
       }
     },
   },
