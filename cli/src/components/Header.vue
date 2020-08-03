@@ -41,7 +41,7 @@
             <a class="navbar-link">
               <p>
                 <strong>{{this.$store.state.userInfo.user}}</strong>
-                <small>@{{this.GROUP[this.$store.state.userInfo.group]}}</small>
+                <small>@{{this.$store.state.GROUP[this.$store.state.userInfo.group]}}</small>
               </p>
             </a>
             <div class="navbar-dropdown is-right">
@@ -64,11 +64,6 @@ export default {
   data: function () {
     return {
       title: "Header",
-      GROUP: {
-        0: "未激活",
-        1: "管理员",
-        2: "未定义",
-      },
     };
   },
   methods: {

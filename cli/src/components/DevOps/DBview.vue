@@ -1,5 +1,5 @@
 <template>
-  <div class="column is-12">
+  <div class="column is-10">
     <nav class="breadcrumb" aria-label="breadcrumbs">
       <ul>
         <li v-if="this.depth>=0">
@@ -14,11 +14,17 @@
       </ul>
     </nav>
     <div class="box">
-      <table class="table" v-if="this.depth==0">
+      <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==0">
         <thead>
           <tr>
             <th>
-              <abbr title="dbname">表名称</abbr>
+              <abbr title="bucket名称">表名称</abbr>
+            </th>
+            <th>
+              <abbr title="查看全表">查看</abbr>
+            </th>
+            <th>
+              <abbr title="删除表">删除</abbr>
             </th>
           </tr>
         </thead>
@@ -37,36 +43,36 @@
         </tbody>
       </table>
 
-      <table class="table" v-if="this.depth==1">
+      <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==1">
         <thead>
           <tr>
             <th>
-              <abbr title="dbname">键</abbr>
+              <abbr title="键名称">键</abbr>
             </th>
             <th>
-              <abbr title="dbname">值</abbr>
+              <abbr title="值">值</abbr>
             </th>
             <th>
-              <abbr title="dbname">修改</abbr>
+              <abbr title="修改值">修改</abbr>
             </th>
             <th>
-              <abbr title="dbname">删除</abbr>
+              <a class="button is-small is-rounded is-success is-vcentered" @click="newKv">新建</a>
             </th>
           </tr>
         </thead>
         <tbody class>
           <tr v-for="k in this.keyValueList" :key="k[0]">
             <td>
-              <input class="input" type="text" v-model="k[0]" readonly />
+              <input class="input" type="text" v-model="k[0]" />
             </td>
             <td>
               <input class="input is-info" type="text" v-model="k[1]" />
             </td>
             <td>
-              <button class="button is-primary is-vcentered" @click="viewTable(tableName)">修改</button>
+              <button class="button is-primary is-vcentered" @click="changeKey(k)">修改</button>
             </td>
             <td>
-              <button class="button is-danger" @click="deleteTable(tableName)">删除</button>
+              <button class="button is-danger" @click="deleteKey(k)">删除</button>
             </td>
           </tr>
         </tbody>
@@ -77,17 +83,17 @@
 
 <script>
 export default {
-  name: "DBview",
+  name: "DataView",
   data: function () {
     this.getAllDBs();
     return {
-      title: "DBview",
+      title: "DataView",
       breadcrumbPath: [],
       tableList: [],
       keyValueList: [
         // [
         //   "00dd597f-40dc-43ff-852c-a6e7a236e025",
-        //   { user: "asdasdsa", group: 2 },
+        //   { user: "jesse", group: 2 },
         // ],
       ],
       depth: 0,
@@ -116,6 +122,35 @@ export default {
       this.keyValueList = tempList;
       window.console.log(this.keyValueList);
     },
+    changeKey: async function (kv) {
+      try {
+        await this.$httpc.put(`/web/db/${this.breadcrumbPath[1]}/${kv[0]}`, {
+          value: kv[1],
+        });
+      } catch (e) {
+        window.console.log(e);
+      }
+    },
+    deleteKey: async function (kv) {
+      try {
+        if (kv[0] === undefined || kv[0] === null || kv[0].toString() === "") {
+          throw new Error("can not delete ''");
+        }
+        await this.$httpc.del(`/web/db/${this.breadcrumbPath[1]}/${kv[0]}`);
+        let delIndex = null;
+        for (let i = 0; i < this.keyValueList.length; i++) {
+          if (kv[0] === this.keyValueList[i][0]) {
+            delIndex = i;
+            break;
+          }
+        }
+        if (delIndex !== null) {
+          this.keyValueList.splice(delIndex, 1);
+        }
+      } catch (e) {
+        window.console.log(e);
+      }
+    },
     deleteTable: async function (tableName) {
       window.console.log("删除", tableName);
     },
@@ -123,6 +158,12 @@ export default {
       window.console.log("depth", depth);
       this.depth = depth;
     },
+    newKv: function () {
+      this.keyValueList = this.keyValueList.concat([[]]);
+    },
+    // copyValue: function (value) {
+    //   window.console.log("depth", value);
+    // },
   },
 };
 </script>

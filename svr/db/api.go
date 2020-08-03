@@ -1,5 +1,6 @@
 package db
 
+import "fmt"
 import "errors"
 import "encoding/json"
 import "github.com/google/uuid"
@@ -12,9 +13,12 @@ type UserInfo struct {
 }
 
 func Register(user, passwd string) error {
-	writeLock.Lock()
+	rwLock.Lock()
 	registerErr := localDB.Update(func(tx *bolt.Tx) error {
 		bup := tx.Bucket([]byte(global.BUCKET_USR_PASSWD))
+		if bup == nil {
+			return fmt.Errorf("bucket:%s is nil", global.BUCKET_USR_PASSWD)
+		}
 		existUser := bup.Get([]byte(user))
 		if len(existUser) != 0 {
 			return errors.New("user already exist")
@@ -30,6 +34,9 @@ func Register(user, passwd string) error {
 			return ejn
 		}
 		bti := tx.Bucket([]byte(global.BUCKET_TOKEN_INFO))
+		if bti == nil {
+			return fmt.Errorf("bucket:%s is nil", global.BUCKET_TOKEN_INFO)
+		}
 		token := uuid.New().String()
 		eti := bti.Put([]byte(token), []byte(string(infoData)))
 		if eti != nil {
@@ -37,17 +44,23 @@ func Register(user, passwd string) error {
 		}
 
 		but := tx.Bucket([]byte(global.BUCKET_USER_TOKEN))
+		if but == nil {
+			return fmt.Errorf("bucket:%s is nil", global.BUCKET_USER_TOKEN)
+		}
 		eut := but.Put([]byte(user), []byte(token))
 		return eut
 	})
-	defer writeLock.Unlock()
+	defer rwLock.Unlock()
 	return registerErr
 }
 
 func Auth(user, passwd string) error {
-	writeLock.Lock()
+	rwLock.Lock()
 	authErr := localDB.Update(func(tx *bolt.Tx) error {
 		bup := tx.Bucket([]byte(global.BUCKET_USR_PASSWD))
+		if bup == nil {
+			return fmt.Errorf("bucket:%s is nil", global.BUCKET_USR_PASSWD)
+		}
 		passwdInDb := string(bup.Get([]byte(user)))
 		if passwd != passwdInDb {
 			return errors.New("user or password wrong")
@@ -58,7 +71,7 @@ func Auth(user, passwd string) error {
 		// eut := but.Put([]byte(user), []byte(token))
 		// return eut
 	})
-	defer writeLock.Unlock()
+	defer rwLock.Unlock()
 	return authErr
 }
 
@@ -83,23 +96,28 @@ func SetTokenInfo(token, info string) error {
 	return Set(global.BUCKET_TOKEN_INFO, token, info)
 }
 
-func Buckets() []string {
+func Buckets() ([]string, error) {
 	ret := []string{}
-	localDB.View(func(tx *bolt.Tx) error {
+	rwLock.RLock()
+	err := localDB.View(func(tx *bolt.Tx) error {
 		return tx.ForEach(func(name []byte, _ *bolt.Bucket) error {
 			b := []string{string(name)}
 			ret = append(ret, b...)
 			return nil
 		})
 	})
-	return ret
+	defer rwLock.RUnlock()
+	return ret, err
 }
-func Keys(bucketName string) []string {
+func Keys(bucketName string) ([]string, error) {
 	ret := []string{}
-	localDB.View(func(tx *bolt.Tx) error {
+	rwLock.RLock()
+	err := localDB.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
 		b := tx.Bucket([]byte(bucketName))
-
+		if b == nil {
+			return fmt.Errorf("bucket:%s is nil", bucketName)
+		}
 		b.ForEach(func(k, v []byte) error {
 			ret = append(ret, string(k))
 			ret = append(ret, string(v))
@@ -107,5 +125,6 @@ func Keys(bucketName string) []string {
 		})
 		return nil
 	})
-	return ret
+	defer rwLock.RUnlock()
+	return ret, err
 }

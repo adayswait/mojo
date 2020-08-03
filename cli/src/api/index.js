@@ -5,7 +5,7 @@ const httpClient = axios.create({
     baseURL: 'http://10.1.1.248:3000/',
     timeout: 1000,
     headers: { 'X-Custom-Header': 'mojo' },
-    withCredentials:true
+    withCredentials: true
 });
 
 // request拦截器
@@ -32,6 +32,7 @@ httpClient.interceptors.response.use(
         window.console.log(res);
         if (res.code != 0) { // 需自定义
             // 返回异常
+            window.console.error(res)
             return Promise.reject(res);
         } else {
             return res;
@@ -87,13 +88,6 @@ httpClient.interceptors.response.use(
     }
 )
 
-/*网络请求部分*/
-
-/*
- *  get请求
- *  url:请求地址
- *  params:参数
- * */
 export function get(url, params = {}) {
     return new Promise((resolve, reject) => {
         httpClient({
@@ -108,11 +102,34 @@ export function get(url, params = {}) {
     });
 }
 
-/*
- *  post请求
- *  url:请求地址
- *  params:参数
- * */
+export function put(url, params = {}) {
+    return new Promise((resolve, reject) => {
+        httpClient({
+            url: url,
+            method: 'put',
+            data: params
+        }).then(response => {
+            resolve(response);
+        }).catch(error => {
+            reject(error);
+        });
+    });
+}
+
+export function del(url, params = {}) {
+    return new Promise((resolve, reject) => {
+        httpClient({
+            url: url,
+            method: 'delete',
+            data: params
+        }).then(response => {
+            resolve(response);
+        }).catch(error => {
+            reject(error);
+        });
+    });
+}
+
 export function post(url, params = {}) {
     return new Promise((resolve, reject) => {
         httpClient({
@@ -150,5 +167,7 @@ export function fileUpload(url, params = {}) {
 export default {
     get,
     post,
+    del,
+    put,
     fileUpload
 }

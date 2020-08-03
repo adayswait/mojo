@@ -27,27 +27,28 @@ func initDb() {
 }
 
 func createBucket(bucketName string) error {
-	writeLock.Lock()
+	rwLock.Lock()
 	err := localDB.Update(func(tx *bolt.Tx) error {
 		tx.CreateBucketIfNotExists([]byte(bucketName))
 		return nil
 	})
-	defer writeLock.Unlock()
+	defer rwLock.Unlock()
 	return err
 }
 
 func boltSet(bucketName, key, value string) error {
-	writeLock.Lock()
+	rwLock.Lock()
 	err := localDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
 		e := b.Put([]byte(key), []byte(value))
 		return e
 	})
-	defer writeLock.Unlock()
+	defer rwLock.Unlock()
 	return err
 }
 func boltGet(bucketName, key string) ([]byte, error) {
 	var value []byte
+	rwLock.RLock()
 	err := localDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
 		v := b.Get([]byte(key))
@@ -55,15 +56,16 @@ func boltGet(bucketName, key string) ([]byte, error) {
 		copy(value, v)
 		return nil
 	})
+	defer rwLock.RUnlock()
 	return value, err
 }
 func boltDelete(bucketName, key string) error {
-	writeLock.Lock()
+	rwLock.Lock()
 	err := localDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
 		e := b.Delete([]byte(key))
 		return e
 	})
-	defer writeLock.Unlock()
+	defer rwLock.Unlock()
 	return err
 }

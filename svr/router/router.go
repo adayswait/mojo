@@ -37,6 +37,8 @@ func Route(app *fiber.App) {
 
 	//db工具
 	dbWeb := web.Group("/db")
-	dbWeb.Get("/", handler.ShowAllDB)
-	dbWeb.Get("/:table/:key?", handler.ShowAllKV)
+	dbWeb.Get("/:table?/:key?", handler.ViewDB)
+	dbWeb.Put("/:table?/:key?", handler.UpdateDB)
+	dbWeb.Post("/:table?/:key?", handler.NewDB)
+	dbWeb.Delete("/:table?/:key?", handler.DeleteDB)
 }

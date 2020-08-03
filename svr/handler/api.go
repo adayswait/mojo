@@ -1,6 +1,8 @@
 package handler
 
 import "time"
+import "crypto/md5"
+import "encoding/hex"
 import "encoding/json"
 import "github.com/gofiber/fiber"
 import "github.com/gofiber/session"
@@ -22,17 +24,26 @@ func Login(c *fiber.Ctx) {
 	var secInfo SecInfo
 	var accessToken string
 	if err := c.QueryParser(&secInfo); err == nil {
-		//优先使用用户名和密码进行验证
-		eau := db.Auth(secInfo.User, secInfo.Passwd)
-		if eau != nil {
-			c.JSON(fiber.Map{"code": global.RET_ERR_USER_PASSWD, "data": eau.Error()})
-			return
+		if len(secInfo.User) != 0 && len(secInfo.Passwd) != 0 {
+			//优先使用用户名和密码进行验证
+			tempMD5 := md5.New()
+			tempMD5.Write([]byte(secInfo.Passwd))
+			tempMD5.Write([]byte(global.MD5_SALT))
+			passwdMD5 := hex.EncodeToString(tempMD5.Sum(nil))
+			eau := db.Auth(secInfo.User, passwdMD5)
+			if eau != nil {
+				c.JSON(fiber.Map{"code": global.RET_ERR_USER_PASSWD,
+					"data": eau.Error()})
+				return
+			}
+			token, etk := db.GetAccessToken(secInfo.User)
+			if etk != nil {
+				c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+					"data": etk.Error()})
+			}
+			accessToken = token
 		}
-		token, etk := db.GetAccessToken(secInfo.User)
-		if etk != nil {
-			c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": etk.Error()})
-		}
-		accessToken = token
+		//取不到user和passwd, 后面尝试access_token登录
 	}
 	if len(accessToken) == 0 {
 		//用户名密码验证未成功, 再尝试使用access_token进行验证
@@ -46,12 +57,14 @@ func Login(c *fiber.Ctx) {
 	}
 
 	if len(accessToken) == 0 {
-		c.JSON(fiber.Map{"code": global.RET_ERR_ACCESS_TOKEN, "data": "no access_token found"})
+		c.JSON(fiber.Map{"code": global.RET_ERR_ACCESS_TOKEN,
+			"data": "no access_token found"})
 		return
 	}
 	userInfo, elg := db.Login(accessToken)
 	if elg != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_ACCESS_TOKEN, "data": elg.Error()})
+		c.JSON(fiber.Map{"code": global.RET_ERR_ACCESS_TOKEN,
+			"data": elg.Error()})
 		return
 	}
 	data, _ := json.Marshal(userInfo)
@@ -84,11 +97,21 @@ func Register(c *fiber.Ctx) {
 	var secInfo SecInfo
 	err := c.QueryParser(&secInfo)
 	if err != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY, "data": err.Error()})
+		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+			"data": err.Error()})
 		return
 	}
+	if len(secInfo.User) == 0 || len(secInfo.Passwd) == 0 {
+		c.JSON(fiber.Map{"code": global.RET_ERR_INPUT,
+			"data": "user or password is empty"})
+		return
+	}
+	tempMD5 := md5.New()
+	tempMD5.Write([]byte(secInfo.Passwd))
+	tempMD5.Write([]byte(global.MD5_SALT))
+	passwdMD5 := hex.EncodeToString(tempMD5.Sum(nil))
 
-	edb := db.Register(secInfo.User, secInfo.Passwd)
+	edb := db.Register(secInfo.User, passwdMD5)
 	if edb != nil {
 		c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": edb.Error()})
 		return
@@ -106,38 +129,110 @@ func Register(c *fiber.Ctx) {
 	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
-func ShowAllDB(c *fiber.Ctx) {
+func ViewDB(c *fiber.Ctx) {
 	store := sessions.Get(c)
 	// user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID, "data": "session invalid"})
+		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
 		return
 	}
 	if int(group.(int64)) > int(global.GROUP_UNDEF) {
-		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT, "data": "no right to do this"})
+		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
+			"data": "no right to do this"})
 		return
 	}
-	ret := db.Buckets()
-	c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
+	table := c.Params("table")
+	if len(table) == 0 {
+		ret, err := db.Buckets()
+		if err != nil {
+			c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": err.Error()})
+			return
+		}
+		c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
+		return
+	}
+	key := c.Params("key")
+	if len(key) == 0 {
+		ret, err := db.Keys(table)
+		if err != nil {
+			c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": err.Error()})
+			return
+		}
+		c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
+		return
+	}
 }
 
-func ShowAllKV(c *fiber.Ctx) {
+func UpdateDB(c *fiber.Ctx) {
 	store := sessions.Get(c)
 	// user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID, "data": "session invalid"})
+		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
 		return
 	}
 	if int(group.(int64)) > int(global.GROUP_UNDEF) {
-		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT, "data": "no right to do this"})
+		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
+			"data": "no right to do this"})
 		return
 	}
 	table := c.Params("table")
 	key := c.Params("key")
-	if len(key) == 0 {
-		ret := db.Keys(table)
-		c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
+	if len(table) == 0 || len(key) == 0 {
+		c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+			"data": "request param err"})
+		return
 	}
+
+	body := struct {
+		Value string `json:"value"`
+	}{}
+
+	if errBp := c.BodyParser(&body); errBp != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
+			"data": errBp.Error()})
+		return
+	}
+	err := db.Set(table, key, body.Value)
+	if err != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+			"data": err.Error()})
+		return
+	}
+	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
+
+func DeleteDB(c *fiber.Ctx) {
+	store := sessions.Get(c)
+	// user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
+		return
+	}
+	if int(group.(int64)) > int(global.GROUP_UNDEF) {
+		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
+			"data": "no right to do this"})
+		return
+	}
+	table := c.Params("table")
+	key := c.Params("key")
+	if len(table) == 0 || len(key) == 0 {
+		c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+			"data": "request param err"})
+		return
+	}
+	err := db.Delete(table, key)
+	if err != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+			"data": err.Error()})
+		return
+	}
+	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+}
+
+var NewDB = UpdateDB

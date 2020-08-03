@@ -14,19 +14,11 @@ const state = {
         Footer: true,
         UsrInfo: false
     },
-    mock: {
-        query: [
-            [1, 'crespo', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [2, 'messi', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [3, 'rui costa', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [4, 'cocacola', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [5, 'inzaghi', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [6, 'crespo', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [7, 'messi', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [8, 'rui costa', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [9, 'cocacola', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-            [10, 'inzaghi', 'S计划', 'online', '2019-10-01 12:02:23', '/opt/splan/game'],
-        ]
+    GROUP: {
+        0: "管理员",
+        1: "普通用户",
+        2: "游客",
+        3: "未激活"
     },
     footer: "Copyrights Reserved. All materials not authorized may not be redirected or for other usages."
 };
@@ -46,9 +38,9 @@ const actions = {//包含多个对应事件回调函数的对象
         commit('setVisible')
     }
 };
-const getters = {//包含多个getter计算属性函数的对象
-    evenOrOdd(state) {//不需要调用
-        return state.count & 0b1 ? '奇数' : '偶数'
+const getters = {
+    GROUP() {
+        return state.GROUP
     }
 };
 
