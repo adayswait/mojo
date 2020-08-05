@@ -1,10 +1,18 @@
 <template>
-  <div id="notification" class="columns is-multiline is-vcentered">
+  <div id="blackboard" class="columns is-multiline is-vcentered">
     <div class="column">
       <tr v-for="message in $store.state.messageList" :key="message[0]">
-        <div class="notification is-primary">
-          <button class="delete"></button>
-          {{message[1]}}
+        <div
+          id="notice"
+          class="notification"
+          :class="{
+            'is-danger':message[1]==$store.state.MESSAGE_TYPE.ERROR,
+            'is-warning':message[1]==$store.state.MESSAGE_TYPE.WARN,
+            'is-info':message[1]==$store.state.MESSAGE_TYPE.INFO,
+          }"
+        >
+          <!-- <button class="delete"></button> -->
+          {{message[2]}}
         </div>
       </tr>
     </div>
@@ -18,18 +26,22 @@ export default {
   data: function () {
     return {};
   },
-  methods: {
-    addMessage: function () {
-      this.$store.commit("pushMessage", "message");
-    },
-  },
+  methods: {},
 };
 </script>
 
 <style scoped>
-#notification {
-  position: absolute; /*设定footer绝对位置在底部*/
+#blackboard {
+  position: absolute;
   right: 0px;
   z-index: 100;
+  filter: alpha(Opacity=50);
+  -moz-opacity: 0.5;
+  opacity: 0.5;
+  pointer-events: none;
+  margin-top: 20px;
+}
+#notice {
+  margin-bottom: 2px;
 }
 </style>

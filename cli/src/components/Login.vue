@@ -18,7 +18,7 @@
       </div>
       <div v-if="this.loginBoxVisible">
         <br />
-        <input class="input is-primary" type="text" placeholder="账号" v-model="usr" />
+        <input class="input is-primary" type="email" placeholder="账号" v-model="usr" />
         <br />
         <br />
         <input class="input is-danger" type="password" placeholder="密码" v-model="passwd" />

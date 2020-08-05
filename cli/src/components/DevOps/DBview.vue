@@ -1,19 +1,19 @@
 <template>
   <div class="column is-10">
-    <nav class="breadcrumb" aria-label="breadcrumbs">
-      <ul>
-        <li v-if="this.depth>=0">
-          <a @click="setDepth(0)">ROOT</a>
-        </li>
-        <li v-if="this.depth>=1">
-          <a href="#">表 {{this.breadcrumbPath[1]}}</a>
-        </li>
-        <li v-if="this.depth>=2">
-          <a href="#">键 {{this.breadcrumbPath[2]}}</a>
-        </li>
-      </ul>
-    </nav>
     <div class="box">
+      <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+          <li v-if="this.depth>=0">
+            <a @click="setDepth(0)">ROOT</a>
+          </li>
+          <li v-if="this.depth>=1">
+            <a href="#">表 {{this.breadcrumbPath[1]}}</a>
+          </li>
+          <li v-if="this.depth>=2">
+            <a href="#">键 {{this.breadcrumbPath[2]}}</a>
+          </li>
+        </ul>
+      </nav>
       <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==0">
         <thead>
           <tr>
@@ -21,10 +21,7 @@
               <abbr title="bucket名称">表名称</abbr>
             </th>
             <th>
-              <abbr title="查看全表">查看</abbr>
-            </th>
-            <th>
-              <abbr title="删除表">删除</abbr>
+              <abbr title="操作">操作</abbr>
             </th>
           </tr>
         </thead>
@@ -34,10 +31,8 @@
               <input class="input" type="text" v-model="item[0]" readonly />
             </td>
             <td>
-              <button class="button is-primary is-vcentered" @click="viewTable(item)">查看</button>
-            </td>
-            <td>
-              <button class="button is-danger" @click="deleteTable(item)">删除</button>
+              <button class="button is-primary is-vcentered is-small" @click="viewTable(item)">查看</button>
+              <button class="button is-danger is-small" @click="deleteTable(item)">删除</button>
             </td>
           </tr>
         </tbody>
@@ -53,9 +48,6 @@
               <abbr title="值">值</abbr>
             </th>
             <th>
-              <abbr title="修改值">修改</abbr>
-            </th>
-            <th>
               <a class="button is-small is-rounded is-success is-vcentered" @click="newKv">新建</a>
             </th>
           </tr>
@@ -69,10 +61,8 @@
               <input class="input is-info" type="text" v-model="k[1]" />
             </td>
             <td>
-              <button class="button is-primary is-vcentered" @click="changeKey(k)">修改</button>
-            </td>
-            <td>
-              <button class="button is-danger" @click="deleteKey(k)">删除</button>
+              <button class="button is-primary is-vcentered is-small" @click="changeKey(k)">修改</button>
+              <button class="button is-danger is-small" @click="deleteKey(k)">删除</button>
             </td>
           </tr>
         </tbody>
@@ -85,7 +75,6 @@
 export default {
   name: "DataView",
   data: function () {
-    this.getAllDBs();
     return {
       title: "DataView",
       breadcrumbPath: [],
@@ -107,19 +96,29 @@ export default {
           this.tableList.push([key]);
         }
       } catch (e) {
-        this.$store.commit("pushMessage", `获取数据库表错误 : ${e}`);
+        this.$store.commit(
+          "error",
+          `获取数据库表错误 : ${e.data || e.message}`
+        );
       }
     },
     viewTable: async function (tableName) {
-      this.depth = 1;
-      this.breadcrumbPath[1] = tableName;
-      this.keyValueList = [];
-      const ret = await this.$httpc.get(`/web/db/${tableName}`);
-      let tempList = [];
-      for (let i = 0; i < ret.data.length; i += 2) {
-        tempList[i / 2] = [ret.data[i], ret.data[i + 1]];
+      try {
+        const ret = await this.$httpc.get(`/web/db/${tableName}`);
+        this.depth = 1;
+        this.breadcrumbPath[1] = tableName;
+        this.keyValueList = [];
+        let tempList = [];
+        for (let i = 0; i < ret.data.length; i += 2) {
+          tempList[i / 2] = [ret.data[i], ret.data[i + 1]];
+        }
+        this.keyValueList = tempList;
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `查看表${tableName}错误 : ${e.data || e.message}`
+        );
       }
-      this.keyValueList = tempList;
     },
     changeKey: async function (kv) {
       try {
@@ -127,13 +126,13 @@ export default {
           value: kv[1],
         });
       } catch (e) {
-        this.$store.commit("pushMessage", `修改数据库值错误 : ${e}`);
+        this.$store.commit("error", `修改数据库值错误 : ${e}`);
       }
     },
     deleteKey: async function (kv) {
       try {
         if (kv[0] === undefined || kv[0] === null || kv[0].toString() === "") {
-          throw new Error("can not delete ''");
+          throw new Error("无法删除空值");
         }
         await this.$httpc.del(`/web/db/${this.breadcrumbPath[1]}/${kv[0]}`);
         let delIndex = null;
@@ -147,18 +146,21 @@ export default {
           this.keyValueList.splice(delIndex, 1);
         }
       } catch (e) {
-        this.$store.commit("pushMessage", `删除键值对错误 : ${e}`);
+        this.$store.commit("error", `删除键值对错误 : ${e}`);
       }
     },
     deleteTable: async function (tableName) {
-      this.$store.commit("pushMessage", `删除表${tableName}错误 : 尚未实现`);
+      this.$store.commit("warn", `删除表${tableName}错误 : 尚未实现`);
     },
     setDepth: function (depth) {
       this.depth = depth;
     },
     newKv: function () {
-      this.keyValueList = this.keyValueList.concat([[]]);
+      this.keyValueList.splice(0, 0, []);
     },
+  },
+  beforeMount: function () {
+    this.getAllDBs();
   },
 };
 </script>

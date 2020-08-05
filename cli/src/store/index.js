@@ -20,6 +20,11 @@ const state = {
         2: "游客",
         3: "未激活"
     },
+    MESSAGE_TYPE: {
+        INFO: 1,
+        WARN: 2,
+        ERROR: 3
+    },
     messageIdx: 0,
     messageDelN: 0,
     messageList: [],
@@ -35,8 +40,24 @@ const mutations = {//包含多个更新status函数的对象
             group: group
         }
     },
-    pushMessage(state, message) {
-        state.messageList.push([state.messageIdx++, message]);
+    error(state, message) {
+        state.messageList.push([state.messageIdx++, state.MESSAGE_TYPE.ERROR, message]);
+        state.messageDelN += 1;
+        setTimeout(() => {
+            state.messageList.splice(state.messageList.length - state.messageDelN, 1);
+            state.messageDelN -= 1;
+        }, 5000);
+    },
+    warn(state, message) {
+        state.messageList.push([state.messageIdx++, state.MESSAGE_TYPE.WARN, message]);
+        state.messageDelN += 1;
+        setTimeout(() => {
+            state.messageList.splice(state.messageList.length - state.messageDelN, 1);
+            state.messageDelN -= 1;
+        }, 5000);
+    },
+    info(state, message) {
+        state.messageList.push([state.messageIdx++, state.MESSAGE_TYPE.INFO, message]);
         state.messageDelN += 1;
         setTimeout(() => {
             state.messageList.splice(state.messageList.length - state.messageDelN, 1);
@@ -52,6 +73,12 @@ const actions = {//包含多个对应事件回调函数的对象
 const getters = {
     GROUP() {
         return state.GROUP
+    },
+    MESSAGE_TYPE() {
+        return state.MESSAGE_TYPE
+    },
+    userInfo() {
+        return state.userInfo
     }
 };
 

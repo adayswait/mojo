@@ -52,24 +52,44 @@ export default {
         }
         this.userList = tempList;
       } catch (e) {
-        this.$store.commit("pushMessage", `获取所有注册用户错误 : ${e}`);
+        this.$store.commit("error", `获取所有注册用户错误 : ${e}`);
       }
     },
     changeRight: async function (b, kv) {
-      const oldGroup = kv[1].group;
+      let newGroup;
       if (b === true) {
-        kv[1].group -= 1;
+        newGroup = kv[1].group - 1;
       } else {
-        kv[1].group += 1;
+        newGroup = kv[1].group + 1;
       }
-      if (this.$store.getters.GROUP[kv[1].group]) {
-        await this.$httpc.put(`/web/db/${this.dbTable}/${kv[0]}`, {
-          value: JSON.stringify(kv[1]),
-        });
+      if (this.$store.getters.GROUP[newGroup]) {
+        if (this.$store.getters.userInfo.group >= newGroup) {
+          this.$store.commit("error", `改变用户权限组错误 : 权限不足`);
+          return;
+        }
+        try {
+          await this.$httpc.put(`/web/db/${this.dbTable}/${kv[0]}`, {
+            value: JSON.stringify({
+              user: kv[1].user,
+              group: newGroup,
+            }),
+          });
+          kv[1].group = newGroup;
+          if (this.$store.getters.userInfo.user === kv[1].user) {
+            this.$store.commit("setUserInfo", {
+              user: kv[1].user,
+              group: kv[1].group,
+            });
+          }
+        } catch (e) {
+          this.$store.commit(
+            "error",
+            `改变用户权限组错误 : ${e.data || e.message}`
+          );
+        }
       } else {
-        kv[1].group = oldGroup;
         this.$store.commit(
-          "pushMessage",
+          "error",
           `改变用户权限组错误 : invalid group:${kv[1].group}`
         );
       }

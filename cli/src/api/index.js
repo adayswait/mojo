@@ -40,7 +40,12 @@ httpClient.interceptors.response.use(
     },
     // 处理处理
     error => {
+        const ret = {
+            code: -1,
+            data: null
+        }
         if (error && error.response) {
+            ret.code = error.response.status;
             switch (error.response.status) {
                 case 400:
                     error.message = '错误请求';
@@ -81,10 +86,12 @@ httpClient.interceptors.response.use(
                 default:
                     error.message = `未知错误${error.response.status}`;
             }
+            ret.data = error.message;
         } else {
-            error.message = "连接到服务器失败";
+            ret.data = "连接到服务器失败";
         }
-        return Promise.reject(error);
+        window.console.error(ret);
+        return Promise.reject(ret);
     }
 )
 

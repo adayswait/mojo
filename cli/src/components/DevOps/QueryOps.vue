@@ -26,7 +26,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="item in this.$store.state.mock.query" :key="item[0]">
+      <!-- <tr v-for="item in this.$store.state.mock.query" :key="item[0]">
         <th>{{item[0]}}</th>
         <td>{{item[1]}}</td>
         <td>{{item[2]}}</td>
@@ -38,7 +38,7 @@
         <button class="button is-small is-rounded is-warn">删除</button>
         <button class="button is-small is-rounded is-danger">上线</button>
         </td>
-      </tr>
+      </tr> -->
     </tbody>
   </table>
 </template>

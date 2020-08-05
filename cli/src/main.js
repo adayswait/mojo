@@ -1,5 +1,6 @@
 import httpc from './api'
 import Vue from 'vue'
+import VueClipboard from 'vue-clipboard2'
 import router from './router'
 import App from './App.vue'
 import store from './store'
@@ -7,9 +8,9 @@ import echarts from "echarts"
 import "bulma/css/bulma.css"
 
 Vue.config.productionTip = false
+Vue.use(VueClipboard)
 Vue.prototype.$echarts = echarts
 Vue.prototype.$httpc = httpc
-
 new Vue({
   store,
   router,

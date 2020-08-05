@@ -4,11 +4,13 @@ import Home from "@/components/Home.vue"
 import DevOps from "@/components/DevOps.vue";
 import OpsHome from "@/components/DevOps/Home.vue"
 import QueryOps from "@/components/DevOps/QueryOps.vue";
-import QueryUsr from "@/components/DevOps/QueryUsr.vue";
+import ManageUsr from "@/components/DevOps/ManageUsr.vue";
 import NewDep from "@/components/DevOps/NewDep.vue";
-import NewIni from "@/components/DevOps/NewIni.vue";
+import MacIni from "@/components/DevOps/MacIni.vue";
+import DepIni from "@/components/DevOps/DepIni.vue";
 import NewUsr from "@/components/DevOps/NewUsr.vue";
 import DBview from "@/components/DevOps/DBview.vue";
+import DevTools from '@/components/DevOps/DevTools.vue';
 import Data from "@/components/Data.vue";
 import e404 from '@/components/E404.vue';
 import UsrInfo from '@/components/UsrInfo.vue';
@@ -19,7 +21,7 @@ const router = new Router({
     routes: [
         {
             path: "/",
-            component: DevOps
+            redirect: "/devops"
         },
         {
             path: "/home",
@@ -30,6 +32,10 @@ const router = new Router({
             component: DevOps,
             children: [
                 {
+                    path: "",
+                    redirect: "home"
+                },
+                {
                     path: "home",
                     component: OpsHome
                 },
@@ -38,16 +44,20 @@ const router = new Router({
                     component: QueryOps
                 },
                 {
-                    path: "queryusr",
-                    component: QueryUsr
+                    path: "manageuser",
+                    component: ManageUsr
                 },
                 {
                     path: "newdep",
                     component: NewDep
                 },
                 {
-                    path: "newini",
-                    component: NewIni
+                    path: "macini",
+                    component: MacIni
+                },
+                {
+                    path: "depini",
+                    component: DepIni
                 },
                 {
                     path: "newusr",
@@ -56,8 +66,11 @@ const router = new Router({
                 {
                     path: "dbview",
                     component: DBview
+                },
+                {
+                    path: "devtools",
+                    component: DevTools
                 }
-
             ]
         },
         {

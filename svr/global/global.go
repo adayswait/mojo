@@ -31,6 +31,9 @@ const (
 const BUCKET_USR_PASSWD = "sys:usr:passwd"
 const BUCKET_TOKEN_INFO = "sys:token:info"
 const BUCKET_USER_TOKEN = "sys:user:token"
+const BUCKET_USR_OPSLOG = "sys:usr:opslog"
+const BUCKET_OPS_MACINI = "sys:ops:macini"
+const BUCKET_OPS_DEPINI = "sys:ops:depini"
 
 //cookie名
 const ACCESS_TOKEN = "access_token"

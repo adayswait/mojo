@@ -1,8 +1,9 @@
 package db
 
-// import "fmt"
+import "fmt"
 import "log"
 import "time"
+import "strconv"
 import "github.com/boltdb/bolt"
 import "github.com/adayswait/mojo/global"
 
@@ -23,6 +24,9 @@ func initDb() {
 		createBucket(global.BUCKET_TOKEN_INFO)
 		createBucket(global.BUCKET_USR_PASSWD)
 		createBucket(global.BUCKET_USER_TOKEN)
+		createBucket(global.BUCKET_USR_OPSLOG)
+		createBucket(global.BUCKET_OPS_MACINI)
+		createBucket(global.BUCKET_OPS_DEPINI)
 	}
 }
 
@@ -40,6 +44,13 @@ func boltSet(bucketName, key, value string) error {
 	rwLock.Lock()
 	err := localDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
+		if b == nil {
+			return fmt.Errorf("bucket:%s is nil", bucketName)
+		}
+		if len(key) == 0 {
+			id, _ := b.NextSequence()
+			key = strconv.FormatUint(id, 10)
+		}
 		e := b.Put([]byte(key), []byte(value))
 		return e
 	})
@@ -51,6 +62,9 @@ func boltGet(bucketName, key string) ([]byte, error) {
 	rwLock.RLock()
 	err := localDB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
+		if b == nil {
+			return fmt.Errorf("bucket:%s is nil", bucketName)
+		}
 		v := b.Get([]byte(key))
 		value = make([]byte, len(v))
 		copy(value, v)
@@ -63,6 +77,9 @@ func boltDelete(bucketName, key string) error {
 	rwLock.Lock()
 	err := localDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
+		if b == nil {
+			return fmt.Errorf("bucket:%s is nil", bucketName)
+		}
 		e := b.Delete([]byte(key))
 		return e
 	})

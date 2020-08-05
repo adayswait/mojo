@@ -41,4 +41,7 @@ func Route(app *fiber.App) {
 	dbWeb.Put("/:table?/:key?", handler.UpdateDB)
 	dbWeb.Post("/:table?/:key?", handler.NewDB)
 	dbWeb.Delete("/:table?/:key?", handler.DeleteDB)
+
+	rsyncWeb := web.Group("/rsync")
+	rsyncWeb.Get("/", handler.Rsync)
 }

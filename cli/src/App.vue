@@ -4,6 +4,7 @@
     <br />
     <Notification />
     <br />
+    <br />
     <router-view />
     <br />
     <Footer />
@@ -23,4 +24,5 @@ export default {
   },
 };
 </script>
-<style></style>;
+<style>
+</style>;

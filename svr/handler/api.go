@@ -9,6 +9,8 @@ import "github.com/gofiber/session"
 import "github.com/adayswait/mojo/db"
 import "github.com/adayswait/mojo/global"
 
+// import "github.com/adayswait/mojo/cmd"
+
 var sessions *session.Session
 
 func init() {
@@ -181,7 +183,7 @@ func UpdateDB(c *fiber.Ctx) {
 	}
 	table := c.Params("table")
 	key := c.Params("key")
-	if len(table) == 0 || len(key) == 0 {
+	if len(table) == 0 {
 		c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
 			"data": "request param err"})
 		return
@@ -233,6 +235,35 @@ func DeleteDB(c *fiber.Ctx) {
 		return
 	}
 	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+}
+
+func Rsync(c *fiber.Ctx) {
+	// task := rsync.NewTask(
+	// 	"jesse@10.1.1.248:~/tmp",
+	// 	"./do.sh",
+	// 	rsync.RsyncOptions{},
+	// )
+
+	// go func() {
+	// 	for {
+	// 		state := task.State()
+	// 		fmt.Printf(
+	// 			"progress: %.2f / rem. %d / tot. %d / sp. %s \n",
+	// 			state.Progress,
+	// 			state.Remain,
+	// 			state.Total,
+	// 			state.Speed,
+	// 		)
+	// 		time.Sleep(time.Second)
+	// 	}
+	// }()
+
+	// if err := task.Run(); err != nil {
+	// 	panic(err)
+	// }
+
+	// fmt.Println("well done")
+	// fmt.Println(task.Log())
 }
 
 var NewDB = UpdateDB
