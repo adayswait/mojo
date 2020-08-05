@@ -9,6 +9,13 @@ import "github.com/gofiber/session"
 import "github.com/adayswait/mojo/db"
 import "github.com/adayswait/mojo/global"
 
+import (
+	"fmt"
+	"github.com/google/goexpect"
+	"github.com/google/goterm/term"
+	"regexp"
+)
+
 // import "github.com/adayswait/mojo/cmd"
 
 var sessions *session.Session
@@ -238,32 +245,31 @@ func DeleteDB(c *fiber.Ctx) {
 }
 
 func Rsync(c *fiber.Ctx) {
-	// task := rsync.NewTask(
-	// 	"jesse@10.1.1.248:~/tmp",
-	// 	"./do.sh",
-	// 	rsync.RsyncOptions{},
-	// )
+	const timeout = 10 * time.Minute
+	userRE := regexp.MustCompile("username:")
+	passRE := regexp.MustCompile("password:")
+	promptRE := regexp.MustCompile("%")
+	fmt.Println(term.Bluef("Telnet 1 example"))
 
-	// go func() {
-	// 	for {
-	// 		state := task.State()
-	// 		fmt.Printf(
-	// 			"progress: %.2f / rem. %d / tot. %d / sp. %s \n",
-	// 			state.Progress,
-	// 			state.Remain,
-	// 			state.Total,
-	// 			state.Speed,
-	// 		)
-	// 		time.Sleep(time.Second)
-	// 	}
-	// }()
+	e, _, err := expect.Spawn("telnet 10.1.1.43", -1)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer e.Close()
+	userRE = regexp.MustCompile("username:")
+	passRE = regexp.MustCompile("password:")
+	promptRE = regexp.MustCompile("%")
 
-	// if err := task.Run(); err != nil {
-	// 	panic(err)
-	// }
+	e.Expect(userRE, timeout)
+	e.Send("user" + "\n")
+	e.Expect(passRE, timeout)
+	e.Send("pass" + "\n")
+	e.Expect(promptRE, timeout)
+	e.Send("cmd" + "\n")
+	result, _, _ := e.Expect(promptRE, timeout)
+	e.Send("exit\n")
 
-	// fmt.Println("well done")
-	// fmt.Println(task.Log())
+	fmt.Println(term.Greenf("%s: result: %s\n", "cmd", result))
 }
 
 var NewDB = UpdateDB

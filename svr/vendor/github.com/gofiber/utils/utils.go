@@ -531,22 +531,4 @@ var mimeExtensions = map[string]string{
 	"asf":     "video/x-ms-asf",
 	"wmv":     "video/x-ms-wmv",
 	"avi":     "video/x-msvideo",
-	//custom - programing language
-	"h":    "text/plain",
-	"hpp":  "text/plain",
-	"c":    "text/plain",
-	"cc":   "text/plain",
-	"cpp":  "text/plain",
-	"go":   "text/plain",
-	"php":  "text/plain",
-	"java": "text/plain",
-	"py":   "text/plain",
-	"cs":   "text/plain",
-	"rb":   "text/plain",
-	"rs":   "text/plain",
-	"lua":  "text/plain",
-	//custom - markup language
-	"md":   "text/plain",
-	"yml":  "text/plain",
-	"toml": "text/plain",
 }
