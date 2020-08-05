@@ -230,7 +230,7 @@ var decoderPool = &sync.Pool{New: func() interface{} {
 // It supports decoding the following content types based on the Content-Type header:
 // application/json, application/xml, application/x-www-form-urlencoded, multipart/form-data
 func (ctx *Ctx) BodyParser(out interface{}) error {
-	ctype := getString(ctx.Fasthttp.Request.Header.ContentType())
+	ctype := strings.ToLower(getString(ctx.Fasthttp.Request.Header.ContentType()))
 	schemaDecoder := decoderPool.Get().(*schema.Decoder)
 	defer decoderPool.Put(schemaDecoder)
 
