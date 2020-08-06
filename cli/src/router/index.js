@@ -3,11 +3,13 @@ import Router from 'vue-router';
 import Home from "@/components/Home.vue"
 import DevOps from "@/components/DevOps.vue";
 import OpsHome from "@/components/DevOps/Home.vue"
-import QueryOps from "@/components/DevOps/QueryOps.vue";
+import AllDep from "@/components/DevOps/AllDep.vue";
+import MyDep from "@/components/DevOps/MyDep.vue";
 import ManageUsr from "@/components/DevOps/ManageUsr.vue";
 import NewDep from "@/components/DevOps/NewDep.vue";
 import MacIni from "@/components/DevOps/MacIni.vue";
 import DepIni from "@/components/DevOps/DepIni.vue";
+import DevIni from "@/components/DevOps/DevIni.vue";
 import NewUsr from "@/components/DevOps/NewUsr.vue";
 import DBview from "@/components/DevOps/DBview.vue";
 import DevTools from '@/components/DevOps/DevTools.vue';
@@ -40,8 +42,12 @@ const router = new Router({
                     component: OpsHome
                 },
                 {
-                    path: "queryops",
-                    component: QueryOps
+                    path: "mydep",
+                    component: MyDep
+                },
+                {
+                    path: "alldep",
+                    component: AllDep
                 },
                 {
                     path: "manageuser",
@@ -58,6 +64,10 @@ const router = new Router({
                 {
                     path: "depini",
                     component: DepIni
+                },
+                {
+                    path: "devini",
+                    component: DevIni
                 },
                 {
                     path: "newusr",

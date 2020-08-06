@@ -25,15 +25,18 @@ const (
 	RET_ERR_CREATE_TOKEN
 	RET_ERR_NO_RIGHT
 	RET_ERR_SESSION_INVALID
+	RET_ERR_SPAWN
 )
 
 //数据库表名
+const BUCKET_ITEMS_DESC = "sys:items:desc"
 const BUCKET_USR_PASSWD = "sys:usr:passwd"
 const BUCKET_TOKEN_INFO = "sys:token:info"
 const BUCKET_USER_TOKEN = "sys:user:token"
 const BUCKET_USR_OPSLOG = "sys:usr:opslog"
 const BUCKET_OPS_MACINI = "sys:ops:macini"
 const BUCKET_OPS_DEPINI = "sys:ops:depini"
+const BUCKET_OPS_DEVINI = "sys:ops:devini"
 
 //cookie名
 const ACCESS_TOKEN = "access_token"

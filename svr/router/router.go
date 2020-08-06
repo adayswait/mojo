@@ -20,6 +20,7 @@ func Route(app *fiber.App) {
 	api := app.Group("/api")
 	api.Use(cors.New())
 	authApi := api.Group("/auth")
+
 	authApi.Get("/login", handler.Login)
 	authApi.Get("/logout", handler.Logout)
 	authApi.Get("/register", handler.Register)
@@ -30,6 +31,7 @@ func Route(app *fiber.App) {
 		AllowOrigins:     []string{"http://10.1.1.248:8080"},
 		AllowCredentials: true,
 	}))
+	web.Get("/svnlog", handler.SvnLog)
 	authWeb := web.Group("/auth")
 	authWeb.Get("/login", handler.Login)
 	authWeb.Get("/logout", handler.Logout)

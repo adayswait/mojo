@@ -1,5 +1,5 @@
 <template>
-  <div class="column is-10">
+  <div class="column">
     <div class="tabs">
       <ul>
         <li class="is-active">
@@ -25,7 +25,7 @@
       </div>
       <div class="column is-1">
         <a
-          class="button is-primary is-fullwidth"
+          class="button is-primary "
           v-clipboard:copy="currUnixTimeS"
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
@@ -41,7 +41,7 @@
       </div>
       <div class="column is-1">
         <a
-          class="button is-primary is-fullwidth"
+          class="button is-primary"
           v-clipboard:copy="currUnixTimeMS"
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
@@ -57,7 +57,7 @@
       </div>
       <div class="column is-1">
         <a
-          class="button is-primary is-fullwidth"
+          class="button is-primary"
           v-clipboard:copy="currStdDateS"
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
@@ -73,7 +73,7 @@
       </div>
       <div class="column is-1">
         <a
-          class="button is-primary is-fullwidth"
+          class="button is-primary"
           v-clipboard:copy="currStdDateMS"
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
@@ -101,7 +101,7 @@
         />
       </div>
       <div class="column is-1">
-        <a class="button is-primary is-fullwidth" @click="copy(transUnixMS,true)">转换</a>
+        <a class="button is-primary" @click="copy(transUnixMS,true)">转换</a>
       </div>
     </div>
   </div>

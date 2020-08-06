@@ -1,5 +1,4 @@
 <template>
-  <div class="column is-10">
     <div class="box">
       <table class="table is-striped is-fullwidth has-text-centered">
         <thead>
@@ -27,7 +26,6 @@
         </tbody>
       </table>
     </div>
-  </div>
 </template>
 
 

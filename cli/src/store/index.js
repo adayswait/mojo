@@ -12,14 +12,17 @@ const state = {
         Login: true,
         Home: false,
         Footer: true,
-        UsrInfo: false
+        UsrInfo: false,
     },
+    DevOpsMask: 0,
     GROUP: {
         0: "管理员",
         1: "普通用户",
         2: "游客",
         3: "未激活"
     },
+    SERVER_TYPE: ["online", "battle", "match", "team", "center"],
+    REPO_TYPE: ["svn"],
     MESSAGE_TYPE: {
         INFO: 1,
         WARN: 2,
@@ -38,6 +41,12 @@ const mutations = {//包含多个更新status函数的对象
         state.userInfo = {
             user: user,
             group: group
+        }
+    },
+    updateDevOpsMask(state, n) {
+        state.DevOpsMask += n;
+        if (state.DevOpsMask < 0) {
+            state.DevOpsMask = 0;
         }
     },
     error(state, message) {

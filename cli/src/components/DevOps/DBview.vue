@@ -1,73 +1,79 @@
 <template>
-  <div class="column is-10">
-    <div class="box">
-      <nav class="breadcrumb" aria-label="breadcrumbs">
-        <ul>
-          <li v-if="this.depth>=0">
-            <a @click="setDepth(0)">ROOT</a>
-          </li>
-          <li v-if="this.depth>=1">
-            <a href="#">表 {{this.breadcrumbPath[1]}}</a>
-          </li>
-          <li v-if="this.depth>=2">
-            <a href="#">键 {{this.breadcrumbPath[2]}}</a>
-          </li>
-        </ul>
-      </nav>
-      <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==0">
-        <thead>
-          <tr>
-            <th>
-              <abbr title="bucket名称">表名称</abbr>
-            </th>
-            <th>
-              <abbr title="操作">操作</abbr>
-            </th>
-          </tr>
-        </thead>
-        <tbody class>
-          <tr v-for="item in this.tableList" :key="item[0]">
-            <td>
-              <input class="input" type="text" v-model="item[0]" readonly />
-            </td>
-            <td>
-              <button class="button is-primary is-vcentered is-small" @click="viewTable(item)">查看</button>
-              <button class="button is-danger is-small" @click="deleteTable(item)">删除</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="box">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+      <ul>
+        <li v-if="this.depth>=0">
+          <a @click="setDepth(0)">ROOT</a>
+        </li>
+        <li v-if="this.depth>=1">
+          <a href="#">表 {{this.breadcrumbPath[1]}}</a>
+        </li>
+        <li v-if="this.depth>=2">
+          <a href="#">键 {{this.breadcrumbPath[2]}}</a>
+        </li>
+      </ul>
+    </nav>
+    <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==0">
+      <thead>
+        <tr>
+          <th>
+            <abbr title="bucket名称">表名称</abbr>
+          </th>
+          <th>
+            <abbr title="操作">操作</abbr>
+          </th>
+        </tr>
+      </thead>
+      <tbody class>
+        <tr v-for="item in this.tableList" :key="item[0]">
+          <td>
+            <input class="input" type="text" v-model="item[0]" readonly />
+          </td>
+          <td>
+            <button
+              id="opsbtn"
+              class="button is-primary is-vcentered is-small"
+              @click="viewTable(item)"
+            >查看</button>
+            <button id="opsbtn" class="button is-danger is-small" @click="deleteTable(item)">删除</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-      <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==1">
-        <thead>
-          <tr>
-            <th>
-              <abbr title="键名称">键</abbr>
-            </th>
-            <th>
-              <abbr title="值">值</abbr>
-            </th>
-            <th>
-              <a class="button is-small is-rounded is-success is-vcentered" @click="newKv">新建</a>
-            </th>
-          </tr>
-        </thead>
-        <tbody class>
-          <tr v-for="k in this.keyValueList" :key="k[0]">
-            <td>
-              <input class="input" type="text" v-model="k[0]" />
-            </td>
-            <td>
-              <input class="input is-info" type="text" v-model="k[1]" />
-            </td>
-            <td>
-              <button class="button is-primary is-vcentered is-small" @click="changeKey(k)">修改</button>
-              <button class="button is-danger is-small" @click="deleteKey(k)">删除</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==1">
+      <thead>
+        <tr>
+          <th>
+            <abbr title="键名称">键</abbr>
+          </th>
+          <th>
+            <abbr title="值">值</abbr>
+          </th>
+          <th>
+            <a class="button is-small is-rounded is-success is-vcentered" @click="newKv">新建</a>
+          </th>
+        </tr>
+      </thead>
+      <tbody class>
+        <tr v-for="k in this.keyValueList" :key="k[0]">
+          <td>
+            <input class="input" type="text" v-model="k[0]" />
+          </td>
+          <td>
+            <input class="input is-info" type="text" v-model="k[1]" />
+          </td>
+          <td>
+            <button
+              id="opsbtn"
+              class="button is-primary is-vcentered is-small"
+              @click="changeKey(k)"
+            >修改</button>
+            <button id="opsbtn" class="button is-danger is-small" @click="deleteKey(k)">删除</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -166,4 +172,7 @@ export default {
 </script>
 
 <style scoped>
+#opsbtn {
+  margin-top: 4px;
+}
 </style>
