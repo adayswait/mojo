@@ -1,31 +1,31 @@
 <template>
-    <div class="box">
-      <table class="table is-striped is-fullwidth has-text-centered">
-        <thead>
-          <tr>
-            <th>
-              <abbr title="用户名">用户名</abbr>
-            </th>
-            <th>
-              <abbr title="用户组">用户组</abbr>
-            </th>
-            <th>
-              <abbr title="操作">修改用户组</abbr>
-            </th>
-          </tr>
-        </thead>
-        <tbody class>
-          <tr v-for="kv in this.userList" :key="kv[0]">
-            <td>{{kv[1].user}}</td>
-            <td>{{$store.state.GROUP[kv[1].group]}}</td>
-            <td>
-              <button class="button is-small is-warning" @click="changeRight(true,kv)">提权</button>
-              <button class="button is-small is-dark" @click="changeRight(false,kv)">降权</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="box">
+    <table class="table is-striped is-fullwidth has-text-centered">
+      <thead>
+        <tr>
+          <th>
+            <abbr title="用户名">用户名</abbr>
+          </th>
+          <th>
+            <abbr title="用户组">用户组</abbr>
+          </th>
+          <th>
+            <abbr title="操作">修改用户组</abbr>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="kv in this.userList" :key="kv[0]">
+          <td>{{kv[1].user}}</td>
+          <td>{{$store.state.GROUP[kv[1].group]}}</td>
+          <td>
+            <button class="button is-small is-warning" @click="changeRight(true,kv)">提权</button>
+            <button class="button is-small is-dark" @click="changeRight(false,kv)">降权</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 
@@ -50,7 +50,10 @@ export default {
         }
         this.userList = tempList;
       } catch (e) {
-        this.$store.commit("error", `获取所有注册用户错误 : ${e}`);
+        this.$store.commit(
+          "error",
+          `获取所有注册用户错误 : ${e.data || e.message}`
+        );
       }
     },
     changeRight: async function (b, kv) {

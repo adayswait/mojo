@@ -10,12 +10,14 @@ const local_DB_DATA_DIR = "db-data-dir"
 const local_LOG_DIR = "log-dir"
 const local_HOST = "host"
 const local_PORT = "port"
+const local_REPO_PATH = "repo-path"
 
 type config struct {
 	dbDataDir string
 	logDir    string
 	host      string
 	port      uint16
+	repoPath  string
 }
 
 var mojoCnf config
@@ -53,6 +55,8 @@ func ReadConfig() {
 		case local_PORT:
 			portuint64, _ := strconv.ParseUint(cnfArr[1], 10, 16)
 			mojoCnf.port = uint16(portuint64)
+		case local_REPO_PATH:
+			mojoCnf.repoPath = cnfArr[1]
 		default:
 
 		}
@@ -72,6 +76,10 @@ func GetLogDirCnf() string {
 
 func GetListeningPort() uint16 {
 	return mojoCnf.port
+}
+
+func GetRepoPath() string {
+	return mojoCnf.repoPath
 }
 
 func IsPathExist(path string) bool {

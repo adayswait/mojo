@@ -31,11 +31,19 @@ func Route(app *fiber.App) {
 		AllowOrigins:     []string{"http://10.1.1.248:8080"},
 		AllowCredentials: true,
 	}))
-	web.Get("/svnlog", handler.SvnLog)
+
+	//身份认证
 	authWeb := web.Group("/auth")
 	authWeb.Get("/login", handler.Login)
 	authWeb.Get("/logout", handler.Logout)
 	authWeb.Get("/register", handler.Register)
+
+	//本地或远程shell cmd
+	cmdWeb := web.Group("/cmd")
+	cmdWeb.Get("/svnlog", handler.SvnLog)
+
+	depWeb := web.Group("/dep")
+	depWeb.Get("/submit", handler.SubmitDep)
 
 	//db工具
 	dbWeb := web.Group("/db")

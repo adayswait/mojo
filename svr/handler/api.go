@@ -8,6 +8,7 @@ import "github.com/gofiber/fiber"
 import "github.com/gofiber/session"
 import "github.com/adayswait/mojo/db"
 import "github.com/adayswait/mojo/global"
+import "github.com/adayswait/mojo/utils"
 
 import (
 	"fmt"
@@ -300,8 +301,55 @@ func SvnLog(c *fiber.Ctx) {
 				"data": ret})
 			return
 		} else {
-			c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
 				"data": `can't find param repourl`})
+			return
+		}
+	} else {
+		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+			"data": err.Error()})
+		return
+	}
+}
+
+type SubmitDepParam struct {
+	DepId string `json:"depid"`
+}
+type DepInfo struct {
+	Type     string `json:"type"`
+	RepoUrl  string `json:"repourl"`
+	Rversion string `json:"rversion"`
+}
+
+func SubmitDep(c *fiber.Ctx) {
+	const timeout = time.Minute
+	var subDepParam SubmitDepParam
+	if err := c.QueryParser(&subDepParam); err == nil {
+		if len(subDepParam.DepId) != 0 {
+			depInfoInDB, _ := db.Get(global.BUCKET_OPS_DEPBIL, subDepParam.DepId)
+			var depInfo DepInfo
+			json.Unmarshal(depInfoInDB, &depInfo)
+			path := utils.GetRepoPath()
+			if len(path) == 0 {
+				path = "."
+			}
+			cmd := fmt.Sprintf("svn checkout -%s %s %s/%s",
+				depInfo.Rversion, depInfo.RepoUrl, path, depInfo.Type)
+			e, _, err := expect.Spawn(cmd, -1)
+			defer e.Close()
+			if err != nil {
+				c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+					"data": cmd})
+				return
+			}
+			checkedOutRE := regexp.MustCompile(fmt.Sprintf("Checked out revision %s", depInfo.Rversion))
+			ret, _, _ := e.Expect(checkedOutRE, timeout)
+			c.JSON(fiber.Map{"code": global.RET_OK,
+				"data": ret})
+			return
+		} else {
+			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+				"data": `can't find param depid`})
 			return
 		}
 	} else {

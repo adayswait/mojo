@@ -85,7 +85,6 @@ export default {
           tempList[i / 2] = [ret.data[i], JSON.parse(ret.data[i + 1])];
         }
         this.devIniList = tempList;
-        window.console.log("devIniList", this.devIniList);
       } catch (e) {
         this.$store.commit(
           "error",

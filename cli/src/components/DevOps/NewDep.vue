@@ -2,15 +2,15 @@
   <div class="box">
     <div class="columns">
       <div class="column is-2">
-        <input class="input" type="text" value="上线单标题" disabled />
+        <input class="input has-text-centered" type="text" value="上线单标题" disabled />
       </div>
       <div class="column is-4">
-        <input class="input is-primary" type="text" />
+        <input class="input is-primary" type="text" v-model="depTitle" placeholder="请输入此上线单标题" />
       </div>
     </div>
     <div class="columns">
       <div class="column is-2">
-        <input class="input" type="text" value="服务类型" disabled />
+        <input class="input has-text-centered" type="text" value="服务类型" disabled />
       </div>
       <div class="column is-4">
         <div class="dropdown is-hoverable">
@@ -38,7 +38,11 @@
     </div>
     <div class="columns">
       <div class="column is-2">
-        <a class="button is-primary is-fullwidth" @click="updateSvnLog">刷新版本</a>
+        <a
+          class="button is-primary is-fullwidth"
+          @click="updateSvnLog(true)"
+          :class="{'is-loading':isLoading}"
+        >刷新版本</a>
       </div>
       <div class="column">
         <div class="dropdown is-hoverable">
@@ -76,6 +80,14 @@
         </div>
       </div>
     </div>
+    <div class="columns">
+      <div class="column is-2">
+        <a class="button is-primary is-fullwidth" @click="submit">提交上线单</a>
+      </div>
+      <div class="column is-3">
+        <a class="button is-primary is-fullwidth" @click="submitNewest">一键提交最新版</a>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -85,6 +97,7 @@ export default {
   data: function () {
     return {
       title: "NewDep",
+      depTitle: "",
       currServerType: "",
       currVersion: "",
       currUrl: "",
@@ -94,6 +107,8 @@ export default {
       versionMap: {},
       messageMap: {},
       urlMap: {},
+      isLoading: false,
+      rversion: null,
     };
   },
   methods: {
@@ -103,18 +118,20 @@ export default {
       this.currMessage = [];
       window.console.log(type, this.versionMap[type]);
       if (this.versionMap[type]) {
+        this.rversion = null;
         this.currUrl = this.urlMap[type];
         this.versionList = JSON.parse(this.versionMap[type]);
       } else {
         await this.updateSvnLog();
       }
     },
-    updateSvnLog: async function () {
+    updateSvnLog: async function (buttonClicked) {
+      this.isLoading = buttonClicked || false;
       this.updateMask(1);
       try {
         this.currUrl = await this.getServerSvnUrl(this.currServerType);
         this.urlMap[this.currServerType] = this.currUrl;
-        let ret = await this.$httpc.get("/web/svnlog", {
+        let ret = await this.$httpc.get("/web/cmd/svnlog", {
           repourl: this.currUrl,
           limit: 15,
         });
@@ -128,50 +145,50 @@ export default {
         }
         this.versionList = tempList;
         this.versionMap[this.currServerType] = JSON.stringify(tempList);
-        this.updateMask(-1);
       } catch (e) {
         this.$store.commit("setVisible", {
           name: "DevOpsMask",
           visible: false,
         });
         this.$store.commit("error", `刷新svn版本失败:${e.data || e.message}`);
-        this.updateMask(-1);
       }
+      this.isLoading = false;
+      this.updateMask(-1);
     },
     selectVersion: async function (version) {
       this.currVersion = version;
 
-      let rversion = this.currVersion.split("|")[0];
+      this.rversion = this.currVersion.split("|")[0];
       this.currMessage = [];
       if (
         this.messageMap[this.currServerType] &&
-        this.messageMap[this.currServerType][rversion]
+        this.messageMap[this.currServerType][this.rversion]
       ) {
         this.currMessage = JSON.parse(
-          this.messageMap[this.currServerType][rversion]
+          this.messageMap[this.currServerType][this.rversion]
         );
         return;
       }
       this.updateMask(1);
       try {
-        let ret = await this.$httpc.get("/web/svnlog", {
+        let ret = await this.$httpc.get("/web/cmd/svnlog", {
           repourl: this.currUrl,
-          version: rversion,
+          version: this.rversion,
         });
         this.currMessage = ret.data.split("\n");
         if (!this.messageMap[this.currServerType]) {
           this.messageMap[this.currServerType] = {};
         }
-        this.messageMap[this.currServerType][rversion] = JSON.stringify(
+        this.messageMap[this.currServerType][this.rversion] = JSON.stringify(
           this.currMessage
         );
         this.updateMask(-1);
       } catch (e) {
         this.$store.commit(
           "error",
-          `加载服务类型<${this.currVersion}>版本<${rversion}>说明信息失败 : ${
-            e.data || e.message
-          }`
+          `加载服务类型<${this.currVersion}>版本<${
+            this.rversion
+          }>说明信息失败 : ${e.data || e.message}`
         );
         this.updateMask(-1);
       }
@@ -192,8 +209,27 @@ export default {
         );
       }
     },
+    submit: async function () {
+      try {
+        await this.$httpc.put(`/web/db/sys:ops:depbil`, {
+          value: JSON.stringify({
+            title: this.depTitle,
+            type: this.currServerType,
+            rversion: this.rversion,
+            repourl: this.currUrl,
+            desc: this.currMessage,
+          }),
+        });
+        this.$store.commit("info", `提交上线单成功 : ${this.depTitle}`);
+      } catch (e) {
+        this.$store.commit("error", `提交上线单失败 : ${e.data || e.message}`);
+      }
+    },
+    submitNewest: async function () {
+      this.$store.commit("info", `一键提交最新上线单成功`);
+    },
   },
-  beforeMount: function () {
+  beforeMount: async function () {
     // this.updateSvnLog();
   },
 };

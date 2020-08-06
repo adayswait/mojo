@@ -37,6 +37,7 @@ const BUCKET_USR_OPSLOG = "sys:usr:opslog"
 const BUCKET_OPS_MACINI = "sys:ops:macini"
 const BUCKET_OPS_DEPINI = "sys:ops:depini"
 const BUCKET_OPS_DEVINI = "sys:ops:devini"
+const BUCKET_OPS_DEPBIL = "sys:ops:depbil"
 
 //cookie名
 const ACCESS_TOKEN = "access_token"
