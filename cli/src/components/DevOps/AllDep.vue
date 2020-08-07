@@ -1,56 +1,79 @@
 <template>
   <div class="box">
-    <table class="table is-striped is-fullwidth">
-      <thead>
-        <tr>
-          <th>
-            <abbr title="标题"></abbr>
-          </th>
-          <th>
-            <abbr title="服务类型">服务类型</abbr>
-          </th>
-          <th>
-            <abbr title="版本号">版本号</abbr>
-          </th>
-          <th>
-            <abbr title="操作">操作</abbr>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(info,i) in allDeps" :key="info[0]">
-          <td>
-            <span class="tag is-black">未上线</span>
-            {{info[1].title}}
-          </td>
-          <td>{{info[1].type}}</td>
-          <td>{{info[1].rversion}}</td>
-          <td>
-            <button class="button is-small is-warning" @click="viewDetail(i)">查看详情</button>
-            <button class="button is-small is-dark" @click="submit(i)">部署上线</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="box">
+      <table class="table is-striped is-fullwidth">
+        <tbody>
+          <tr v-for="(info,i) in progressList" :key="i">
+            <td>
+              <div class="columns">
+                <div class="column is-1"></div>
+                <div class="column">
+                  <progress class="progress" :value="i" max="100">15%</progress>
+                </div>
+                <div class="column is-3"></div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="box">
+      <table class="table is-striped is-fullwidth">
+        <tbody>
+          <tr v-for="(info,i) in allDeps" :key="info[0]">
+            <td>{{info[0]}}</td>
+            <td>{{info[1].title}}</td>
+            <td>
+              <div class="field is-grouped is-grouped-multiline">
+                <div class="control">
+                  <div class="tags has-addons">
+                    <span class="tag is-dark">type</span>
+                    <span class="tag is-info">{{info[1].type}}</span>
+                  </div>
+                </div>
 
+                <div class="control">
+                  <div class="tags has-addons">
+                    <span class="tag is-dark">version</span>
+                    <span class="tag is-success">{{info[1].rversion}}</span>
+                  </div>
+                </div>
+                <span class="tag is-dark">status</span>
+              </div>
+            </td>
+            <td>
+              <button class="button is-small is-warning" @click="viewDetail(i)">查看详情</button>
+              <button class="button is-small is-dark" @click="submit(i)">部署上线</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div id="details" class="modal is-large" :class="{'is-active':modalActive}">
       <div class="modal-background"></div>
       <div class="modal-card">
         <header class="modal-card-head">
-          <p class="modal-card-title">{{currFoucsIdx?allDeps[currFoucsIdx][1].title:""}}</p>
+          <p
+            class="modal-card-title"
+          >{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].title:"非法上线单"}}</p>
           <button class="delete" aria-label="close" @click="closeDetails"></button>
         </header>
         <section class="modal-card-body">
           <div class="content">
+            <h4>上线单号</h4>
+            <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][0]:"无"}}</p>
             <h4>服务类型</h4>
-            <p>{{currFoucsIdx?allDeps[currFoucsIdx][1].type:"无"}}</p>
+            <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].type:"无"}}</p>
             <h4>checkout地址</h4>
-            <p>{{currFoucsIdx?allDeps[currFoucsIdx][1].repourl:"无"}}</p>
+            <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].repourl:"无"}}</p>
             <h4>版本号</h4>
-            <p>{{currFoucsIdx?allDeps[currFoucsIdx][1].rversion:"无"}}</p>
+            <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].rversion:"无"}}</p>
 
             <h4>版本描述</h4>
-            <tr v-for="(msg,i) in currFoucsIdx?allDeps[currFoucsIdx][1].desc:[]" :key="i">
+            <tr
+              v-for="(msg,i) in typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].desc.slice(1,-2):[]"
+              :key="i"
+            >
               <p>{{msg}}</p>
             </tr>
           </div>
@@ -73,6 +96,7 @@ export default {
       currFoucsIdx: null,
       modalActive: false,
       allDeps: [],
+      progressList: [1, 2, 3, 4],
     };
   },
   methods: {

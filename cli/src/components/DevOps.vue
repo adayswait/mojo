@@ -20,9 +20,9 @@
                   <li @click="focus('新建部署')">
                     <router-link to="/devops/newdep" :class="{'is-active':currFocus=='新建部署'}">新建部署</router-link>
                   </li>
-                  <li @click="focus('我的部署')">
+                  <!-- <li @click="focus('我的部署')">
                     <router-link to="/devops/mydep" :class="{'is-active':currFocus=='我的部署'}">我的部署</router-link>
-                  </li>
+                  </li> -->
                   <li @click="focus('所有部署')">
                     <router-link to="/devops/alldep" :class="{'is-active':currFocus=='所有部署'}">所有部署</router-link>
                   </li>

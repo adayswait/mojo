@@ -1,5 +1,6 @@
 package handler
 
+import "sync"
 import "time"
 import "crypto/md5"
 import "encoding/hex"
@@ -259,35 +260,30 @@ func DeleteDB(c *fiber.Ctx) {
 type ParamSvn struct {
 	RepoUrl string `json:"repourl"`
 	Limit   string `json:"limit"`
+	Period  string `json:"period"`
 	Version string `json:"version"`
 }
 
-func SvnLog(c *fiber.Ctx) {
+func CommitHistory(c *fiber.Ctx) {
 	const timeout = time.Minute
 	var paramSvn ParamSvn
 	if err := c.QueryParser(&paramSvn); err == nil {
-		if len(paramSvn.Version) != 0 {
-			cmd := fmt.Sprintf("svn log -%s %s",
-				paramSvn.Version, paramSvn.RepoUrl)
-			e, _, err := expect.Spawn(cmd, -1)
-			defer e.Close()
-			if err != nil {
-				c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
-					"data": cmd})
-				return
-			}
-			// allRE := regexp.MustCompile(`[\s\S]`)
-			ret, _, _ := e.Expect(nil, timeout)
-			c.JSON(fiber.Map{"code": global.RET_OK,
-				"data": ret})
-			return
-		}
 		if len(paramSvn.RepoUrl) != 0 {
-			if len(paramSvn.Limit) == 0 {
-				paramSvn.Limit = "10"
+			var cmd string
+			if len(paramSvn.Version) != 0 {
+				cmd = fmt.Sprintf("svn log -%s %s",
+					paramSvn.Version, paramSvn.RepoUrl)
+			} else if len(paramSvn.Period) != 0 {
+				cmd = fmt.Sprintf("svn log -r %s -q %s",
+					paramSvn.Period, paramSvn.RepoUrl)
+			} else {
+				if len(paramSvn.Limit) == 0 {
+					paramSvn.Limit = "10"
+				}
+				cmd = fmt.Sprintf("svn log -l %s -q %s",
+					paramSvn.Limit, paramSvn.RepoUrl)
 			}
-			cmd := fmt.Sprintf("svn log -l %s -q %s",
-				paramSvn.Limit, paramSvn.RepoUrl)
+
 			e, _, err := expect.Spawn(cmd, -1)
 			defer e.Close()
 			if err != nil {
@@ -295,7 +291,6 @@ func SvnLog(c *fiber.Ctx) {
 					"data": cmd})
 				return
 			}
-			// allRE := regexp.MustCompile(`[\s\S]`)
 			ret, _, _ := e.Expect(nil, timeout)
 			c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": ret})
@@ -312,29 +307,27 @@ func SvnLog(c *fiber.Ctx) {
 	}
 }
 
-type SubmitDepParam struct {
-	DepId string `json:"depid"`
-}
-type DepInfo struct {
-	Type     string `json:"type"`
-	RepoUrl  string `json:"repourl"`
-	Rversion string `json:"rversion"`
-}
-
 func SubmitDep(c *fiber.Ctx) {
 	const timeout = time.Minute
-	var subDepParam SubmitDepParam
+	subDepParam := struct {
+		DepId string `json:"depid"`
+	}{}
 	if err := c.QueryParser(&subDepParam); err == nil {
 		if len(subDepParam.DepId) != 0 {
 			depInfoInDB, _ := db.Get(global.BUCKET_OPS_DEPBIL, subDepParam.DepId)
-			var depInfo DepInfo
+			depInfo := struct {
+				Type     string `json:"type"`
+				RepoUrl  string `json:"repourl"`
+				Rversion string `json:"rversion"`
+			}{}
 			json.Unmarshal(depInfoInDB, &depInfo)
 			path := utils.GetRepoPath()
 			if len(path) == 0 {
 				path = "."
 			}
-			cmd := fmt.Sprintf("svn checkout -%s %s %s/%s",
-				depInfo.Rversion, depInfo.RepoUrl, path, depInfo.Type)
+			path = fmt.Sprintf("%s/%s", path, subDepParam.DepId)
+			cmd := fmt.Sprintf("svn checkout -%s %s %s",
+				depInfo.Rversion, depInfo.RepoUrl, path)
 			e, _, err := expect.Spawn(cmd, -1)
 			defer e.Close()
 			if err != nil {
@@ -342,8 +335,18 @@ func SubmitDep(c *fiber.Ctx) {
 					"data": cmd})
 				return
 			}
-			checkedOutRE := regexp.MustCompile(fmt.Sprintf("Checked out revision %s", depInfo.Rversion))
-			ret, _, _ := e.Expect(checkedOutRE, timeout)
+			expectStr := "Checked out revision"
+			ret, matched, err := e.Expect(regexp.MustCompile(expectStr), timeout)
+			if err != nil {
+				c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN_EXPECT,
+					"data": err.Error()})
+				return
+			}
+			if len(matched) == 0 {
+				c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN_EXPECT_MATCH,
+					"data": `expected can't match : ` + expectStr})
+				return
+			}
 			c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": ret})
 			return
@@ -357,6 +360,53 @@ func SubmitDep(c *fiber.Ctx) {
 			"data": err.Error()})
 		return
 	}
+}
+
+type Progress struct {
+	DepId  string `json:"depid"`
+	Status string `json:"status"`
+}
+
+var progressMap = make(map[string]Progress)
+var progressMutex sync.RWMutex
+
+func ProgressList(c *fiber.Ctx) {
+	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+	return
+}
+
+func DeleteDep(c *fiber.Ctx) {
+	const timeout = time.Minute
+	subDepParam := struct {
+		DepId string `json:"depid"`
+	}{}
+	if err := c.BodyParser(&subDepParam); err == nil {
+
+	} else {
+		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+			"data": err.Error()})
+		return
+	}
+}
+
+func Test(c *fiber.Ctx) {
+	const timeout = time.Minute
+	e, _, err := expect.Spawn("node", -1)
+	defer e.Close()
+	if err != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+			"data": "cmd"})
+		return
+	}
+	// checkedOutRE := regexp.MustCompile(fmt.Sprintf("Checked out revision %s", depInfo.Rversion))
+	checkedOutRE := regexp.MustCompile(">")
+	ret, _, err2 := e.Expect(checkedOutRE, timeout)
+	fmt.Println(ret, err2)
+	e.Send("1+1\n")
+	ret2, _, err3 := e.Expect(checkedOutRE, timeout)
+	fmt.Println(ret2, err3)
+	c.JSON(fiber.Map{"code": global.RET_OK,
+		"data": ret})
 }
 
 func Rsync(c *fiber.Ctx) {

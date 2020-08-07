@@ -39,11 +39,14 @@ func Route(app *fiber.App) {
 	authWeb.Get("/register", handler.Register)
 
 	//本地或远程shell cmd
-	cmdWeb := web.Group("/cmd")
-	cmdWeb.Get("/svnlog", handler.SvnLog)
+	// cmdWeb := web.Group("/cmd")
 
 	depWeb := web.Group("/dep")
+	depWeb.Get("/test", handler.Test)
 	depWeb.Get("/submit", handler.SubmitDep)
+	depWeb.Get("/commithistory", handler.CommitHistory)
+	depWeb.Get("/progress", handler.ProgressList)
+	depWeb.Delete("/", handler.DeleteDep)
 
 	//db工具
 	dbWeb := web.Group("/db")

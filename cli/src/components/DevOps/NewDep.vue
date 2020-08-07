@@ -38,6 +38,20 @@
     </div>
     <div class="columns">
       <div class="column is-2">
+        <input class="input has-text-centered" type="text" value="版本提交时间" disabled />
+      </div>
+      <div class="column is-2">
+        <input class="input" type="text" placeholder="起始" v-model="versionStartTime" />
+      </div>
+      <div class="column is-2">
+        <input class="input" type="text" placeholder="终止" v-model="versionEndTime" />
+      </div>
+      <div class="column">
+        <span class="tag is-small is-dark">默认最新{{defaultSvnLogLimit}}条</span>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column is-2">
         <a
           class="button is-primary is-fullwidth"
           @click="updateSvnLog(true)"
@@ -45,9 +59,14 @@
         >刷新版本</a>
       </div>
       <div class="column">
-        <div class="dropdown is-hoverable">
+        <div class="dropdown" :class="{'is-hoverable':versionMap[currServerType]}">
           <div class="dropdown-trigger">
-            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+            <button
+              class="button"
+              aria-haspopup="true"
+              aria-controls="dropdown-menu"
+              @click="showVersion"
+            >
               {{currVersion||"点击选择待发布版本"}}
               <span class="icon is-small">
                 <i class="fas fa-angle-down" aria-hidden="true"></i>
@@ -109,6 +128,9 @@ export default {
       urlMap: {},
       isLoading: false,
       rversion: null,
+      versionStartTime: "",
+      versionEndTime: "",
+      defaultSvnLogLimit: 15,
     };
   },
   methods: {
@@ -117,24 +139,41 @@ export default {
       this.currVersion = "";
       this.currMessage = [];
       window.console.log(type, this.versionMap[type]);
-      if (this.versionMap[type]) {
+      this.versionList = [];
+      if (this.versionMap[this.currServerType]) {
         this.rversion = null;
-        this.currUrl = this.urlMap[type];
-        this.versionList = JSON.parse(this.versionMap[type]);
-      } else {
-        await this.updateSvnLog();
+        this.currUrl = this.urlMap[this.currServerType];
+        this.versionList = JSON.parse(this.versionMap[this.currServerType]);
       }
     },
     updateSvnLog: async function (buttonClicked) {
+      if (!this.currServerType) {
+        return this.$store.commit("warn", `请先选择服务类型`);
+      }
+      const reg = /^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))$|^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))\s((?:[0-1]?[0-9]{1}|2[0-3])):([0-5]?[0-9]{1}):([0-5]?[0-9]{1})$|^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))\s((?:[0-1]?[0-9]{1}|2[0-3])):([0-5]?[0-9]{1}):([0-5]?[0-9]{1})\.?(\d{3})+$/;
+      if (this.versionStartTime || this.versionEndTime) {
+        if (
+          reg.test(this.versionStartTime) === false ||
+          reg.test(this.versionEndTime) === false
+        ) {
+          return this.$store.commit("warn", `请检查你的日期格式yyyy:mm:dd`);
+        }
+      }
       this.isLoading = buttonClicked || false;
       this.updateMask(1);
       try {
         this.currUrl = await this.getServerSvnUrl(this.currServerType);
         this.urlMap[this.currServerType] = this.currUrl;
-        let ret = await this.$httpc.get("/web/cmd/svnlog", {
+        let params = {
           repourl: this.currUrl,
-          limit: 15,
-        });
+          limit: this.defaultSvnLogLimit,
+        };
+
+        if (this.versionStartTime && this.versionEndTime) {
+          params.period = `{${this.versionStartTime}}:{${this.versionEndTime}}`;
+          delete params.limit;
+        }
+        let ret = await this.$httpc.get("/web/dep/commithistory", params);
         const formatData = ret.data.split("\n");
         let tempList = [];
         //奇数下标的是有效信息
@@ -171,7 +210,7 @@ export default {
       }
       this.updateMask(1);
       try {
-        let ret = await this.$httpc.get("/web/cmd/svnlog", {
+        let ret = await this.$httpc.get("/web/dep/commithistory", {
           repourl: this.currUrl,
           version: this.rversion,
         });
@@ -193,6 +232,15 @@ export default {
         this.updateMask(-1);
       }
     },
+    showVersion: async function () {
+      if (this.versionMap[this.currServerType]) {
+        this.rversion = null;
+        this.currUrl = this.urlMap[this.currServerType];
+        this.versionList = JSON.parse(this.versionMap[this.currServerType]);
+      } else {
+        await this.updateSvnLog();
+      }
+    },
     updateMask: function (n) {
       this.$store.commit("updateDevOpsMask", n);
     },
@@ -211,6 +259,9 @@ export default {
     },
     submit: async function () {
       try {
+        if (this.depTitle.length < 10) {
+          return this.$store.commit("warn", `提交上线单失败 : 标题最少10个字符`);
+        }
         await this.$httpc.put(`/web/db/sys:ops:depbil`, {
           value: JSON.stringify({
             title: this.depTitle,
