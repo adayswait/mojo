@@ -2,15 +2,32 @@
   <div class="box">
     <div class="box">
       <table class="table is-striped is-fullwidth">
+        <thead>
+          <tr>
+            <th>
+              <abbr title="bucket名称">表名称</abbr>
+            </th>
+          </tr>
+        </thead>
         <tbody>
           <tr v-for="(info,i) in progressList" :key="i">
             <td>
               <div class="columns">
-                <div class="column is-1"></div>
-                <div class="column">
-                  <progress class="progress" :value="i" max="100">15%</progress>
+                <div class="column is-1">
+                  <p>{{info.depid}}</p>
                 </div>
-                <div class="column is-3"></div>
+                <div class="column">
+                  <progress
+                    class="progress"
+                    :class="{'is-danger':info.status===-1,
+                    'is-success':info.status===5}"
+                    :value="info.status/5"
+                    max="1"
+                  >15%</progress>
+                </div>
+                <div class="column is-3">
+                  <p>{{info.desc}}</p>
+                </div>
               </div>
             </td>
           </tr>
@@ -96,11 +113,11 @@ export default {
       currFoucsIdx: null,
       modalActive: false,
       allDeps: [],
+      timerId: null,
       progressList: [1, 2, 3, 4],
     };
   },
   methods: {
-    // focus: function (idx) {},
     viewDetail: function (idx) {
       this.currFoucsIdx = idx;
       this.modalActive = true;
@@ -123,6 +140,17 @@ export default {
         this.$store.commit("error", `获取上线单失败 : ${e.data || e.message}`);
       }
     },
+    getProgressList: async function () {
+      try {
+        const ret = await this.$httpc.get("/web/dep/progress");
+        this.progressList = ret.data;
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `获取任务进度列表失败 : ${e.data || e.message}`
+        );
+      }
+    },
     submit: async function (idx) {
       window.console.log(this.allDeps[idx][0]);
       const ret = await this.$httpc.get(`/web/dep/submit`, {
@@ -133,6 +161,13 @@ export default {
   },
   beforeMount: function () {
     this.getAllDeps();
+    this.timerId = setInterval(this.getProgressList, 1000);
+  },
+  destroyed: function () {
+    if (this.timerId) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
   },
 };
 </script>

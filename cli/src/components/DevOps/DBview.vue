@@ -24,7 +24,7 @@
           </th>
         </tr>
       </thead>
-      <tbody class>
+      <tbody>
         <tr v-for="item in this.tableList" :key="item[0]">
           <td>
             <input class="input" type="text" v-model="item[0]" readonly />

@@ -307,6 +307,15 @@ func CommitHistory(c *fiber.Ctx) {
 	}
 }
 
+type Progress struct {
+	DepId  string  `json:"depid"`
+	Status float64 `json:"status"`
+	Desc   string  `json:"desc"`
+}
+
+var progressMap = make(map[string]*Progress)
+var progressMutex sync.RWMutex
+
 func SubmitDep(c *fiber.Ctx) {
 	const timeout = time.Minute
 	subDepParam := struct {
@@ -328,27 +337,45 @@ func SubmitDep(c *fiber.Ctx) {
 			path = fmt.Sprintf("%s/%s", path, subDepParam.DepId)
 			cmd := fmt.Sprintf("svn checkout -%s %s %s",
 				depInfo.Rversion, depInfo.RepoUrl, path)
-			e, _, err := expect.Spawn(cmd, -1)
-			defer e.Close()
-			if err != nil {
-				c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
-					"data": cmd})
+			go func() {
+				progressMutex.Lock()
+				progressMap[subDepParam.DepId] = &Progress{
+					DepId:  subDepParam.DepId,
+					Status: global.DEP_STATUS_NOT_START,
+					Desc:   "initing",
+				}
+				progressMutex.Unlock()
+				e, _, err := expect.Spawn(cmd, -1)
+				defer e.Close()
+				if err != nil {
+					c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+						"data": cmd})
+					return
+				}
+				expectStr := "Checked out revision"
+				_, matched, err := e.Expect(regexp.MustCompile(expectStr), timeout)
+				if err != nil {
+					progressMutex.Lock()
+					progressMap[subDepParam.DepId].Status = global.DEP_STATUS_FAILD
+					progressMap[subDepParam.DepId].Desc = err.Error()
+					progressMutex.Unlock()
+					return
+				}
+				if len(matched) == 0 {
+					progressMutex.Lock()
+					progressMap[subDepParam.DepId].Status = global.DEP_STATUS_FAILD
+					progressMap[subDepParam.DepId].Desc = `can't match : ` + expectStr
+					progressMutex.Unlock()
+					return
+				}
+				progressMutex.Lock()
+				progressMap[subDepParam.DepId].Status = global.DEP_STATUS_SUCCESS
+				progressMap[subDepParam.DepId].Desc = "successed"
+				progressMutex.Unlock()
 				return
-			}
-			expectStr := "Checked out revision"
-			ret, matched, err := e.Expect(regexp.MustCompile(expectStr), timeout)
-			if err != nil {
-				c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN_EXPECT,
-					"data": err.Error()})
-				return
-			}
-			if len(matched) == 0 {
-				c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN_EXPECT_MATCH,
-					"data": `expected can't match : ` + expectStr})
-				return
-			}
+			}()
 			c.JSON(fiber.Map{"code": global.RET_OK,
-				"data": ret})
+				"data": "request submitted"})
 			return
 		} else {
 			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
@@ -362,16 +389,15 @@ func SubmitDep(c *fiber.Ctx) {
 	}
 }
 
-type Progress struct {
-	DepId  string `json:"depid"`
-	Status string `json:"status"`
-}
-
-var progressMap = make(map[string]Progress)
-var progressMutex sync.RWMutex
-
 func ProgressList(c *fiber.Ctx) {
-	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+	ret := [](Progress){}
+	progressMutex.RLock()
+	for p := range progressMap {
+		fmt.Println(p)
+		ret = append(ret, *progressMap[p])
+	}
+	progressMutex.RUnlock()
+	c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
 	return
 }
 
