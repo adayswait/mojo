@@ -11,13 +11,15 @@ const local_LOG_DIR = "log-dir"
 const local_HOST = "host"
 const local_PORT = "port"
 const local_REPO_PATH = "repo-path"
+const local_EXCLUDE_FROM = "exclude-from"
 
 type config struct {
-	dbDataDir string
-	logDir    string
-	host      string
-	port      uint16
-	repoPath  string
+	dbDataDir   string
+	logDir      string
+	host        string
+	port        uint16
+	repoPath    string
+	excludeFrom string
 }
 
 var mojoCnf config
@@ -57,6 +59,8 @@ func ReadConfig() {
 			mojoCnf.port = uint16(portuint64)
 		case local_REPO_PATH:
 			mojoCnf.repoPath = cnfArr[1]
+		case local_EXCLUDE_FROM:
+			mojoCnf.excludeFrom = cnfArr[1]
 		default:
 
 		}
@@ -80,6 +84,10 @@ func GetListeningPort() uint16 {
 
 func GetRepoPath() string {
 	return mojoCnf.repoPath
+}
+
+func GetExcludeFrom() string {
+	return mojoCnf.excludeFrom
 }
 
 func IsPathExist(path string) bool {

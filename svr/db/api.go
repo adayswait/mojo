@@ -109,6 +109,7 @@ func Buckets() ([]string, error) {
 	defer rwLock.RUnlock()
 	return ret, err
 }
+
 func Keys(bucketName string) ([]string, error) {
 	ret := []string{}
 	rwLock.RLock()

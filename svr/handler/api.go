@@ -17,11 +17,8 @@ import (
 	"github.com/google/goexpect"
 	"github.com/google/goterm/term"
 	"golang.org/x/crypto/ssh"
-	// "google.golang.org/grpc/codes"
 	"regexp"
 )
-
-// import "github.com/adayswait/mojo/cmd"
 
 var sessions *session.Session
 
@@ -29,6 +26,11 @@ type Progress struct {
 	DepId  string  `json:"depid"`
 	Status float64 `json:"status"`
 	Desc   string  `json:"desc"`
+}
+type SSHinfo struct {
+	Port   string
+	User   string
+	Passwd string
 }
 
 var progressMap sync.Map
@@ -334,36 +336,109 @@ func SubmitDep(c *fiber.Ctx) {
 			if len(path) == 0 {
 				path = "."
 			}
-			path = fmt.Sprintf("%s/%s", path, depid)
+			path = fmt.Sprintf("%s/%s/", path, depid)
 			coCmd := fmt.Sprintf("svn checkout -%s %s %s",
 				depInfo.Rversion, depInfo.RepoUrl, path)
 			cuCmd := fmt.Sprintf("svn cleanup %s", path)
-			go func(depid string) {
+			go func(depid, deptype string) {
 				// depid := strconv.Itoa(int(subDepParam.DepId))
 				progressMap.Store(depid, global.DEP_STATUS_NOT_START)
 				ec, _, _ := expect.Spawn(cuCmd, -1)
 				ec.Expect(regexp.MustCompile(`[\s\S]`), 2*time.Minute)
+				progressMap.Store(depid, global.DEP_STATUS_CHECKOUT)
 				e, _, err := expect.Spawn(coCmd, -1)
 				defer e.Close()
 				if err != nil {
+					progressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
 					c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 						"data": coCmd})
 					return
 				}
-				expectStr := "Checked out revision"
-				ret, matched, err := e.Expect(regexp.MustCompile(expectStr), 5*time.Minute)
+				coStr := "Checked out revision"
+				ret, matched, err := e.Expect(regexp.MustCompile(coStr),
+					5*time.Minute)
 				fmt.Println(coCmd, ret)
 				if err != nil {
-					progressMap.Store(depid, global.DEP_STATUS_FAILD)
+					progressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
 					return
 				}
 				if len(matched) == 0 {
-					progressMap.Store(depid, global.DEP_STATUS_FAILD)
+					progressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
 					return
 				}
+				progressMap.Store(depid, global.DEP_STATUS_SYNC)
+				depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
+				if errd != nil {
+					progressMap.Store(depid, global.DEP_STATUS_ERR_GETINI)
+					fmt.Println("errd", errd)
+					return
+				}
+				maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
+				if errm != nil {
+					fmt.Println("errm", errm)
+					progressMap.Store(depid, global.DEP_STATUS_ERR_GETINI)
+					return
+				}
+				macIni := make(map[string]SSHinfo)
+				for i := 1; i < len(maciniInDB); i += 2 {
+					var imac []string
+					e := json.Unmarshal([]byte(maciniInDB[i]), &imac)
+					if e != nil {
+						continue
+					}
+					_, exist := macIni[imac[0]]
+					if exist == false {
+						macIni[imac[0]] = SSHinfo{
+							Port:   imac[1],
+							User:   imac[2],
+							Passwd: imac[3],
+						}
+					}
+				}
+				for i := 1; i < len(depiniInDB); i += 2 {
+					var idep []string
+					e := json.Unmarshal([]byte(depiniInDB[i]), &idep)
+					if e != nil {
+						continue
+					}
+					if idep[0] != deptype {
+						continue
+					}
+					macini, exist := macIni[idep[2]]
+					if exist == false {
+						continue
+					}
+					syncCmd := []string{
+						"rsync",
+						"-zarv",
+						"--copy-links",
+						fmt.Sprintf("--rsh=ssh -p %s", macini.Port),
+						fmt.Sprintf("--exclude-from=%s", utils.GetExcludeFrom()),
+						path,
+						fmt.Sprintf("%s@%s:%s", macini.User, idep[2], idep[3]),
+					}
+					fmt.Println(syncCmd)
+					ers, _, _ := expect.SpawnWithArgs(syncCmd, -1)
+					rsStr := "password:"
+					retrs, matchedrs, errrs :=
+						ers.Expect(regexp.MustCompile(rsStr), 5*time.Minute)
+					if len(matchedrs) == 1 && errrs == nil {
+						ers.Send(macini.Passwd + "\n")
+						retrsc, matchedrsc, errrsc := ers.Expect(
+							regexp.MustCompile("speedup is"), 5*time.Minute)
+						if errrsc == nil && len(matchedrsc) == 1 {
+							fmt.Println("sync succeed", retrsc)
+						} else {
+							fmt.Println("sync failed", retrsc, errrsc)
+						}
+					} else {
+						fmt.Println(syncCmd, retrs, matchedrs, errrs)
+					}
+				}
 				progressMap.Store(depid, global.DEP_STATUS_SUCCESS)
+
 				return
-			}(depid)
+			}(depid, depInfo.Type)
 			c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": "request submitted"})
 			return
@@ -413,7 +488,6 @@ func Test(c *fiber.Ctx) {
 			"data": "cmd"})
 		return
 	}
-	// checkedOutRE := regexp.MustCompile(fmt.Sprintf("Checked out revision %s", depInfo.Rversion))
 	checkedOutRE := regexp.MustCompile(">")
 	ret, _, err2 := e.Expect(checkedOutRE, timeout)
 	fmt.Println(ret, err2)

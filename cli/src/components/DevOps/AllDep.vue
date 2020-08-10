@@ -4,7 +4,7 @@
       <table class="table is-striped is-fullwidth">
         <tbody>
           <tr v-for="(info,i) in progressList" :key="i">
-            <td>
+            <td @click="showProgressDetails">
               <div class="columns">
                 <div class="column is-2">
                   <div class="tags has-addons">
@@ -22,7 +22,7 @@
                   ></progress>
                 </div>
                 <div class="column is-3">
-                  <p>{{info[0]}}</p>
+                  <p>{{progressDesc[info[1]]}}</p>
                 </div>
               </div>
             </td>
@@ -110,6 +110,14 @@ export default {
       allDeps: [],
       timerId: null,
       progressList: [],
+      progressDesc: [
+        "初始化",
+        "检出代码",
+        "同步代码",
+        "停止旧服务",
+        "启动新服务",
+        "部署成功 ",
+      ],
     };
   },
   methods: {
@@ -146,6 +154,9 @@ export default {
         for (let i = 0; i < ret.data.length; i += 2) {
           tempList[i / 2] = [ret.data[i], ret.data[i + 1]];
         }
+        tempList.sort((a, b) => {
+          return parseInt(b[0]) - parseInt(a[0]);
+        });
         this.progressList = tempList;
       } catch (e) {
         this.$store.commit(
@@ -160,6 +171,9 @@ export default {
         depid: this.allDeps[idx][0],
       });
       this.$store.commit("info", `成功 : ${ret.data}`);
+    },
+    showProgressDetails: function () {
+      window.console.log("showProgressDetails");
     },
   },
   beforeMount: function () {

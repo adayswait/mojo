@@ -3,3 +3,4 @@ log-dir .
 #host 10.1.1.1
 port 3000
 repo-path /opt/jesse/tmp
+exclude-from /opt/jesse/splan/tools/release/exclude.list
