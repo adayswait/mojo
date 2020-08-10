@@ -2,6 +2,7 @@ package handler
 
 import "sync"
 import "time"
+import "strconv"
 import "crypto/md5"
 import "encoding/hex"
 import "encoding/json"
@@ -23,6 +24,14 @@ import (
 // import "github.com/adayswait/mojo/cmd"
 
 var sessions *session.Session
+
+type Progress struct {
+	DepId  string  `json:"depid"`
+	Status float64 `json:"status"`
+	Desc   string  `json:"desc"`
+}
+
+var progressMap sync.Map
 
 func init() {
 	sessions = session.New()
@@ -307,23 +316,14 @@ func CommitHistory(c *fiber.Ctx) {
 	}
 }
 
-type Progress struct {
-	DepId  string  `json:"depid"`
-	Status float64 `json:"status"`
-	Desc   string  `json:"desc"`
-}
-
-var progressMap = make(map[string]*Progress)
-var progressMutex sync.RWMutex
-
 func SubmitDep(c *fiber.Ctx) {
-	const timeout = time.Minute
 	subDepParam := struct {
-		DepId string `json:"depid"`
+		DepId float64 `json:"depid"`
 	}{}
 	if err := c.QueryParser(&subDepParam); err == nil {
-		if len(subDepParam.DepId) != 0 {
-			depInfoInDB, _ := db.Get(global.BUCKET_OPS_DEPBIL, subDepParam.DepId)
+		if subDepParam.DepId != 0 {
+			depid := strconv.Itoa(int(subDepParam.DepId)) //float64
+			depInfoInDB, _ := db.Get(global.BUCKET_OPS_DEPBIL, depid)
 			depInfo := struct {
 				Type     string `json:"type"`
 				RepoUrl  string `json:"repourl"`
@@ -334,46 +334,36 @@ func SubmitDep(c *fiber.Ctx) {
 			if len(path) == 0 {
 				path = "."
 			}
-			path = fmt.Sprintf("%s/%s", path, subDepParam.DepId)
-			cmd := fmt.Sprintf("svn checkout -%s %s %s",
+			path = fmt.Sprintf("%s/%s", path, depid)
+			coCmd := fmt.Sprintf("svn checkout -%s %s %s",
 				depInfo.Rversion, depInfo.RepoUrl, path)
-			go func() {
-				progressMutex.Lock()
-				progressMap[subDepParam.DepId] = &Progress{
-					DepId:  subDepParam.DepId,
-					Status: global.DEP_STATUS_NOT_START,
-					Desc:   "initing",
-				}
-				progressMutex.Unlock()
-				e, _, err := expect.Spawn(cmd, -1)
+			cuCmd := fmt.Sprintf("svn cleanup %s", path)
+			go func(depid string) {
+				// depid := strconv.Itoa(int(subDepParam.DepId))
+				progressMap.Store(depid, global.DEP_STATUS_NOT_START)
+				ec, _, _ := expect.Spawn(cuCmd, -1)
+				ec.Expect(regexp.MustCompile(`[\s\S]`), 2*time.Minute)
+				e, _, err := expect.Spawn(coCmd, -1)
 				defer e.Close()
 				if err != nil {
 					c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
-						"data": cmd})
+						"data": coCmd})
 					return
 				}
 				expectStr := "Checked out revision"
-				_, matched, err := e.Expect(regexp.MustCompile(expectStr), timeout)
+				ret, matched, err := e.Expect(regexp.MustCompile(expectStr), 5*time.Minute)
+				fmt.Println(coCmd, ret)
 				if err != nil {
-					progressMutex.Lock()
-					progressMap[subDepParam.DepId].Status = global.DEP_STATUS_FAILD
-					progressMap[subDepParam.DepId].Desc = err.Error()
-					progressMutex.Unlock()
+					progressMap.Store(depid, global.DEP_STATUS_FAILD)
 					return
 				}
 				if len(matched) == 0 {
-					progressMutex.Lock()
-					progressMap[subDepParam.DepId].Status = global.DEP_STATUS_FAILD
-					progressMap[subDepParam.DepId].Desc = `can't match : ` + expectStr
-					progressMutex.Unlock()
+					progressMap.Store(depid, global.DEP_STATUS_FAILD)
 					return
 				}
-				progressMutex.Lock()
-				progressMap[subDepParam.DepId].Status = global.DEP_STATUS_SUCCESS
-				progressMap[subDepParam.DepId].Desc = "successed"
-				progressMutex.Unlock()
+				progressMap.Store(depid, global.DEP_STATUS_SUCCESS)
 				return
-			}()
+			}(depid)
 			c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": "request submitted"})
 			return
@@ -390,13 +380,12 @@ func SubmitDep(c *fiber.Ctx) {
 }
 
 func ProgressList(c *fiber.Ctx) {
-	ret := [](Progress){}
-	progressMutex.RLock()
-	for p := range progressMap {
-		fmt.Println(p)
-		ret = append(ret, *progressMap[p])
-	}
-	progressMutex.RUnlock()
+	ret := []string{}
+	progressMap.Range(func(k, v interface{}) bool {
+		ret = append(ret, k.(string))
+		ret = append(ret, strconv.Itoa(v.(int)))
+		return true
+	})
 	c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
 	return
 }

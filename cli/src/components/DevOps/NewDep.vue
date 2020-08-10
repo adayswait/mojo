@@ -259,8 +259,8 @@ export default {
     },
     submit: async function () {
       try {
-        if (this.depTitle.length < 10) {
-          return this.$store.commit("warn", `提交上线单失败 : 标题最少10个字符`);
+        if (this.depTitle.length <6) {
+          return this.$store.commit("warn", `提交上线单失败 : 标题最少6个字符`);
         }
         await this.$httpc.put(`/web/db/sys:ops:depbil`, {
           value: JSON.stringify({

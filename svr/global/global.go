@@ -31,14 +31,14 @@ const (
 )
 
 const (
-	DEP_STATUS_NOT_START float64 = iota
+	DEP_STATUS_NOT_START int = iota
 	DEP_STATUS_CHECKOUT
 	DEP_STATUS_SYNC
 	DEP_STATUS_STOP_SERVER
 	DEP_STATUS_START_SERVER
 	DEP_STATUS_SUCCESS
 )
-const DEP_STATUS_FAILD float64 = -1
+const DEP_STATUS_FAILD int = -1
 
 //数据库表名
 const BUCKET_ITEMS_DESC = "sys:items:desc"

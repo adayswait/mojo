@@ -1,32 +1,28 @@
 <template>
   <div class="box">
-    <div class="box">
+    <div class="box" v-if="progressList.length!==0">
       <table class="table is-striped is-fullwidth">
-        <thead>
-          <tr>
-            <th>
-              <abbr title="bucket名称">表名称</abbr>
-            </th>
-          </tr>
-        </thead>
         <tbody>
           <tr v-for="(info,i) in progressList" :key="i">
             <td>
               <div class="columns">
-                <div class="column is-1">
-                  <p>{{info.depid}}</p>
+                <div class="column is-2">
+                  <div class="tags has-addons">
+                    <span class="tag is-dark">version</span>
+                    <span class="tag is-success">{{info[0]}}</span>
+                  </div>
                 </div>
                 <div class="column">
                   <progress
                     class="progress"
-                    :class="{'is-danger':info.status===-1,
-                    'is-success':info.status===5}"
-                    :value="info.status/5"
+                    :class="{'is-danger':info[1]==-1,
+                    'is-success':info[1]==5}"
+                    :value="info[1]/5"
                     max="1"
-                  >15%</progress>
+                  ></progress>
                 </div>
                 <div class="column is-3">
-                  <p>{{info.desc}}</p>
+                  <p>{{info[0]}}</p>
                 </div>
               </div>
             </td>
@@ -55,7 +51,6 @@
                     <span class="tag is-success">{{info[1].rversion}}</span>
                   </div>
                 </div>
-                <span class="tag is-dark">status</span>
               </div>
             </td>
             <td>
@@ -114,7 +109,7 @@ export default {
       modalActive: false,
       allDeps: [],
       timerId: null,
-      progressList: [1, 2, 3, 4],
+      progressList: [],
     };
   },
   methods: {
@@ -135,6 +130,10 @@ export default {
           window.console.log(ret.data[i + 1]);
           tempList[i / 2] = [ret.data[i], JSON.parse(ret.data[i + 1])];
         }
+        tempList.sort((a, b) => {
+          return parseInt(b[0]) - parseInt(a[0]);
+        });
+        window.console.log(tempList);
         this.allDeps = tempList;
       } catch (e) {
         this.$store.commit("error", `获取上线单失败 : ${e.data || e.message}`);
@@ -143,7 +142,11 @@ export default {
     getProgressList: async function () {
       try {
         const ret = await this.$httpc.get("/web/dep/progress");
-        this.progressList = ret.data;
+        let tempList = [];
+        for (let i = 0; i < ret.data.length; i += 2) {
+          tempList[i / 2] = [ret.data[i], ret.data[i + 1]];
+        }
+        this.progressList = tempList;
       } catch (e) {
         this.$store.commit(
           "error",
@@ -161,6 +164,7 @@ export default {
   },
   beforeMount: function () {
     this.getAllDeps();
+    this.getProgressList();
     this.timerId = setInterval(this.getProgressList, 1000);
   },
   destroyed: function () {
