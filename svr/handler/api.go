@@ -12,7 +12,6 @@ import (
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/session"
 	"github.com/google/goexpect"
-	"golang.org/x/crypto/ssh"
 	"regexp"
 	"strconv"
 	"time"
@@ -383,77 +382,6 @@ func Test(c *fiber.Ctx) {
 	fmt.Println(ret2, err3)
 	c.JSON(fiber.Map{"code": global.RET_OK,
 		"data": ret})
-}
-
-func Rsync(c *fiber.Ctx) {
-	const timeout = time.Minute
-
-	sshClt, err := ssh.Dial("tcp", "10.1.1.43:22000", &ssh.ClientConfig{
-		User:            "jesse",
-		Auth:            []ssh.AuthMethod{ssh.Password("m@@n1i9ht")},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	})
-	if err != nil {
-		fmt.Println("ssh.Dial failed")
-	}
-	defer sshClt.Close()
-
-	e, _, err := expect.SpawnSSH(sshClt, timeout)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer e.Close()
-
-	// e.ExpectBatch([]expect.Batcher{
-	// 	&expect.BExp{R: "password:"},
-	// 	&expect.BSnd{S: "m@@n1i9ht" + "\n"},
-	// 	// &expect.BExp{R: "Last login:"},
-	// 	// &expect.BSnd{S: "node\n"},
-	// }, timeout)
-	// allRE := regexp.MustCompile(`[\s\S]`)
-	// // passRE := regexp.MustCompile("password:")
-	logined := regexp.MustCompile("$")
-	result, _, _ := e.Expect(logined, timeout)
-	fmt.Println(result)
-	e.Send("/opt/jesse/server/online/start.sh\n")
-	started := regexp.MustCompile("启动")
-	result2, _, _ := e.Expect(started, timeout)
-	fmt.Println(result2)
-
-	// const timeout = 10 * time.Minute
-	// // userRE := regexp.MustCompile("username:")
-	// // passRE := regexp.MustCompile("password:")
-	// // allRE := regexp.MustCompile(`[\s\S]*`)
-	// allRE := regexp.MustCompile(">")
-	// fmt.Println(term.Bluef("Telnet 1 example"))
-
-	// e, _, err := expect.Spawn("node", -1)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// defer e.Close()
-	// // userRE = regexp.MustCompile("username:")
-	// // passRE = regexp.MustCompile("password:")
-	// // promptRE = regexp.MustCompile("%")
-
-	// // e.Expect(userRE, timeout)
-	// // e.Send("jesse" + "\n")
-	// // ret, _, _ := e.Expect(passRE, timeout)
-	// // fmt.Println(ret)
-	// // e.Send("m@@n1i9ht" + "\n")
-	// // fmt.Println("---")
-	// ret2, _, _ := e.Expect(allRE, timeout)
-	// fmt.Println("2", ret2)
-	// // e.Expect(promptRE, timeout)
-	// // e.Send("cmd" + "\n")
-	// // result, _, _ := e.Expect(promptRE, timeout)
-	// e1, _, err := expect.Spawn("cd vendor", -1)
-	// e1.Expect(allRE, timeout)
-	// fmt.Println("ls")
-	// e3, _, err := expect.Spawn("node", -1)
-	// ret3, _, _ := e3.Expect(allRE, timeout)
-	// fmt.Println("3", ret3)
-	// // fmt.Println(term.Greenf("%s: result: %s\n", "cmd", result))
 }
 
 var NewDB = UpdateDB

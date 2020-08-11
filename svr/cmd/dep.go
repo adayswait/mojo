@@ -13,6 +13,20 @@ import (
 	"time"
 )
 
+var dingdingStr string
+
+func init() {
+	dingdingStr = "{" +
+		`"msgtype":"markdown",` +
+		`"markdown":{` +
+		`"title":"更新提醒",` +
+		`"text":"#### **%s**将于30秒后重启\n\n` +
+		`> - [点击打断重启](http://10.1.1.248:8080)\n` +
+		`###### %s [详情](http://10.1.1.248:8080)\n"` +
+		"}" +
+		"}"
+}
+
 func SvnDep(depid, deptype, coCmd, cuCmd, path string) {
 	// depid := strconv.Itoa(int(subDepParam.DepId))
 	global.ProgressMap.Store(depid, global.DEP_STATUS_NOT_START)
@@ -127,7 +141,8 @@ func SvnDep(depid, deptype, coCmd, cuCmd, path string) {
 		retlogin, _, _ := essh.Expect(logined, 10*time.Second)
 		fmt.Println(retlogin)
 		essh.Send(idep[3] + "/stop.sh\n")
-		retstop, _, _ := essh.Expect(regexp.MustCompile("killed your"), 10*time.Second)
+		retstop, _, _ := essh.Expect(regexp.MustCompile("killed your"),
+			10*time.Second)
 		fmt.Println(retstop)
 		essh.Send(idep[3] + "/start.sh\n")
 		retstart, _, _ := essh.Expect(regexp.MustCompile("启动"), 10*time.Second)
@@ -136,14 +151,8 @@ func SvnDep(depid, deptype, coCmd, cuCmd, path string) {
 
 	req := &fasthttp.Request{}
 	req.SetRequestURI(utils.GetDingdingWebhook())
-	markdown := fmt.Sprintf(`
-	{
-		"msgtype":"markdown",
-		"markdown":{
-			"title":"更新提醒",
-			"text":"#### **%s**将于30秒后重启\n\n > - [点击打断重启](http://10.1.1.248:8080)\n > - [点击查看详情](http://10.1.1.248:8080)\n ###### %s\n"
-		}
-	}`, deptype, time.Now().Format("2006-01-02 15:04:05"))
+	markdown := fmt.Sprintf(dingdingStr, deptype,
+		time.Now().Format("2006-01-02 15:04:05"))
 	req.SetBody([]byte(markdown))
 
 	// 默认是application/x-www-form-urlencoded

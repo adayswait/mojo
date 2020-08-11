@@ -38,9 +38,6 @@ func Route(app *fiber.App) {
 	authWeb.Get("/logout", handler.Logout)
 	authWeb.Get("/register", handler.Register)
 
-	//本地或远程shell cmd
-	// cmdWeb := web.Group("/cmd")
-
 	depWeb := web.Group("/dep")
 	depWeb.Get("/test", handler.Test)
 	depWeb.Get("/submit", handler.SubmitDep)
@@ -55,6 +52,4 @@ func Route(app *fiber.App) {
 	dbWeb.Post("/:table?/:key?", handler.NewDB)
 	dbWeb.Delete("/:table?/:key?", handler.DeleteDB)
 
-	rsyncWeb := web.Group("/rsync")
-	rsyncWeb.Get("/", handler.Rsync)
 }
