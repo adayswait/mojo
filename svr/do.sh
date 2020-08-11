@@ -11,6 +11,11 @@ elif [ "$1" == "run" -o "$1" == "r" ]; then
 	echo "go run -mod=vendor main.go"
 	go run -mod=vendor main.go
 	echo "building finished"
+elif [ "$1" == "serve" -o "$1" == "s" ]; then
+	echo "go run -mod=vendor main.go"
+	go build -mod=vendor
+	nohup ./mojo &
+	echo "building finished"
 else
 	echo "usage:"
 	echo ""
@@ -22,4 +27,3 @@ else
 	echo "	r short for run"
 	echo "	b short for build"
 fi
-

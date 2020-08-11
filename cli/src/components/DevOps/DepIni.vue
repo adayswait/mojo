@@ -72,11 +72,10 @@
 export default {
   name: "DepIni",
   data: function () {
-    let dbDepTableName = "sys:ops:depini";
     return {
       title: "DepIni",
       currDropIdx: undefined,
-      dbDepTableName: dbDepTableName,
+      dbDepTableName: "sys:ops:depini",
       depIniList: [
         ["1", "online", "example", "10.1.1.1", "/opt/splan/example"],
       ],

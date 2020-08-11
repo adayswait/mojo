@@ -27,31 +27,74 @@ func init() {
 		"}"
 }
 
-func SvnDep(depid, deptype, coCmd, cuCmd, path string) {
-	// depid := strconv.Itoa(int(subDepParam.DepId))
-	global.ProgressMap.Store(depid, global.DEP_STATUS_NOT_START)
-	ec, _, _ := expect.Spawn(cuCmd, -1)
-	ec.Expect(regexp.MustCompile(`[\s\S]`), 2*time.Minute)
-	global.ProgressMap.Store(depid, global.DEP_STATUS_CHECKOUT)
-	e, _, err := expect.Spawn(coCmd, -1)
-	defer e.Close()
-	if err != nil {
-		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
-		return
+func SvnDep(depid, deptype, rversion, repourl string, list []string) {
+	path := utils.GetRepoPath()
+	if len(path) == 0 {
+		path = "."
 	}
-	coStr := "Checked out revision"
-	ret, matched, err := e.Expect(regexp.MustCompile(coStr),
+	path = fmt.Sprintf("%s/%s/", path, depid)
+	coCmd := fmt.Sprintf("svn export --force -%s %s %s",
+		rversion, repourl, path)
+	cuCmd := fmt.Sprintf("svn cleanup %s", path)
+	global.ProgressMap.Store(depid, global.DEP_STATUS_NOT_START)
+	ecu, _, _ := expect.Spawn(cuCmd, -1)
+	defer ecu.Close()
+	ecu.Expect(regexp.MustCompile("$"), 2*time.Minute)
+	fmt.Println("svn cleanup passed")
+	global.ProgressMap.Store(depid, global.DEP_STATUS_CHECKOUT)
+	eco, _, _ := expect.Spawn(coCmd, -1)
+	defer eco.Close()
+	coStr := "Exported revision"
+	ret, matched, errcoe := eco.Expect(regexp.MustCompile(coStr),
 		5*time.Minute)
-	fmt.Println(coCmd, ret)
-	if err != nil {
+	if errcoe != nil {
+		fmt.Println(coCmd, ret)
 		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
 	if len(matched) == 0 {
+		fmt.Println(coCmd, ret)
 		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
+	fmt.Println("svn export passed")
 	global.ProgressMap.Store(depid, global.DEP_STATUS_SYNC)
+
+	ecoplan, _, _ := expect.Spawn(path+"/config/import_json_from_design.sh", -1)
+	defer ecoplan.Close()
+	fmt.Println(path + "/config/import_json_from_design.sh")
+	retcoplan, matchedcoplan, errcoplan := ecoplan.Expect(regexp.MustCompile("import complete"),
+		5*time.Minute)
+	if errcoplan != nil || len(matchedcoplan) == 0 {
+		fmt.Println("import json err", retcoplan, matchedcoplan, errcoplan)
+		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
+		return
+	} else {
+		fmt.Println("import json passed")
+	}
+
+	//发布更新通知
+	req := &fasthttp.Request{}
+	req.SetRequestURI(utils.GetDingdingWebhook())
+	markdown := fmt.Sprintf(dingdingStr, deptype,
+		time.Now().Format("2006-01-02 15:04:05"))
+	req.SetBody([]byte(markdown))
+
+	// 默认是application/x-www-form-urlencoded
+	req.Header.SetContentType("application/json")
+	req.Header.SetMethod("POST")
+
+	resp := &fasthttp.Response{}
+
+	client := &fasthttp.Client{}
+	if err := client.Do(req, resp); err != nil {
+		fmt.Println("请求失败:", err.Error())
+		return
+	}
+	b := resp.Body()
+
+	fmt.Println("dingding webhook ret:\r\n", string(b))
+
 	depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
 	if errd != nil {
 		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_GETINI)
@@ -89,6 +132,16 @@ func SvnDep(depid, deptype, coCmd, cuCmd, path string) {
 		if idep[0] != deptype {
 			continue
 		}
+		inList := false
+		for c := 0; c < len(list); c++ {
+			if idep[1] == list[c] {
+				inList = true
+				break
+			}
+		}
+		if !inList && len(list) != 0 {
+			continue
+		}
 		macini, exist := macIni[idep[2]]
 		if exist == false {
 			continue
@@ -102,7 +155,6 @@ func SvnDep(depid, deptype, coCmd, cuCmd, path string) {
 			path,
 			fmt.Sprintf("%s@%s:%s", macini.User, idep[2], idep[3]),
 		}
-		fmt.Println(syncCmd)
 		ers, _, _ := expect.SpawnWithArgs(syncCmd, -1)
 		rsStr := "password:"
 		retrs, matchedrs, errrs :=
@@ -112,65 +164,62 @@ func SvnDep(depid, deptype, coCmd, cuCmd, path string) {
 			retrsc, matchedrsc, errrsc := ers.Expect(
 				regexp.MustCompile("speedup is"), 5*time.Minute)
 			if errrsc == nil && len(matchedrsc) == 1 {
-				fmt.Println("sync succeed", retrsc)
+				fmt.Println("sync succeed", idep[2], idep[3])
 			} else {
-				fmt.Println("sync failed", retrsc, errrsc)
+				fmt.Println("sync failed", idep[2], idep[3], retrsc, errrsc)
+				continue
 			}
 		} else {
-			fmt.Println(syncCmd, retrs, matchedrs, errrs)
+			fmt.Println("sync failed", syncCmd, retrs, matchedrs, errrs)
+			continue
 		}
 
-		sshClt, err := ssh.Dial("tcp",
+		sshClt, errdial := ssh.Dial("tcp",
 			fmt.Sprintf("%s:%s", idep[2], macini.Port),
 			&ssh.ClientConfig{
 				User:            macini.User,
 				Auth:            []ssh.AuthMethod{ssh.Password(macini.Passwd)},
 				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			})
-		if err != nil {
-			fmt.Println("ssh.Dial failed")
+		if errdial != nil {
+			fmt.Println("ssh dial failed", errdial)
+			continue
 		}
 		defer sshClt.Close()
+		fmt.Println("ssh dial passed")
 
 		essh, _, errssh := expect.SpawnSSH(sshClt, time.Minute)
 		if errssh != nil {
 			fmt.Println(errssh)
+			continue
 		}
 		defer essh.Close()
 		logined := regexp.MustCompile("$")
-		retlogin, _, _ := essh.Expect(logined, 10*time.Second)
-		fmt.Println(retlogin)
+		retlogin, _, elogin := essh.Expect(logined, 10*time.Second)
+		if elogin != nil {
+			fmt.Println("ssh login failed", elogin, retlogin)
+			continue
+		}
+		fmt.Println("ssh login passed")
 		essh.Send(idep[3] + "/stop.sh\n")
-		retstop, _, _ := essh.Expect(regexp.MustCompile("killed your"),
+		retstop, _, estop := essh.Expect(regexp.MustCompile("$"),
 			10*time.Second)
-		fmt.Println(retstop)
+		if estop != nil {
+			fmt.Println("stop old service failed", estop, retstop)
+			continue
+		} else {
+			fmt.Println("stop old service passed")
+		}
 		essh.Send(idep[3] + "/start.sh\n")
-		retstart, _, _ := essh.Expect(regexp.MustCompile("启动"), 10*time.Second)
-		fmt.Println(retstart)
+		retstart, _, estart := essh.Expect(regexp.MustCompile("启动"), 10*time.Second)
+		if estart != nil {
+			fmt.Println("start new service failed", estart, retstart)
+			continue
+		} else {
+			fmt.Println("start new service passed")
+		}
 	}
-
-	req := &fasthttp.Request{}
-	req.SetRequestURI(utils.GetDingdingWebhook())
-	markdown := fmt.Sprintf(dingdingStr, deptype,
-		time.Now().Format("2006-01-02 15:04:05"))
-	req.SetBody([]byte(markdown))
-
-	// 默认是application/x-www-form-urlencoded
-	req.Header.SetContentType("application/json")
-	req.Header.SetMethod("POST")
-
-	resp := &fasthttp.Response{}
-
-	client := &fasthttp.Client{}
-	if err := client.Do(req, resp); err != nil {
-		fmt.Println("请求失败:", err.Error())
-		return
-	}
-
-	b := resp.Body()
-
-	fmt.Println("result:\r\n", string(b))
-
+	fmt.Println("dep all done")
 	global.ProgressMap.Store(depid, global.DEP_STATUS_SUCCESS)
 
 	return

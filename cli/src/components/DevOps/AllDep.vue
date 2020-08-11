@@ -4,25 +4,24 @@
       <table class="table is-striped is-fullwidth">
         <tbody>
           <tr v-for="(info,i) in progressList" :key="i">
-            <td @click="showProgressDetails">
+            <td @click="showProgressDetails(info[0])">
               <div class="columns">
-                <div class="column is-2">
-                  <div class="tags has-addons">
-                    <span class="tag is-dark">version</span>
-                    <span class="tag is-success">{{info[0]}}</span>
-                  </div>
-                </div>
                 <div class="column">
                   <progress
                     class="progress"
-                    :class="{'is-danger':info[1]==-1,
+                    :class="{'is-danger':info[1]<0,
                     'is-success':info[1]==5}"
-                    :value="info[1]/5"
+                    :value="info[1]>0?info[1]/5:1"
                     max="1"
                   ></progress>
                 </div>
                 <div class="column is-3">
-                  <p>{{progressDesc[info[1]]}}</p>
+                  <div class="control">
+                    <div class="tags has-addons">
+                      <span class="tag is-dark">{{info[0]}}</span>
+                      <span class="tag is-success">{{progressDesc[info[1]]}}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </td>
@@ -78,6 +77,8 @@
             <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].type:"无"}}</p>
             <h4>checkout地址</h4>
             <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].repourl:"无"}}</p>
+            <h4>发布至</h4>
+            <p>{{typeof currFoucsIdx==='number'?(allDeps[currFoucsIdx][1].list||"全服"):"无"}}</p>
             <h4>版本号</h4>
             <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].rversion:"无"}}</p>
 
@@ -172,8 +173,13 @@ export default {
       });
       this.$store.commit("info", `成功 : ${ret.data}`);
     },
-    showProgressDetails: function () {
-      window.console.log("showProgressDetails");
+    showProgressDetails: function (depid) {
+      for (let i = 0; i < this.allDeps.length; i++) {
+        if (depid == this.allDeps[i][0]) {
+          this.viewDetail(i);
+          break;
+        }
+      }
     },
   },
   beforeMount: function () {
@@ -193,6 +199,9 @@ export default {
 <style scoped>
 #details {
   width: 100%;
+}
+.progress {
+  margin-top: 4px;
 }
 </style>
 

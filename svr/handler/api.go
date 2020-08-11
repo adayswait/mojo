@@ -8,7 +8,6 @@ import (
 	"github.com/adayswait/mojo/cmd"
 	"github.com/adayswait/mojo/db"
 	"github.com/adayswait/mojo/global"
-	"github.com/adayswait/mojo/utils"
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/session"
 	"github.com/google/goexpect"
@@ -311,20 +310,15 @@ func SubmitDep(c *fiber.Ctx) {
 			depid := strconv.Itoa(int(subDepParam.DepId)) //float64
 			depInfoInDB, _ := db.Get(global.BUCKET_OPS_DEPBIL, depid)
 			depInfo := struct {
-				Type     string `json:"type"`
-				RepoUrl  string `json:"repourl"`
-				Rversion string `json:"rversion"`
+				Type     string   `json:"type"`
+				RepoUrl  string   `json:"repourl"`
+				Rversion string   `json:"rversion"`
+				List     []string `json:list`
 			}{}
 			json.Unmarshal(depInfoInDB, &depInfo)
-			path := utils.GetRepoPath()
-			if len(path) == 0 {
-				path = "."
-			}
-			path = fmt.Sprintf("%s/%s/", path, depid)
-			coCmd := fmt.Sprintf("svn checkout -%s %s %s",
-				depInfo.Rversion, depInfo.RepoUrl, path)
-			cuCmd := fmt.Sprintf("svn cleanup %s", path)
-			go cmd.SvnDep(depid, depInfo.Type, coCmd, cuCmd, path)
+
+			go cmd.SvnDep(depid, depInfo.Type, depInfo.Rversion,
+				depInfo.RepoUrl, depInfo.List)
 			c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": "request submitted"})
 			return

@@ -100,6 +100,28 @@
       </div>
     </div>
     <div class="columns">
+      <div class="column">
+        <div class="control">
+          <label class="radio">
+            <input type="radio" name="answer" :checked="depRadio==1" @click="changeRadio(1)" />
+            全服上线
+          </label>
+          <label class="radio">
+            <input type="radio" name="answer" :checked="depRadio==2" @click="changeRadio(2)" />
+            自定义上线
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="columns" v-if="depRadio==2">
+      <div class="column is-12">
+        <label class="checkbox" v-for="(k,i) in depRadioList" :key="i">
+          <input type="checkbox" v-model="checkedDepRadioList" :value="k" />
+          {{k}}
+        </label>
+      </div>
+    </div>
+    <div class="columns">
       <div class="column is-2">
         <a class="button is-primary is-fullwidth" @click="submit">提交上线单</a>
       </div>
@@ -125,12 +147,15 @@ export default {
       versionList: [],
       versionMap: {},
       messageMap: {},
+      depRadioList: [],
+      checkedDepRadioList: [],
       urlMap: {},
       isLoading: false,
       rversion: null,
       versionStartTime: "",
       versionEndTime: "",
       defaultSvnLogLimit: 15,
+      depRadio: 1,
     };
   },
   methods: {
@@ -138,6 +163,7 @@ export default {
       this.currServerType = type;
       this.currVersion = "";
       this.currMessage = [];
+      this.depRadioList = [];
       window.console.log(type, this.versionMap[type]);
       this.versionList = [];
       if (this.versionMap[this.currServerType]) {
@@ -262,6 +288,11 @@ export default {
         if (this.depTitle.length < 6) {
           return this.$store.commit("warn", `提交上线单失败 : 标题最少6个字符`);
         }
+        if (this.depRadio != 1) {
+          if (this.checkedDepRadioList.length === 0) {
+            return this.$store.commit("warn", `自定义上线至少选择一个服务`);
+          }
+        }
         await this.$httpc.put(`/web/db/sys:ops:depbil`, {
           value: JSON.stringify({
             title: this.depTitle,
@@ -269,6 +300,7 @@ export default {
             rversion: this.rversion,
             repourl: this.currUrl,
             desc: this.currMessage,
+            list: this.checkedDepRadioList,
           }),
         });
         this.$store.commit("info", `提交上线单成功 : ${this.depTitle}`);
@@ -283,6 +315,32 @@ export default {
         this.rversion
       }-${new Date().toLocaleString()}`;
       await this.submit();
+    },
+    changeRadio: async function (i) {
+      if (i == 1) {
+        this.depRadio = 1;
+        return;
+      }
+      if (!this.currServerType) {
+        return this.$store.commit("warn", `请先选择服务类型`);
+      }
+      this.depRadio = 2;
+      try {
+        const ret = await this.$httpc.get(`/web/db/sys:ops:depini`);
+        let tempList = [];
+        for (let i = 0; i < ret.data.length; i += 2) {
+          let info = JSON.parse(ret.data[i + 1]);
+          if (info[0] == this.currServerType) {
+            tempList.push(info[1]);
+          }
+        }
+        this.depRadioList = tempList;
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `获取数据库表错误 : ${e.data || e.message}`
+        );
+      }
     },
   },
   beforeMount: async function () {
