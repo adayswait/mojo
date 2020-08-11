@@ -3,6 +3,7 @@ cli/node_modules
 cli/dist
 svr/mojo
 svr/*.db
+svr/mojo.cnf
 
 # local env files
 .env.local
@@ -21,3 +22,5 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+

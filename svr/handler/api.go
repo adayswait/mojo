@@ -1,39 +1,24 @@
 package handler
 
-import "sync"
-import "time"
-import "strconv"
-import "crypto/md5"
-import "encoding/hex"
-import "encoding/json"
-import "github.com/gofiber/fiber"
-import "github.com/gofiber/session"
-import "github.com/adayswait/mojo/db"
-import "github.com/adayswait/mojo/global"
-import "github.com/adayswait/mojo/utils"
-
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"github.com/adayswait/mojo/cmd"
+	"github.com/adayswait/mojo/db"
+	"github.com/adayswait/mojo/global"
+	"github.com/adayswait/mojo/utils"
+	"github.com/gofiber/fiber"
+	"github.com/gofiber/session"
 	"github.com/google/goexpect"
-	"github.com/google/goterm/term"
 	"golang.org/x/crypto/ssh"
 	"regexp"
+	"strconv"
+	"time"
 )
 
 var sessions *session.Session
-
-type Progress struct {
-	DepId  string  `json:"depid"`
-	Status float64 `json:"status"`
-	Desc   string  `json:"desc"`
-}
-type SSHinfo struct {
-	Port   string
-	User   string
-	Passwd string
-}
-
-var progressMap sync.Map
 
 func init() {
 	sessions = session.New()
@@ -340,105 +325,7 @@ func SubmitDep(c *fiber.Ctx) {
 			coCmd := fmt.Sprintf("svn checkout -%s %s %s",
 				depInfo.Rversion, depInfo.RepoUrl, path)
 			cuCmd := fmt.Sprintf("svn cleanup %s", path)
-			go func(depid, deptype string) {
-				// depid := strconv.Itoa(int(subDepParam.DepId))
-				progressMap.Store(depid, global.DEP_STATUS_NOT_START)
-				ec, _, _ := expect.Spawn(cuCmd, -1)
-				ec.Expect(regexp.MustCompile(`[\s\S]`), 2*time.Minute)
-				progressMap.Store(depid, global.DEP_STATUS_CHECKOUT)
-				e, _, err := expect.Spawn(coCmd, -1)
-				defer e.Close()
-				if err != nil {
-					progressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
-					c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
-						"data": coCmd})
-					return
-				}
-				coStr := "Checked out revision"
-				ret, matched, err := e.Expect(regexp.MustCompile(coStr),
-					5*time.Minute)
-				fmt.Println(coCmd, ret)
-				if err != nil {
-					progressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
-					return
-				}
-				if len(matched) == 0 {
-					progressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
-					return
-				}
-				progressMap.Store(depid, global.DEP_STATUS_SYNC)
-				depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
-				if errd != nil {
-					progressMap.Store(depid, global.DEP_STATUS_ERR_GETINI)
-					fmt.Println("errd", errd)
-					return
-				}
-				maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
-				if errm != nil {
-					fmt.Println("errm", errm)
-					progressMap.Store(depid, global.DEP_STATUS_ERR_GETINI)
-					return
-				}
-				macIni := make(map[string]SSHinfo)
-				for i := 1; i < len(maciniInDB); i += 2 {
-					var imac []string
-					e := json.Unmarshal([]byte(maciniInDB[i]), &imac)
-					if e != nil {
-						continue
-					}
-					_, exist := macIni[imac[0]]
-					if exist == false {
-						macIni[imac[0]] = SSHinfo{
-							Port:   imac[1],
-							User:   imac[2],
-							Passwd: imac[3],
-						}
-					}
-				}
-				for i := 1; i < len(depiniInDB); i += 2 {
-					var idep []string
-					e := json.Unmarshal([]byte(depiniInDB[i]), &idep)
-					if e != nil {
-						continue
-					}
-					if idep[0] != deptype {
-						continue
-					}
-					macini, exist := macIni[idep[2]]
-					if exist == false {
-						continue
-					}
-					syncCmd := []string{
-						"rsync",
-						"-zarv",
-						"--copy-links",
-						fmt.Sprintf("--rsh=ssh -p %s", macini.Port),
-						fmt.Sprintf("--exclude-from=%s", utils.GetExcludeFrom()),
-						path,
-						fmt.Sprintf("%s@%s:%s", macini.User, idep[2], idep[3]),
-					}
-					fmt.Println(syncCmd)
-					ers, _, _ := expect.SpawnWithArgs(syncCmd, -1)
-					rsStr := "password:"
-					retrs, matchedrs, errrs :=
-						ers.Expect(regexp.MustCompile(rsStr), 5*time.Minute)
-					if len(matchedrs) == 1 && errrs == nil {
-						ers.Send(macini.Passwd + "\n")
-						retrsc, matchedrsc, errrsc := ers.Expect(
-							regexp.MustCompile("speedup is"), 5*time.Minute)
-						if errrsc == nil && len(matchedrsc) == 1 {
-							fmt.Println("sync succeed", retrsc)
-						} else {
-							fmt.Println("sync failed", retrsc, errrsc)
-						}
-					} else {
-						fmt.Println(syncCmd, retrs, matchedrs, errrs)
-					}
-				}
-				progressMap.Store(depid, global.DEP_STATUS_SUCCESS)
-
-				return
-			}(depid, depInfo.Type)
+			go cmd.SvnDep(depid, depInfo.Type, coCmd, cuCmd, path)
 			c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": "request submitted"})
 			return
@@ -456,7 +343,7 @@ func SubmitDep(c *fiber.Ctx) {
 
 func ProgressList(c *fiber.Ctx) {
 	ret := []string{}
-	progressMap.Range(func(k, v interface{}) bool {
+	global.ProgressMap.Range(func(k, v interface{}) bool {
 		ret = append(ret, k.(string))
 		ret = append(ret, strconv.Itoa(v.(int)))
 		return true
@@ -500,7 +387,6 @@ func Test(c *fiber.Ctx) {
 
 func Rsync(c *fiber.Ctx) {
 	const timeout = time.Minute
-	fmt.Println(term.Bluef("SSH Example"))
 
 	sshClt, err := ssh.Dial("tcp", "10.1.1.43:22000", &ssh.ClientConfig{
 		User:            "jesse",
@@ -533,7 +419,7 @@ func Rsync(c *fiber.Ctx) {
 	started := regexp.MustCompile("启动")
 	result2, _, _ := e.Expect(started, timeout)
 	fmt.Println(result2)
-	fmt.Println(term.Greenf("All done"))
+
 	// const timeout = 10 * time.Minute
 	// // userRE := regexp.MustCompile("username:")
 	// // passRE := regexp.MustCompile("password:")

@@ -259,7 +259,7 @@ export default {
     },
     submit: async function () {
       try {
-        if (this.depTitle.length <6) {
+        if (this.depTitle.length < 6) {
           return this.$store.commit("warn", `提交上线单失败 : 标题最少6个字符`);
         }
         await this.$httpc.put(`/web/db/sys:ops:depbil`, {
@@ -277,7 +277,12 @@ export default {
       }
     },
     submitNewest: async function () {
-      this.$store.commit("info", `一键提交最新上线单成功`);
+      await this.updateSvnLog();
+      await this.selectVersion(this.versionList[0]);
+      this.depTitle = `${this.currServerType}-${
+        this.rversion
+      }-${new Date().toLocaleString()}`;
+      await this.submit();
     },
   },
   beforeMount: async function () {

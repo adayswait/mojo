@@ -4,3 +4,4 @@ log-dir .
 port 3000
 repo-path /opt/jesse/tmp
 exclude-from /opt/jesse/splan/tools/release/exclude.list
+dingding-webhook https://oapi.dingtalk.com/robot/send?access_token=xxx
