@@ -1,21 +1,23 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from "@/components/Home.vue"
-import DevOps from "@/components/DevOps.vue";
-import OpsHome from "@/components/DevOps/Home.vue"
-import AllDep from "@/components/DevOps/AllDep.vue";
-import MyDep from "@/components/DevOps/MyDep.vue";
-import ManageUsr from "@/components/DevOps/ManageUsr.vue";
-import NewDep from "@/components/DevOps/NewDep.vue";
-import MacIni from "@/components/DevOps/MacIni.vue";
-import DepIni from "@/components/DevOps/DepIni.vue";
-import DevIni from "@/components/DevOps/DevIni.vue";
-import NewUsr from "@/components/DevOps/NewUsr.vue";
-import DBview from "@/components/DevOps/DBview.vue";
-import DevTools from '@/components/DevOps/DevTools.vue';
-import Data from "@/components/Data.vue";
-import e404 from '@/components/E404.vue';
-import UsrInfo from '@/components/UsrInfo.vue';
+import Home from "@/pages/Home.vue"
+import DevOps from "@/pages/DevOps.vue";
+import OpsHome from "@/pages/DevOps/Home.vue"
+import AllDep from "@/pages/DevOps/AllDep.vue";
+import MyDep from "@/pages/DevOps/MyDep.vue";
+import ManageUsr from "@/pages/DevOps/ManageUsr.vue";
+import NewDep from "@/pages/DevOps/NewDep.vue";
+import MacIni from "@/pages/DevOps/MacIni.vue";
+import DepIni from "@/pages/DevOps/DepIni.vue";
+import DevIni from "@/pages/DevOps/DevIni.vue";
+import NewUsr from "@/pages/DevOps/NewUsr.vue";
+import DBview from "@/pages/DevOps/DBview.vue";
+import DevTools from '@/pages/DevOps/DevTools.vue';
+import NoLogin from "@/pages/NoLogin.vue";
+import BreakDep from "@/pages/NoLogin/BreakDep.vue";
+import Data from "@/pages/Data.vue";
+import e404 from '@/pages/E404.vue';
+import UsrInfo from '@/pages/UsrInfo.vue';
 
 Vue.use(Router)
 
@@ -80,7 +82,17 @@ const router = new Router({
                 {
                     path: "devtools",
                     component: DevTools
-                }
+                },
+            ]
+        },
+        {
+            path: "/nologin",
+            component: NoLogin,
+            children: [
+                {
+                    path: "breakdep",
+                    component: BreakDep
+                },
             ]
         },
         {

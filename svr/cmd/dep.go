@@ -7,6 +7,7 @@ import (
 	"github.com/adayswait/mojo/global"
 	"github.com/adayswait/mojo/utils"
 	"github.com/google/goexpect"
+	"github.com/google/uuid"
 	"github.com/valyala/fasthttp"
 	"golang.org/x/crypto/ssh"
 	"regexp"
@@ -20,9 +21,9 @@ func init() {
 		`"msgtype":"markdown",` +
 		`"markdown":{` +
 		`"title":"更新提醒",` +
-		`"text":"#### **%s**将于30秒后重启\n\n` +
-		`> - [点击打断重启](http://10.1.1.248:8080)\n` +
-		`###### %s [详情](http://10.1.1.248:8080)\n"` +
+		`"text":"#### **%s**将于一分钟后重启\n\n` +
+		`> - [点击打断重启](%s)\n` +
+		`###### %s [详情](%s)\n"` +
 		"}" +
 		"}"
 }
@@ -76,8 +77,12 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 	//发布更新通知
 	req := &fasthttp.Request{}
 	req.SetRequestURI(utils.GetDingdingWebhook())
+
+	breakid := uuid.New().String()
 	markdown := fmt.Sprintf(dingdingStr, deptype,
-		time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Sprintf("http://10.1.1.248:8080/#/nologin/breakdep?id=%s", breakid),
+		time.Now().Format("2006-01-02 15:04:05"),
+		fmt.Sprintf("http://10.1.1.248:8080/#/nologin/viewdep?id=%s", breakid))
 	req.SetBody([]byte(markdown))
 
 	// 默认是application/x-www-form-urlencoded
@@ -94,6 +99,8 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 	b := resp.Body()
 
 	fmt.Println("dingding webhook ret:\r\n", string(b))
+	// global.BreakMap.Store(breakid, [0,])
+	time.Sleep(time.Minute)
 
 	depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
 	if errd != nil {

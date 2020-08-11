@@ -22,8 +22,10 @@ else
 	echo "	do.sh fmt    formating all user .go codes"
 	echo "	do.sh run    run this project"
 	echo "	do.sh build  build this project"
+	echo "	do.sh serve  run this project under daemon mod"
 	echo ""
 	echo "	f short for fmt"
 	echo "	r short for run"
 	echo "	b short for build"
+	echo "	s short for serve"
 fi

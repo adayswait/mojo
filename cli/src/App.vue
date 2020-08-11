@@ -11,9 +11,9 @@
   </div>
 </template>
 <script>
-import Header from "@/components/Header.vue";
-import Notification from "@/components/Notification.vue";
-// import Footer from "@/components/Footer.vue";
+import Header from "@/pages/Header.vue";
+import Notification from "@/pages/Notification.vue";
+// import Footer from "@/pages/Footer.vue";
 
 export default {
   name: "app",

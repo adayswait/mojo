@@ -114,7 +114,7 @@
 </template>
 
 <script>
-import Login from "@/components/Login.vue";
+import Login from "@/pages/Login.vue";
 export default {
   name: "DevOps",
   data: function () {
