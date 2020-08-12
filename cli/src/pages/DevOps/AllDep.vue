@@ -4,7 +4,51 @@
       <table class="table is-striped is-fullwidth">
         <tbody>
           <tr v-for="(info,i) in progressList" :key="i">
-            <td @click="showProgressDetails(info[0])">
+            <td @click="showProgressDetails(info[1])">
+              <div id="progressTag" class="columns">
+                <div class="column">
+                  <div class="field is-grouped is-grouped-multiline">
+                    <div class="control">
+                      <div class="tags has-addons">
+                        <span class="tag is-dark">version</span>
+                        <span class="tag is-primary">{{info[1]}}</span>
+                      </div>
+                    </div>
+
+                    <div class="control">
+                      <div class="tags has-addons">
+                        <span class="tag is-dark">time</span>
+                        <span
+                          class="tag is-light"
+                        >{{new Date(parseInt(info[0])*1000).toLocaleString()}}</span>
+                      </div>
+                    </div>
+
+                    <div class="control">
+                      <div class="tags has-addons">
+                        <span class="tag is-dark">status</span>
+                        <span
+                          class="tag"
+                          :class="{'is-success':info[3]==progressDesc.length-1,
+                        'is-warning':info[3]!=progressDesc.length-1&& info[3]>=0,
+                        'is-danger':info[3]<0}"
+                        >{{progressDesc[info[3]]}}</span>
+                      </div>
+                    </div>
+
+                    <div
+                      class="control"
+                      v-if="(parseInt(info[4])-Date.now()/1000)>0 &&info[3]!=progressDesc.length-1"
+                    >
+                      <div class="tags has-addons">
+                        <span class="tag is-dark">awake</span>
+                        <span class="tag is-success">{{parseInt(parseInt(info[4])-Date.now()/1000)}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="columns">
                 <div class="column">
                   <progress
@@ -14,15 +58,6 @@
                     :value="info[3]>0?(info[3]/(progressDesc.length-1)):1"
                     max="1"
                   ></progress>
-                </div>
-                <div class="column is-3">
-                  <div class="control">
-                    <div class="tags has-addons">
-                      <span class="tag is-dark">{{info[1]}}</span>
-                      <span class="tag is-success">{{progressDesc[info[3]]}}</span>
-                      <span class="tag is-primary">{{new Date(parseInt(info[0])*1000)}}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </td>
@@ -210,8 +245,12 @@ export default {
 #details {
   width: 100%;
 }
+#progressTag {
+  margin-top: 5px;
+}
 .progress {
-  margin-top: 4px;
+  margin-top: -15px;
+  margin-bottom: 5px;
 }
 </style>
 

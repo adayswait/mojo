@@ -114,6 +114,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 
 		fmt.Println("dingding webhook ret:\r\n", string(b))
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SLEEP)
+		global.DepTypeAwakeTime.Store(depInfo.Type, time.Now().Unix()+10)
 		time.Sleep(time.Second * 10)
 		for {
 			breakTime, exist := global.DepTypeAwakeTime.Load(depInfo.Type)
