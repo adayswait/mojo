@@ -20,6 +20,15 @@ type SSHinfo struct {
 	Passwd string
 }
 
-var ProgressMap sync.Map
-var BreakidMap sync.Map
-var BreakMap sync.Map
+type DepInfo struct {
+	Type      string   `json:"type"`
+	RepoUrl   string   `json:"repourl"`
+	Rversion  string   `json:"rversion"`
+	List      []string `json:list`
+	StartTime int64
+	DepId     string
+}
+
+var Depuuid2DepStatus sync.Map
+var Depuuid2DepInfo sync.Map
+var DepTypeAwakeTime sync.Map

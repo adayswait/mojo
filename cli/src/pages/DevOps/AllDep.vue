@@ -9,17 +9,18 @@
                 <div class="column">
                   <progress
                     class="progress"
-                    :class="{'is-danger':info[1]<0,
-                    'is-success':info[1]==progressDesc.length-1}"
-                    :value="info[1]>0?(info[1]/(progressDesc.length-1)):1"
+                    :class="{'is-danger':info[3]<0,
+                    'is-success':info[3]==progressDesc.length-1}"
+                    :value="info[3]>0?(info[3]/(progressDesc.length-1)):1"
                     max="1"
                   ></progress>
                 </div>
                 <div class="column is-3">
                   <div class="control">
                     <div class="tags has-addons">
-                      <span class="tag is-dark">{{info[0]}}</span>
-                      <span class="tag is-success">{{progressDesc[info[1]]}}</span>
+                      <span class="tag is-dark">{{info[1]}}</span>
+                      <span class="tag is-success">{{progressDesc[info[3]]}}</span>
+                      <span class="tag is-primary">{{new Date(parseInt(info[0])*1000)}}</span>
                     </div>
                   </div>
                 </div>
@@ -55,6 +56,7 @@
             <td>
               <button class="button is-small is-warning" @click="viewDetail(i)">查看详情</button>
               <button class="button is-small is-dark" @click="submit(i)">部署上线</button>
+              <button class="button is-small is-danger" @click="submit(i,true)">强制上线</button>
             </td>
           </tr>
         </tbody>
@@ -153,8 +155,14 @@ export default {
       try {
         const ret = await this.$httpc.get("/web/dep/progress");
         let tempList = [];
-        for (let i = 0; i < ret.data.length; i += 2) {
-          tempList[i / 2] = [ret.data[i], ret.data[i + 1]];
+        for (let i = 0; i < ret.data.length; i += 5) {
+          tempList[i / 5] = [
+            ret.data[i],
+            ret.data[i + 1],
+            ret.data[i + 2],
+            ret.data[i + 3],
+            ret.data[i + 4],
+          ];
         }
         tempList.sort((a, b) => {
           return parseInt(b[0]) - parseInt(a[0]);
@@ -167,10 +175,11 @@ export default {
         );
       }
     },
-    submit: async function (idx) {
+    submit: async function (idx, force) {
       window.console.log(this.allDeps[idx][0]);
       const ret = await this.$httpc.get(`/web/dep/submit`, {
         depid: this.allDeps[idx][0],
+        force: force || false,
       });
       this.$store.commit("info", `成功 : ${ret.data}`);
     },

@@ -304,21 +304,16 @@ func CommitHistory(c *fiber.Ctx) {
 func SubmitDep(c *fiber.Ctx) {
 	subDepParam := struct {
 		DepId float64 `json:"depid"`
+		Force bool    `json:"force"`
 	}{}
 	if err := c.QueryParser(&subDepParam); err == nil {
 		if subDepParam.DepId != 0 {
 			depid := strconv.Itoa(int(subDepParam.DepId)) //float64
 			depInfoInDB, _ := db.Get(global.BUCKET_OPS_DEPBIL, depid)
-			depInfo := struct {
-				Type     string   `json:"type"`
-				RepoUrl  string   `json:"repourl"`
-				Rversion string   `json:"rversion"`
-				List     []string `json:list`
-			}{}
+			depInfo := global.DepInfo{DepId: depid}
 			json.Unmarshal(depInfoInDB, &depInfo)
 
-			go cmd.SvnDep(depid, depInfo.Type, depInfo.Rversion,
-				depInfo.RepoUrl, depInfo.List)
+			go cmd.SvnDep(depInfo, subDepParam.Force)
 			c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": "request submitted"})
 			return
@@ -336,9 +331,23 @@ func SubmitDep(c *fiber.Ctx) {
 
 func ProgressList(c *fiber.Ctx) {
 	ret := []string{}
-	global.ProgressMap.Range(func(k, v interface{}) bool {
-		ret = append(ret, k.(string))
-		ret = append(ret, strconv.Itoa(v.(int)))
+	global.Depuuid2DepStatus.Range(func(k, v interface{}) bool {
+		depInfo, _ := global.Depuuid2DepInfo.Load(k.(string))
+		//start time
+		ret = append(ret, strconv.FormatInt(
+			depInfo.(global.DepInfo).StartTime, 10))
+		ret = append(ret, depInfo.(global.DepInfo).DepId) //depid
+		ret = append(ret, k.(string))                     //depuuid
+		ret = append(ret, strconv.Itoa(v.(int)))          //dep status
+
+		awakeTime, exist := global.DepTypeAwakeTime.Load(
+			depInfo.(global.DepInfo).Type)
+		if exist {
+			ret = append(ret, strconv.FormatInt(awakeTime.(int64), 10))
+		} else {
+			ret = append(ret, "0")
+		}
+
 		return true
 	})
 	c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
@@ -361,24 +370,26 @@ func DeleteDep(c *fiber.Ctx) {
 
 func BreakDep(c *fiber.Ctx) {
 	breakDepParam := struct {
-		BreakId string `json:"breakid"`
+		DepUuid string `json:"depuuid"`
 	}{}
 	err := c.QueryParser(&breakDepParam)
 	if err == nil {
-		if len(breakDepParam.BreakId) == 0 {
+		if len(breakDepParam.DepUuid) == 0 {
 			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
-				"data": `can't find url param breakid`})
+				"data": `can't find url param depuuid`})
 			return
 		}
+		depInfo, exist := global.Depuuid2DepInfo.Load(breakDepParam.DepUuid)
 
-		depType, exist := global.BreakidMap.Load(breakDepParam.BreakId)
-		if exist && len(depType.(string)) != 0 {
-			global.BreakMap.Store(depType, time.Now().Unix()+3*60)
-			c.JSON(fiber.Map{"code": global.RET_OK, "data": time.Now().Unix() + 3*60})
+		if exist {
+			global.DepTypeAwakeTime.Store(depInfo.(global.DepInfo).Type,
+				time.Now().Unix()+3*60)
+			c.JSON(fiber.Map{"code": global.RET_OK,
+				"data": time.Now().Unix() + 3*60})
 			return
 		} else {
 			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
-				"data": `invalid url param breakid`})
+				"data": `invalid url param depuuid`})
 			return
 		}
 	}

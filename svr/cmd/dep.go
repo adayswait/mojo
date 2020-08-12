@@ -18,31 +18,42 @@ var dingdingStr string
 
 func init() {
 	dingdingStr = "{" +
-		`"msgtype":"markdown",` +
-		`"markdown":{` +
+		`"msgtype":"actionCard",` +
+		`"actionCard":{` +
 		`"title":"更新提醒",` +
-		`"text":"#### **%s**将于一分钟后重启\n\n` +
-		`> - [点击打断重启](%s)\n` +
-		`###### %s [详情](%s)\n"` +
+		`"text":"#### **%s**将于一分钟后重启\n ###### %s",` +
+		`"btnOrientation": "1",` +
+		`"btns": [` +
+		"{" +
+		`"title": "打断重启", ` +
+		`"actionURL": "%s"` +
+		"}," +
+		"{" +
+		`"title": "查看发布状态", ` +
+		`"actionURL": "%s"` +
+		"}]" +
 		"}" +
 		"}"
 }
 
-func SvnDep(depid, deptype, rversion, repourl string, list []string) {
+func SvnDep(depInfo global.DepInfo, force bool) {
 	path := utils.GetRepoPath()
 	if len(path) == 0 {
 		path = "."
 	}
-	path = fmt.Sprintf("%s/%s/", path, depid)
+	path = fmt.Sprintf("%s/%s/", path, depInfo.DepId)
 	coCmd := fmt.Sprintf("svn export --force -%s %s %s",
-		rversion, repourl, path)
+		depInfo.Rversion, depInfo.RepoUrl, path)
 	cuCmd := fmt.Sprintf("svn cleanup %s", path)
-	global.ProgressMap.Store(depid, global.DEP_STATUS_NOT_START)
+	depuuid := uuid.New().String()
+	depInfo.StartTime = time.Now().Unix()
+	global.Depuuid2DepInfo.Store(depuuid, depInfo)
+	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_NOT_START)
 	ecu, _, _ := expect.Spawn(cuCmd, -1)
 	defer ecu.Close()
 	ecu.Expect(regexp.MustCompile("$"), 2*time.Minute)
 	fmt.Println("svn cleanup passed")
-	global.ProgressMap.Store(depid, global.DEP_STATUS_CHECKOUT)
+	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_CHECKOUT)
 	eco, _, _ := expect.Spawn(coCmd, -1)
 	defer eco.Close()
 	coStr := "Exported revision"
@@ -50,81 +61,84 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 		5*time.Minute)
 	if errcoe != nil {
 		fmt.Println(coCmd, ret)
-		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
+		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
 	if len(matched) == 0 {
 		fmt.Println(coCmd, ret)
-		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
+		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
 	fmt.Println("svn export passed")
 
 	ecoplan, _, _ := expect.Spawn(path+"/config/import_json_from_design.sh", -1)
-	defer ecoplan.Close()
-	fmt.Println(path + "/config/import_json_from_design.sh")
-	retcoplan, matchedcoplan, errcoplan := ecoplan.Expect(regexp.MustCompile("import complete"),
+	// defer ecoplan.Close() //todo here
+	fmt.Println(path + "config/import_json_from_design.sh")
+	retcoplan, matchedcoplan, errcoplan := ecoplan.Expect(
+		regexp.MustCompile("import complete"),
 		5*time.Minute)
 	if errcoplan != nil || len(matchedcoplan) == 0 {
 		fmt.Println("import json err", retcoplan, matchedcoplan, errcoplan)
-		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_CHECKOUT)
+		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	} else {
 		fmt.Println("import json passed")
 	}
 
-	//发布更新通知
-	req := &fasthttp.Request{}
-	req.SetRequestURI(utils.GetDingdingWebhook())
+	if !force {
+		//发布更新通知
+		req := &fasthttp.Request{}
+		req.SetRequestURI(utils.GetDingdingWebhook())
 
-	breakid := uuid.New().String()
-	global.BreakidMap.Store(breakid, deptype)
-	defer global.BreakidMap.Delete(breakid)
-	markdown := fmt.Sprintf(dingdingStr, deptype,
-		fmt.Sprintf("http://%s:%d/api/visitor/breakdep?breakid=%s",
-			utils.GetServerHost(),
-			utils.GetListeningPort(),
-			breakid),
-		time.Now().Format("2006-01-02 15:04:05"),
-		fmt.Sprintf("http://10.1.1.248:8080/#/visitor/viewdep?depid=%s", depid))
-	req.SetBody([]byte(markdown))
+		markdown := fmt.Sprintf(dingdingStr, depInfo.Type,
+			time.Now().Format("2006-01-02 15:04:05"),
+			fmt.Sprintf("http://%s:%d/api/visitor/breakdep?depuuid=%s",
+				utils.GetServerHost(),
+				utils.GetListeningPort(),
+				depuuid),
+			fmt.Sprintf("http://10.1.1.248:8080/#/visitor/viewdep?depuuid=%s", depuuid))
+		req.SetBody([]byte(markdown))
 
-	// 默认是application/x-www-form-urlencoded
-	req.Header.SetContentType("application/json")
-	req.Header.SetMethod("POST")
+		// 默认是application/x-www-form-urlencoded
+		req.Header.SetContentType("application/json")
+		req.Header.SetMethod("POST")
 
-	resp := &fasthttp.Response{}
+		resp := &fasthttp.Response{}
 
-	client := &fasthttp.Client{}
-	if err := client.Do(req, resp); err != nil {
-		fmt.Println("请求失败:", err.Error())
-		return
-	}
-	b := resp.Body()
+		client := &fasthttp.Client{}
+		if err := client.Do(req, resp); err != nil {
+			fmt.Println("请求失败:", err.Error())
+			return
+		}
+		b := resp.Body()
 
-	fmt.Println("dingding webhook ret:\r\n", string(b))
-	global.ProgressMap.Store(depid, global.DEP_STATUS_SLEEP)
-	time.Sleep(time.Minute)
-	for {
-		breakTime, exist := global.BreakMap.Load(deptype)
-		gapTime := breakTime.(int64) - time.Now().Unix()
-		if exist && gapTime > 0 {
-			time.Sleep(time.Duration(gapTime) * time.Second)
-		} else {
-			break
+		fmt.Println("dingding webhook ret:\r\n", string(b))
+		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SLEEP)
+		time.Sleep(time.Second * 10)
+		for {
+			breakTime, exist := global.DepTypeAwakeTime.Load(depInfo.Type)
+			if exist {
+				gapTime := breakTime.(int64) - time.Now().Unix()
+				if gapTime <= 0 {
+					break
+				}
+				time.Sleep(time.Duration(gapTime) * time.Second)
+			} else {
+				break
+			}
 		}
 	}
 
 	depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
 	if errd != nil {
-		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_GETINI)
+		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_GETINI)
 		fmt.Println("errd", errd)
 		return
 	}
 	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
 	if errm != nil {
 		fmt.Println("errm", errm)
-		global.ProgressMap.Store(depid, global.DEP_STATUS_ERR_GETINI)
+		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_GETINI)
 		return
 	}
 	macIni := make(map[string]global.SSHinfo)
@@ -144,24 +158,24 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 		}
 	}
 
-	global.ProgressMap.Store(depid, global.DEP_STATUS_SYNC)
+	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SYNC)
 	for i := 1; i < len(depiniInDB); i += 2 {
 		var idep []string
 		e := json.Unmarshal([]byte(depiniInDB[i]), &idep)
 		if e != nil {
 			continue
 		}
-		if idep[0] != deptype {
+		if idep[0] != depInfo.Type {
 			continue
 		}
 		inList := false
-		for c := 0; c < len(list); c++ {
-			if idep[1] == list[c] {
+		for c := 0; c < len(depInfo.List); c++ {
+			if idep[1] == depInfo.List[c] {
 				inList = true
 				break
 			}
 		}
-		if !inList && len(list) != 0 {
+		if !inList && len(depInfo.List) != 0 {
 			continue
 		}
 		macini, exist := macIni[idep[2]]
@@ -242,7 +256,7 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 		}
 	}
 	fmt.Println("dep all done")
-	global.ProgressMap.Store(depid, global.DEP_STATUS_SUCCESS)
+	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SUCCESS)
 
 	return
 }
