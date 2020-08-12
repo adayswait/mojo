@@ -1,7 +1,7 @@
 db-data-dir .
 log-dir .
-#host 10.1.1.1
-port 3000
+server-host 10.1.1.248
+server-port 3000
 repo-path /opt/jesse/tmp
 exclude-from /opt/jesse/splan/tools/release/exclude.list
-dingding-webhook https://oapi.dingtalk.com/robot/send?access_token=xxx
+dingding-webhook https://oapi.dingtalk.com/robot/send?access_token=eed71bc6f6b3772e6a00e83edbe196926889910a4df52b2f603b1f6674095df7

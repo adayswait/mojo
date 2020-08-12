@@ -13,8 +13,8 @@ import DevIni from "@/pages/DevOps/DevIni.vue";
 import NewUsr from "@/pages/DevOps/NewUsr.vue";
 import DBview from "@/pages/DevOps/DBview.vue";
 import DevTools from '@/pages/DevOps/DevTools.vue';
-import NoLogin from "@/pages/NoLogin.vue";
-import BreakDep from "@/pages/NoLogin/BreakDep.vue";
+import Visitor from "@/pages/Visitor.vue";
+import BreakDep from "@/pages/Visitor/BreakDep.vue";
 import Data from "@/pages/Data.vue";
 import e404 from '@/pages/E404.vue';
 import UsrInfo from '@/pages/UsrInfo.vue';
@@ -86,8 +86,8 @@ const router = new Router({
             ]
         },
         {
-            path: "/nologin",
-            component: NoLogin,
+            path: "/visitor",
+            component: Visitor,
             children: [
                 {
                     path: "breakdep",

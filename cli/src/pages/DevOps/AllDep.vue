@@ -10,8 +10,8 @@
                   <progress
                     class="progress"
                     :class="{'is-danger':info[1]<0,
-                    'is-success':info[1]==5}"
-                    :value="info[1]>0?info[1]/5:1"
+                    'is-success':info[1]==progressDesc.length-1}"
+                    :value="info[1]>0?(info[1]/(progressDesc.length-1)):1"
                     max="1"
                   ></progress>
                 </div>
@@ -78,7 +78,7 @@
             <h4>checkout地址</h4>
             <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].repourl:"无"}}</p>
             <h4>发布至</h4>
-            <p>{{typeof currFoucsIdx==='number'?(allDeps[currFoucsIdx][1].list||"全服"):"无"}}</p>
+            <p>{{typeof currFoucsIdx==='number'?(allDeps[currFoucsIdx][1].list.length===0?"全服":allDeps[currFoucsIdx][1].list):"无"}}</p>
             <h4>版本号</h4>
             <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].rversion:"无"}}</p>
 
@@ -114,6 +114,7 @@ export default {
       progressDesc: [
         "初始化",
         "检出代码",
+        "睡眠中断",
         "同步代码",
         "停止旧服务",
         "启动新服务",

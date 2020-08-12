@@ -21,4 +21,5 @@ type SSHinfo struct {
 }
 
 var ProgressMap sync.Map
+var BreakidMap sync.Map
 var BreakMap sync.Map

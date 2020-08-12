@@ -28,14 +28,14 @@
 
         <div id="navbarDataTarget" class="navbar-menu">
           <div class="navbar-start">
-            <a class="navbar-item">Home</a>
+            <a class="navbar-item" href="/">Home</a>
             <a class="navbar-item" href="http://10.1.1.248:3000/fs">Documentation</a>
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link">More</a>
               <div class="navbar-dropdown">
-                <a class="navbar-item">About</a>
-                <a class="navbar-item">Jobs</a>
-                <a class="navbar-item">Contact</a>
+                <a class="navbar-item" target="_blank" href="http://10.1.1.239">239GM</a>
+                <a class="navbar-item" target="_blank" href="http://plan_s">plan_s</a>
+                <a class="navbar-item" target="_blank" href="http://s.61.com/?ip=123.206.181.31&port=9999&log=true&showPP=false">s.61.com外网白名单</a>
                 <hr class="navbar-divider" />
                 <a class="navbar-item">Report an issue</a>
               </div>
@@ -51,9 +51,9 @@
                 </p>
               </a>
               <div class="navbar-dropdown is-right">
-                <a class="navbar-item">About</a>
+                <!-- <a class="navbar-item">About</a>
                 <a class="navbar-item">Edit</a>
-                <a class="navbar-item">Message</a>
+                <a class="navbar-item">Message</a> -->
                 <hr class="navbar-divider" />
                 <a href="./" class="navbar-item" @click="logout">退出</a>
               </div>

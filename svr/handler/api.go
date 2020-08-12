@@ -359,6 +359,34 @@ func DeleteDep(c *fiber.Ctx) {
 	}
 }
 
+func BreakDep(c *fiber.Ctx) {
+	breakDepParam := struct {
+		BreakId string `json:"breakid"`
+	}{}
+	err := c.QueryParser(&breakDepParam)
+	if err == nil {
+		if len(breakDepParam.BreakId) == 0 {
+			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+				"data": `can't find url param breakid`})
+			return
+		}
+
+		depType, exist := global.BreakidMap.Load(breakDepParam.BreakId)
+		if exist && len(depType.(string)) != 0 {
+			global.BreakMap.Store(depType, time.Now().Unix()+3*60)
+			c.JSON(fiber.Map{"code": global.RET_OK, "data": time.Now().Unix() + 3*60})
+			return
+		} else {
+			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+				"data": `invalid url param breakid`})
+			return
+		}
+	}
+	c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+		"data": err.Error()})
+	return
+}
+
 func Test(c *fiber.Ctx) {
 	const timeout = time.Minute
 	e, _, err := expect.Spawn("node", -1)

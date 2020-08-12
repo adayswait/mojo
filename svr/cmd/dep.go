@@ -59,7 +59,6 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 		return
 	}
 	fmt.Println("svn export passed")
-	global.ProgressMap.Store(depid, global.DEP_STATUS_SYNC)
 
 	ecoplan, _, _ := expect.Spawn(path+"/config/import_json_from_design.sh", -1)
 	defer ecoplan.Close()
@@ -79,10 +78,15 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 	req.SetRequestURI(utils.GetDingdingWebhook())
 
 	breakid := uuid.New().String()
+	global.BreakidMap.Store(breakid, deptype)
+	defer global.BreakidMap.Delete(breakid)
 	markdown := fmt.Sprintf(dingdingStr, deptype,
-		fmt.Sprintf("http://10.1.1.248:8080/#/nologin/breakdep?id=%s", breakid),
+		fmt.Sprintf("http://%s:%d/api/visitor/breakdep?breakid=%s",
+			utils.GetServerHost(),
+			utils.GetListeningPort(),
+			breakid),
 		time.Now().Format("2006-01-02 15:04:05"),
-		fmt.Sprintf("http://10.1.1.248:8080/#/nologin/viewdep?id=%s", breakid))
+		fmt.Sprintf("http://10.1.1.248:8080/#/visitor/viewdep?depid=%s", depid))
 	req.SetBody([]byte(markdown))
 
 	// 默认是application/x-www-form-urlencoded
@@ -99,8 +103,17 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 	b := resp.Body()
 
 	fmt.Println("dingding webhook ret:\r\n", string(b))
-	// global.BreakMap.Store(breakid, [0,])
+	global.ProgressMap.Store(depid, global.DEP_STATUS_SLEEP)
 	time.Sleep(time.Minute)
+	for {
+		breakTime, exist := global.BreakMap.Load(deptype)
+		gapTime := breakTime.(int64) - time.Now().Unix()
+		if exist && gapTime > 0 {
+			time.Sleep(time.Duration(gapTime) * time.Second)
+		} else {
+			break
+		}
+	}
 
 	depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
 	if errd != nil {
@@ -130,6 +143,8 @@ func SvnDep(depid, deptype, rversion, repourl string, list []string) {
 			}
 		}
 	}
+
+	global.ProgressMap.Store(depid, global.DEP_STATUS_SYNC)
 	for i := 1; i < len(depiniInDB); i += 2 {
 		var idep []string
 		e := json.Unmarshal([]byte(depiniInDB[i]), &idep)

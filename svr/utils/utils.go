@@ -8,8 +8,8 @@ import "strconv"
 
 const local_DB_DATA_DIR = "db-data-dir"
 const local_LOG_DIR = "log-dir"
-const local_HOST = "host"
-const local_PORT = "port"
+const local_SERVER_HOST = "server-host"
+const local_SERVER_PORT = "server-port"
 const local_REPO_PATH = "repo-path"
 const local_EXCLUDE_FROM = "exclude-from"
 const local_DINGDING_WEBHOOK = "dingding-webhook"
@@ -17,8 +17,8 @@ const local_DINGDING_WEBHOOK = "dingding-webhook"
 type config struct {
 	dbDataDir       string
 	logDir          string
-	host            string
-	port            uint16
+	serverHost      string
+	serverPort      uint16
 	repoPath        string
 	excludeFrom     string
 	dingdingWebhook string
@@ -54,11 +54,11 @@ func ReadConfig() {
 			mojoCnf.dbDataDir = cnfArr[1]
 		case local_LOG_DIR:
 			mojoCnf.logDir = cnfArr[1]
-		case local_HOST:
-			mojoCnf.host = cnfArr[1]
-		case local_PORT:
+		case local_SERVER_HOST:
+			mojoCnf.serverHost = cnfArr[1]
+		case local_SERVER_PORT:
 			portuint64, _ := strconv.ParseUint(cnfArr[1], 10, 16)
-			mojoCnf.port = uint16(portuint64)
+			mojoCnf.serverPort = uint16(portuint64)
 		case local_REPO_PATH:
 			mojoCnf.repoPath = cnfArr[1]
 		case local_EXCLUDE_FROM:
@@ -74,6 +74,10 @@ func ReadConfig() {
 	}
 }
 
+func GetServerHost() string {
+	return mojoCnf.serverHost
+}
+
 func GetDbDirCnf() string {
 	return mojoCnf.dbDataDir
 }
@@ -83,7 +87,7 @@ func GetLogDirCnf() string {
 }
 
 func GetListeningPort() uint16 {
-	return mojoCnf.port
+	return mojoCnf.serverPort
 }
 
 func GetRepoPath() string {

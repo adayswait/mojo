@@ -25,6 +25,9 @@ func Route(app *fiber.App) {
 	authApi.Get("/logout", handler.Logout)
 	authApi.Get("/register", handler.Register)
 
+	visitorApi := api.Group("/visitor")
+	visitorApi.Get("/breakdep", handler.BreakDep)
+
 	//用于web页面展示的请求, 允许cookie等
 	web := app.Group("/web")
 	web.Use(cors.New(cors.Config{
