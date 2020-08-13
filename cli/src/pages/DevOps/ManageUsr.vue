@@ -61,7 +61,10 @@ export default {
       if (b === true) {
         newGroup = kv[1].group - 1;
       } else {
-        if (this.$store.getters.userInfo.group == 0) {
+        if (
+          this.$store.getters.userInfo.group == 0 &&
+          kv[1].user == this.$store.getters.userInfo.user
+        ) {
           this.$store.commit("error", `whosyourdaddy`);
           return;
         }

@@ -29,7 +29,6 @@ httpClient.interceptors.response.use(
     response => {
         // 统一处理状态
         const res = response.data;
-        window.console.log(res);
         if (res.code != 0) { // 需自定义
             // 返回异常
             window.console.error(res)

@@ -164,7 +164,6 @@ export default {
       this.currVersion = "";
       this.currMessage = [];
       this.depRadioList = [];
-      window.console.log(type, this.versionMap[type]);
       this.versionList = [];
       if (this.versionMap[this.currServerType]) {
         this.rversion = null;

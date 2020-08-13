@@ -178,13 +178,11 @@ export default {
         let tempList = [];
         //奇数下标的是有效信息
         for (let i = 0; i < ret.data.length; i += 2) {
-          window.console.log(ret.data[i + 1]);
           tempList[i / 2] = [ret.data[i], JSON.parse(ret.data[i + 1])];
         }
         tempList.sort((a, b) => {
           return parseInt(b[0]) - parseInt(a[0]);
         });
-        window.console.log(tempList);
         this.allDeps = tempList;
       } catch (e) {
         this.$store.commit("error", `获取上线单失败 : ${e.data || e.message}`);
@@ -215,7 +213,6 @@ export default {
       }
     },
     submit: async function (idx, force) {
-      window.console.log(this.allDeps[idx][0]);
       const ret = await this.$httpc.get(`/web/dep/submit`, {
         depid: this.allDeps[idx][0],
         force: force || false,

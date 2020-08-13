@@ -147,7 +147,7 @@ export default {
 <style scoped>
 @font-face {
   font-family: consolas;
-  src: url("/public/consola.ttf");
+  src: url("/consola.ttf");
 }
 
 #devopsbody {

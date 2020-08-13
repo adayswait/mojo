@@ -1,9 +1,0 @@
-db-data-dir .
-log-dir .
-server-host 10.1.1.248
-server-port 3000
-client-domain http://10.1.1.248:8080
-repo-path /opt/jesse/tmp
-exclude-from /opt/jesse/splan/tools/release/exclude.list
-dingding-webhook https://oapi.dingtalk.com/robot/send?access_token=eed71bc6f6b3772e6a00e83edbe196926889910a4df52b2f603b1f6674095df7
-developer-webhook https://oapi.dingtalk.com/robot/send?access_token=eed71bc6f6b3772e6a00e83edbe196926889910a4df52b2f603b1f6674095df7

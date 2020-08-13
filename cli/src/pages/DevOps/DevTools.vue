@@ -258,7 +258,6 @@ export default {
   },
   mounted: function () {
     this.timerId = setInterval(() => {
-      window.console.log("timer");
       this.currUnixTimeMS = Date.now();
       this.currUnixTimeS = parseInt(this.currUnixTimeMS / 1000);
       this.currStdDateS = this.format("yyyy-MM-dd hh:mm:ss");

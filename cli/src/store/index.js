@@ -16,7 +16,7 @@ const state = {
     },
     DevOpsMask: 0,
     GROUP: {
-        0: "whosyourdaddy",
+        0: "管理员",
         1: "管理员",
         2: "普通用户",
         3: "游客",

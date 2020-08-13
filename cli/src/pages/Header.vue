@@ -10,7 +10,7 @@
         <div class="navbar-brand">
           <!-- <a class="navbar-item" href="https://github.com/adayswait">
             <img src="./../assets/logo.png" />
-          </a> -->
+          </a>-->
 
           <a
             role="button"
@@ -35,7 +35,11 @@
               <div class="navbar-dropdown">
                 <a class="navbar-item" target="_blank" href="http://10.1.1.239">239GM</a>
                 <a class="navbar-item" target="_blank" href="http://plan_s">plan_s</a>
-                <a class="navbar-item" target="_blank" href="http://s.61.com/?ip=123.206.181.31&port=9999&log=true&showPP=false">外网白名单入口</a>
+                <a
+                  class="navbar-item"
+                  target="_blank"
+                  href="http://s.61.com/?ip=123.206.181.31&port=9999&log=true&showPP=false"
+                >外网白名单入口</a>
                 <hr class="navbar-divider" />
                 <a class="navbar-item">Report an issue</a>
               </div>
@@ -53,7 +57,7 @@
               <div class="navbar-dropdown is-right">
                 <!-- <a class="navbar-item">About</a>
                 <a class="navbar-item">Edit</a>
-                <a class="navbar-item">Message</a> -->
+                <a class="navbar-item">Message</a>-->
                 <hr class="navbar-divider" />
                 <a href="./" class="navbar-item" @click="logout">退出</a>
               </div>
@@ -75,7 +79,7 @@ export default {
   },
   methods: {
     showSmallMenu: async function () {
-      window.console.log("显示小菜单");
+      // window.console.log("显示小菜单");
     },
     logout: async function () {
       try {
