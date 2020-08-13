@@ -10,7 +10,7 @@ import (
 )
 
 func Route(app *fiber.App) {
-	// app.Static("/", "../cli/")
+	app.Static("/", "./dist/")
 	app.Get("/ws", websocket.New(handler.Websocket))
 	app.Use("/fs", middleware.FileSystem(middleware.FileSystemConfig{
 		Root: http.Dir("/opt/jesse/git"),

@@ -13,6 +13,7 @@
               <div class="level-item has-text-centered">
                 <button
                   class="button is-small is-rounded is-dark is-vcentered"
+                  :class="{'is-loading':btnDevLoading}"
                   @click="chat2Developer"
                 >(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧</button>
               </div>
@@ -38,6 +39,7 @@
               <div class="level-item has-text-centered">
                 <button
                   class="button is-small is-rounded is-dark is-vcentered"
+                  :class="{'is-loading':btnGroupLoading}"
                   @click="chat2Group"
                 >匿名发布到 ❥S计划讨论群</button>
               </div>
@@ -78,28 +80,36 @@ export default {
       title: "Issue",
       developerText: "",
       groupText: "",
+      btnDevLoading: false,
+      btnGroupLoading: false,
     };
   },
   methods: {
     chat2Developer: async function () {
       try {
+        this.btnDevLoading = true;
         await this.$httpc.post(`/web/chat/dev`, {
           message: this.developerText,
         });
         this.$store.commit("info", `我们已经收到你的建议啦(●･◡･●)ﾉ♥`);
+        this.developerText = "";
       } catch (e) {
         this.$store.commit("error", `聊天错误 : ${e.data || e.message}`);
       }
+      this.btnDevLoading = false;
     },
     chat2Group: async function () {
       try {
+        this.btnGroupLoading = true;
         await this.$httpc.post(`/web/chat/group`, {
           message: this.groupText,
         });
         this.$store.commit("info", `☝ᖗ乛◡乛ᖘ☝ 完美`);
+        this.groupText = "";
       } catch (e) {
         this.$store.commit("error", `聊天错误 : ${e.data || e.message}`);
       }
+      this.btnGroupLoading = false;
     },
   },
 };
