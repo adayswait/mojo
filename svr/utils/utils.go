@@ -16,16 +16,18 @@ const local_CLIENT_DOMAIN = "client-domain"
 const local_REPO_PATH = "repo-path"
 const local_EXCLUDE_FROM = "exclude-from"
 const local_DINGDING_WEBHOOK = "dingding-webhook"
+const local_DEVELOPER_WEBHOOK = "developer-webhook"
 
 type config struct {
-	dbDataDir       string
-	logDir          string
-	serverHost      string
-	serverPort      uint16
-	clientDomain    string
-	repoPath        string
-	excludeFrom     string
-	dingdingWebhook string
+	dbDataDir        string
+	logDir           string
+	serverHost       string
+	serverPort       uint16
+	clientDomain     string
+	repoPath         string
+	excludeFrom      string
+	dingdingWebhook  string
+	developerWebhook string
 }
 
 var mojoCnf config
@@ -69,6 +71,8 @@ func ReadConfig() {
 			mojoCnf.excludeFrom = cnfArr[1]
 		case local_DINGDING_WEBHOOK:
 			mojoCnf.dingdingWebhook = cnfArr[1]
+		case local_DEVELOPER_WEBHOOK:
+			mojoCnf.developerWebhook = cnfArr[1]
 		case local_CLIENT_DOMAIN:
 			mojoCnf.clientDomain = cnfArr[1]
 		default:
@@ -107,8 +111,13 @@ func GetRepoPath() string {
 func GetExcludeFrom() string {
 	return mojoCnf.excludeFrom
 }
+
 func GetDingdingWebhook() string {
 	return mojoCnf.dingdingWebhook
+}
+
+func GetDeveloperWebhook() string {
+	return mojoCnf.developerWebhook
 }
 
 func IsPathExist(path string) bool {

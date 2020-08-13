@@ -57,4 +57,6 @@ func Route(app *fiber.App) {
 	dbWeb.Post("/:table?/:key?", handler.NewDB)
 	dbWeb.Delete("/:table?/:key?", handler.DeleteDB)
 
+	chatWeb := web.Group("/chat")
+	chatWeb.Post("/:to", handler.Chat)
 }

@@ -22,7 +22,7 @@
                   </li>
                   <!-- <li @click="focus('我的部署')">
                     <router-link to="/devops/mydep" :class="{'is-active':currFocus=='我的部署'}">我的部署</router-link>
-                  </li> -->
+                  </li>-->
                   <li @click="focus('所有部署')">
                     <router-link to="/devops/alldep" :class="{'is-active':currFocus=='所有部署'}">所有部署</router-link>
                   </li>
@@ -76,6 +76,12 @@
                       to="/devops/devtools"
                       :class="{'is-active':currFocus=='DevTools'}"
                     >开发工具</router-link>
+                  </li>
+                  <li @click="focus('Issue')">
+                    <router-link
+                      to="/devops/issue"
+                      :class="{'is-active':currFocus=='Issue'}"
+                    >Issue</router-link>
                   </li>
                 </ul>
               </li>

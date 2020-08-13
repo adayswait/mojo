@@ -9,9 +9,11 @@ import (
 	"github.com/adayswait/mojo/db"
 	"github.com/adayswait/mojo/global"
 	"github.com/adayswait/mojo/mlog"
+	"github.com/adayswait/mojo/utils"
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/session"
 	"github.com/google/goexpect"
+	"github.com/valyala/fasthttp"
 	"regexp"
 	"strconv"
 	"time"
@@ -469,6 +471,66 @@ func BreakDep(c *fiber.Ctx) {
 		"data": ret, "err": reterr})
 
 	return
+}
+
+func Chat(c *fiber.Ctx) {
+	store := sessions.Get(c)
+	user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
+		return
+	}
+
+	to := c.Params("to")
+	chatInfo := struct {
+		Message string `json:"message"`
+	}{}
+	if errBp := c.BodyParser(&chatInfo); errBp != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
+			"data": errBp.Error()})
+		return
+	}
+	mlog.Log(user, "chat to", to, "message:", chatInfo.Message)
+
+	req := &fasthttp.Request{}
+	if to == "group" {
+		req.SetRequestURI(utils.GetDingdingWebhook())
+	} else if to == "dev" {
+		req.SetRequestURI(utils.GetDeveloperWebhook())
+	} else {
+		if errBp := c.BodyParser(&chatInfo); errBp != nil {
+			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+				"data": "err param 'to':" + to})
+			return
+		}
+	}
+	chatPattern := `{
+		"msgtype": "text", 
+		"text": {
+			"content": "%s"
+		}
+	}`
+
+	formatMsg := fmt.Sprintf(chatPattern, chatInfo.Message)
+	req.SetBody([]byte(formatMsg))
+
+	// 默认是application/x-www-form-urlencoded
+	req.Header.SetContentType("application/json")
+	req.Header.SetMethod("POST")
+
+	resp := &fasthttp.Response{}
+
+	client := &fasthttp.Client{}
+	if err := client.Do(req, resp); err != nil {
+		mlog.Log("请求失败:", err.Error())
+		return
+	}
+	b := resp.Body()
+	mlog.Log("chat webhook ret:\r\n", string(b))
+	c.JSON(fiber.Map{"code": global.RET_OK,
+		"data": nil})
 }
 
 func Test(c *fiber.Ctx) {

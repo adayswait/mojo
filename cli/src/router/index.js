@@ -5,6 +5,7 @@ import DevOps from "@/pages/DevOps.vue";
 import OpsHome from "@/pages/DevOps/Home.vue"
 import AllDep from "@/pages/DevOps/AllDep.vue";
 import MyDep from "@/pages/DevOps/MyDep.vue";
+import Issue from "@/pages/DevOps/Issue.vue";
 import ManageUsr from "@/pages/DevOps/ManageUsr.vue";
 import NewDep from "@/pages/DevOps/NewDep.vue";
 import MacIni from "@/pages/DevOps/MacIni.vue";
@@ -83,6 +84,10 @@ const router = new Router({
                     path: "devtools",
                     component: DevTools
                 },
+                {
+                    path: "issue",
+                    component: Issue
+                }
             ]
         },
         {
