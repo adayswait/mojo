@@ -1,11 +1,13 @@
 package db
 
-import "fmt"
-import "errors"
-import "encoding/json"
-import "github.com/google/uuid"
-import "github.com/boltdb/bolt"
-import "github.com/adayswait/mojo/global"
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/adayswait/mojo/global"
+	"github.com/boltdb/bolt"
+	"github.com/google/uuid"
+)
 
 type UserInfo struct {
 	User  string `json:"user"`

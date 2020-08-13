@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/adayswait/mojo/db"
 	"github.com/adayswait/mojo/global"
+	"github.com/adayswait/mojo/mlog"
 	"github.com/adayswait/mojo/utils"
 	"github.com/google/goexpect"
 	"github.com/google/uuid"
@@ -20,8 +21,10 @@ func init() {
 	dingdingStr = "{" +
 		`"msgtype":"actionCard",` +
 		`"actionCard":{` +
-		`"title":"更新提醒",` +
-		`"text":"#### **%s**将于一分钟后重启\n ###### %s",` +
+		`"title":"内网%s更新提醒",` +
+		`"text":"#### 内网%s将于一分钟后重启\n ` +
+		`###### 打断或查看需公司内网或vpn \n ` +
+		`###### %s",` +
 		`"btnOrientation": "1",` +
 		`"btns": [` +
 		"{" +
@@ -52,7 +55,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 	ecu, _, _ := expect.Spawn(cuCmd, -1)
 	defer ecu.Close()
 	ecu.Expect(regexp.MustCompile("$"), 2*time.Minute)
-	fmt.Println("svn cleanup passed")
+	mlog.Log("svn cleanup passed")
 	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_CHECKOUT)
 	eco, _, _ := expect.Spawn(coCmd, -1)
 	defer eco.Close()
@@ -60,29 +63,29 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 	ret, matched, errcoe := eco.Expect(regexp.MustCompile(coStr),
 		5*time.Minute)
 	if errcoe != nil {
-		fmt.Println(coCmd, ret)
+		mlog.Log(coCmd, ret)
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
 	if len(matched) == 0 {
-		fmt.Println(coCmd, ret)
+		mlog.Log(coCmd, ret)
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
-	fmt.Println("svn export passed")
+	mlog.Log("svn export passed")
 
 	ecoplan, _, _ := expect.Spawn(path+"/config/import_json_from_design.sh", -1)
 	// defer ecoplan.Close() //todo here
-	fmt.Println(path + "config/import_json_from_design.sh")
+	mlog.Log(path + "config/import_json_from_design.sh")
 	retcoplan, matchedcoplan, errcoplan := ecoplan.Expect(
 		regexp.MustCompile("import complete"),
 		5*time.Minute)
 	if errcoplan != nil || len(matchedcoplan) == 0 {
-		fmt.Println("import json err", retcoplan, matchedcoplan, errcoplan)
+		mlog.Log("import json err", retcoplan, matchedcoplan, errcoplan)
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	} else {
-		fmt.Println("import json passed")
+		mlog.Log("import json passed")
 	}
 
 	if !force {
@@ -90,13 +93,12 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		req := &fasthttp.Request{}
 		req.SetRequestURI(utils.GetDingdingWebhook())
 
-		markdown := fmt.Sprintf(dingdingStr, depInfo.Type,
+		markdown := fmt.Sprintf(dingdingStr, depInfo.Type, depInfo.Type,
 			time.Now().Format("2006-01-02 15:04:05"),
-			fmt.Sprintf("http://%s:%d/api/visitor/breakdep?depuuid=%s",
-				utils.GetServerHost(),
-				utils.GetListeningPort(),
-				depuuid),
-			fmt.Sprintf("http://10.1.1.248:8080/#/visitor/viewdep?depuuid=%s", depuuid))
+			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=break",
+				utils.GetClientDomain(), depuuid),
+			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=view",
+				utils.GetClientDomain(), depuuid))
 		req.SetBody([]byte(markdown))
 
 		// 默认是application/x-www-form-urlencoded
@@ -107,15 +109,15 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 
 		client := &fasthttp.Client{}
 		if err := client.Do(req, resp); err != nil {
-			fmt.Println("请求失败:", err.Error())
+			mlog.Log("请求失败:", err.Error())
 			return
 		}
 		b := resp.Body()
 
-		fmt.Println("dingding webhook ret:\r\n", string(b))
+		mlog.Log("dingding webhook ret:\r\n", string(b))
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SLEEP)
-		global.DepTypeAwakeTime.Store(depInfo.Type, time.Now().Unix()+10)
-		time.Sleep(time.Second * 10)
+		global.DepTypeAwakeTime.Store(depInfo.Type, time.Now().Unix()+60)
+		time.Sleep(time.Second * 60)
 		for {
 			breakTime, exist := global.DepTypeAwakeTime.Load(depInfo.Type)
 			if exist {
@@ -123,7 +125,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 				if gapTime <= 0 {
 					break
 				}
-				time.Sleep(time.Duration(gapTime) * time.Second)
+				time.Sleep(time.Second)
 			} else {
 				break
 			}
@@ -133,12 +135,12 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 	depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
 	if errd != nil {
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_GETINI)
-		fmt.Println("errd", errd)
+		mlog.Log("errd", errd)
 		return
 	}
 	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
 	if errm != nil {
-		fmt.Println("errm", errm)
+		mlog.Log("errm", errm)
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_GETINI)
 		return
 	}
@@ -201,13 +203,13 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			retrsc, matchedrsc, errrsc := ers.Expect(
 				regexp.MustCompile("speedup is"), 5*time.Minute)
 			if errrsc == nil && len(matchedrsc) == 1 {
-				fmt.Println("sync succeed", idep[2], idep[3])
+				mlog.Log("sync succeed", idep[2], idep[3])
 			} else {
-				fmt.Println("sync failed", idep[2], idep[3], retrsc, errrsc)
+				mlog.Log("sync failed", idep[2], idep[3], retrsc, errrsc)
 				continue
 			}
 		} else {
-			fmt.Println("sync failed", syncCmd, retrs, matchedrs, errrs)
+			mlog.Log("sync failed", syncCmd, retrs, matchedrs, errrs)
 			continue
 		}
 
@@ -219,44 +221,44 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			})
 		if errdial != nil {
-			fmt.Println("ssh dial failed", errdial)
+			mlog.Log("ssh dial failed", errdial)
 			continue
 		}
 		defer sshClt.Close()
-		fmt.Println("ssh dial passed")
+		mlog.Log("ssh dial passed")
 
 		essh, _, errssh := expect.SpawnSSH(sshClt, time.Minute)
 		if errssh != nil {
-			fmt.Println(errssh)
+			mlog.Log(errssh)
 			continue
 		}
 		defer essh.Close()
 		logined := regexp.MustCompile("$")
 		retlogin, _, elogin := essh.Expect(logined, 10*time.Second)
 		if elogin != nil {
-			fmt.Println("ssh login failed", elogin, retlogin)
+			mlog.Log("ssh login failed", elogin, retlogin)
 			continue
 		}
-		fmt.Println("ssh login passed")
+		mlog.Log("ssh login passed")
 		essh.Send(idep[3] + "/stop.sh\n")
 		retstop, _, estop := essh.Expect(regexp.MustCompile("$"),
 			10*time.Second)
 		if estop != nil {
-			fmt.Println("stop old service failed", estop, retstop)
+			mlog.Log("stop old service failed", estop, retstop)
 			continue
 		} else {
-			fmt.Println("stop old service passed")
+			mlog.Log("stop old service passed")
 		}
 		essh.Send(idep[3] + "/start.sh\n")
 		retstart, _, estart := essh.Expect(regexp.MustCompile("启动"), 10*time.Second)
 		if estart != nil {
-			fmt.Println("start new service failed", estart, retstart)
+			mlog.Log("start new service failed", estart, retstart)
 			continue
 		} else {
-			fmt.Println("start new service passed")
+			mlog.Log("start new service passed")
 		}
 	}
-	fmt.Println("dep all done")
+	mlog.Log("dep all done")
 	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SUCCESS)
 
 	return

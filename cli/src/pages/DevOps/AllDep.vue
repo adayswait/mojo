@@ -10,8 +10,15 @@
                   <div class="field is-grouped is-grouped-multiline">
                     <div class="control">
                       <div class="tags has-addons">
-                        <span class="tag is-dark">version</span>
+                        <span class="tag is-dark">depid</span>
                         <span class="tag is-primary">{{info[1]}}</span>
+                      </div>
+                    </div>
+
+                    <div class="control">
+                      <div class="tags has-addons">
+                        <span class="tag is-dark">type</span>
+                        <span class="tag is-info">{{getDepInfoByDepid(info[1])[1].type}}</span>
                       </div>
                     </div>
 
@@ -36,13 +43,10 @@
                       </div>
                     </div>
 
-                    <div
-                      class="control"
-                      v-if="(parseInt(info[4])-Date.now()/1000)>0 &&info[3]!=progressDesc.length-1"
-                    >
+                    <div class="control" v-if="parseInt(info[4])>0">
                       <div class="tags has-addons">
                         <span class="tag is-dark">awake</span>
-                        <span class="tag is-success">{{parseInt(parseInt(info[4])-Date.now()/1000)}}</span>
+                        <span class="tag is-warning">{{parseInt(info[4])}}</span>
                       </div>
                     </div>
                   </div>
@@ -152,10 +156,10 @@ export default {
         "初始化",
         "检出代码",
         "睡眠中断",
-        "同步代码",
+        "部署重启",
         "停止旧服务",
         "启动新服务",
-        "部署成功 ",
+        "发布成功 ",
       ],
     };
   },
@@ -223,6 +227,13 @@ export default {
         if (depid == this.allDeps[i][0]) {
           this.viewDetail(i);
           break;
+        }
+      }
+    },
+    getDepInfoByDepid: function (depid) {
+      for (let i = 0; i < this.allDeps.length; i++) {
+        if (depid == this.allDeps[i][0]) {
+          return this.allDeps[i];
         }
       }
     },

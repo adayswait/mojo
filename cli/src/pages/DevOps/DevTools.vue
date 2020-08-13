@@ -25,7 +25,7 @@
       </div>
       <div class="column is-1">
         <a
-          class="button is-primary "
+          class="button is-primary"
           v-clipboard:copy="currUnixTimeS"
           v-clipboard:success="onCopySuccess"
           v-clipboard:error="onCopyError"
@@ -101,7 +101,53 @@
         />
       </div>
       <div class="column is-1">
-        <a class="button is-primary" @click="copy(transUnixMS,true)">转换</a>
+        <a class="button is-primary" @click="copy(transUnixMS,1)">转换</a>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column is-3">
+        <input
+          class="input"
+          type="text"
+          placeholder="unix时间戳(秒)"
+          v-model="inputUnixS"
+          v-on:input="input"
+        />
+      </div>
+      <div class="column is-3">
+        <input
+          class="input is-primary"
+          type="text"
+          placeholder="标准时间"
+          v-model="transStdDateS"
+          readonly
+        />
+      </div>
+      <div class="column is-1">
+        <a class="button is-primary" @click="copy(transStdDateS,2)">转换</a>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column is-3">
+        <input
+          class="input"
+          type="text"
+          placeholder="unix时间戳(毫秒)"
+          v-model="inputUnixMS"
+          v-on:input="input"
+        />
+      </div>
+      <div class="column is-3">
+        <input
+          class="input is-primary"
+          type="text"
+          placeholder="标准时间"
+          v-model="transStdDateMS"
+          readonly
+        />
+      </div>
+      <div class="column is-1">
+        <a class="button is-primary" @click="copy(transStdDateMS,3)">转换</a>
       </div>
     </div>
   </div>
@@ -118,13 +164,17 @@ export default {
       currStdDateS: this.format("yyyy-MM-dd hh:mm:ss"),
       currUnixTimeMS: Date.now(),
       currUnixTimeS: parseInt(Date.now() / 1000),
-      inputStdDate: "",
+      inputStdDate: this.format("yyyy-MM-dd hh:mm:ss.SSS"),
       transUnixMS: "",
+      inputUnixS: "",
+      transStdDateS: "",
+      inputUnixMS: "",
+      transStdDateMS: "",
     };
   },
   methods: {
-    copy: function (data, isTrans) {
-      if (isTrans) {
+    copy: function (data, isTransIdx) {
+      if (isTransIdx === 1) {
         const reg = /^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))$|^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))\s((?:[0-1]?[0-9]{1}|2[0-3])):([0-5]?[0-9]{1}):([0-5]?[0-9]{1})$|^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))\s((?:[0-1]?[0-9]{1}|2[0-3])):([0-5]?[0-9]{1}):([0-5]?[0-9]{1})\.?(\d{3})+$/;
         if (reg.test(this.inputStdDate) === false) {
           this.transUnixMS = null;
@@ -132,6 +182,24 @@ export default {
           return;
         } else {
           this.transUnixMS = new Date(this.inputStdDate).getTime();
+        }
+      } else if (isTransIdx == 2) {
+        this.inputUnixS = parseInt(this.inputUnixS);
+        if (this.inputUnixS > 0) {
+          this.transStdDateS = new Date(
+            this.inputUnixS * 1000
+          ).toLocaleString();
+        } else {
+          this.$store.commit("error", "请检查你的时间格式");
+          return;
+        }
+      } else if (isTransIdx == 3) {
+        this.inputUnixMS = parseInt(this.inputUnixMS);
+        if (this.inputUnixMS > 0) {
+          this.transStdDateMS = new Date(this.inputUnixMS).toLocaleString();
+        } else {
+          this.$store.commit("error", "请检查你的时间格式");
+          return;
         }
       }
       this.$copyText(data).then(this.onCopySuccess, this.onCopyError);

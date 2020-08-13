@@ -1,6 +1,8 @@
 package ws
 
-import "github.com/gofiber/fiber"
+import (
+	"github.com/gofiber/fiber"
+)
 
 func New() func(*fiber.Ctx) {
 	return func(c *fiber.Ctx) {

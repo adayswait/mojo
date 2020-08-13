@@ -1,15 +1,18 @@
 package utils
 
-import "regexp"
-import "os"
-import "bufio"
-import "strings"
-import "strconv"
+import (
+	"bufio"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
+)
 
 const local_DB_DATA_DIR = "db-data-dir"
 const local_LOG_DIR = "log-dir"
 const local_SERVER_HOST = "server-host"
 const local_SERVER_PORT = "server-port"
+const local_CLIENT_DOMAIN = "client-domain"
 const local_REPO_PATH = "repo-path"
 const local_EXCLUDE_FROM = "exclude-from"
 const local_DINGDING_WEBHOOK = "dingding-webhook"
@@ -19,6 +22,7 @@ type config struct {
 	logDir          string
 	serverHost      string
 	serverPort      uint16
+	clientDomain    string
 	repoPath        string
 	excludeFrom     string
 	dingdingWebhook string
@@ -65,6 +69,8 @@ func ReadConfig() {
 			mojoCnf.excludeFrom = cnfArr[1]
 		case local_DINGDING_WEBHOOK:
 			mojoCnf.dingdingWebhook = cnfArr[1]
+		case local_CLIENT_DOMAIN:
+			mojoCnf.clientDomain = cnfArr[1]
 		default:
 
 		}
@@ -88,6 +94,10 @@ func GetLogDirCnf() string {
 
 func GetListeningPort() uint16 {
 	return mojoCnf.serverPort
+}
+
+func GetClientDomain() string {
+	return mojoCnf.clientDomain
 }
 
 func GetRepoPath() string {

@@ -57,6 +57,10 @@ export default {
       }
     },
     changeRight: async function (b, kv) {
+      if (this.$store.getters.userInfo.group == 0) {
+        this.$store.commit("error", `whosyourdaddy`);
+        return;
+      }
       let newGroup;
       if (b === true) {
         newGroup = kv[1].group - 1;

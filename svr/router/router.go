@@ -1,11 +1,13 @@
 package router
 
-import "net/http"
-import "github.com/gofiber/cors"
-import "github.com/gofiber/fiber"
-import "github.com/gofiber/websocket"
-import "github.com/gofiber/fiber/middleware"
-import "github.com/adayswait/mojo/handler"
+import (
+	"github.com/adayswait/mojo/handler"
+	"github.com/gofiber/cors"
+	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/middleware"
+	"github.com/gofiber/websocket"
+	"net/http"
+)
 
 func Route(app *fiber.App) {
 	// app.Static("/", "../cli/")
@@ -25,15 +27,15 @@ func Route(app *fiber.App) {
 	authApi.Get("/logout", handler.Logout)
 	authApi.Get("/register", handler.Register)
 
-	visitorApi := api.Group("/visitor")
-	visitorApi.Get("/breakdep", handler.BreakDep)
-
 	//用于web页面展示的请求, 允许cookie等
 	web := app.Group("/web")
 	web.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://10.1.1.248:8080"},
 		AllowCredentials: true,
 	}))
+
+	visitorWeb := web.Group("/visitor")
+	visitorWeb.Get("/breakdep", handler.BreakDep)
 
 	//身份认证
 	authWeb := web.Group("/auth")

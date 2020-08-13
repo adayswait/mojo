@@ -132,7 +132,10 @@ export default {
           value: kv[1],
         });
       } catch (e) {
-        this.$store.commit("error", `修改数据库值错误 : ${e}`);
+        this.$store.commit(
+          "error",
+          `修改数据库值错误 : ${e.data || e.message}`
+        );
       }
     },
     deleteKey: async function (kv) {
@@ -152,7 +155,7 @@ export default {
           this.keyValueList.splice(delIndex, 1);
         }
       } catch (e) {
-        this.$store.commit("error", `删除键值对错误 : ${e}`);
+        this.$store.commit("error", `删除键值对错误 : ${e.data || e.message}`);
       }
     },
     deleteTable: async function (tableName) {

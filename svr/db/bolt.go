@@ -1,11 +1,13 @@
 package db
 
-import "fmt"
-import "log"
-import "time"
-import "strconv"
-import "github.com/boltdb/bolt"
-import "github.com/adayswait/mojo/global"
+import (
+	"fmt"
+	"github.com/adayswait/mojo/global"
+	"github.com/boltdb/bolt"
+	"log"
+	"strconv"
+	"time"
+)
 
 var localDB *bolt.DB = nil
 

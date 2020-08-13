@@ -1,6 +1,6 @@
 <template>
   <div class="box">
-    <div id="dep" style="width:60%;height:500%;"></div>
+    <div id="dep" style="width:60%;height:500%;margin-left:18%"></div>
   </div>
 </template>
 
@@ -8,11 +8,11 @@
 export default {
   name: "DevOpsHome",
   methods: {
-    drawDeployTotal() {
+    drawDeployTotal(data) {
       let option = {
         title: {
-          text: "某站点用户访问来源",
-          subtext: "纯属虚构",
+          text: "部署总览",
+          subtext: "近期全部部署的情况概览",
           left: "center",
         },
         tooltip: {
@@ -22,21 +22,15 @@ export default {
         legend: {
           orient: "vertical",
           left: "left",
-          data: ["直接访问", "邮件营销", "联盟广告", "视频广告", "搜索引擎"],
+          data: ["成功", "失败"],
         },
         series: [
           {
-            name: "访问来源",
+            name: "次数",
             type: "pie",
             radius: "55%",
             center: ["50%", "60%"],
-            data: [
-              { value: 335, name: "直接访问" },
-              { value: 310, name: "邮件营销" },
-              { value: 234, name: "联盟广告" },
-              { value: 135, name: "视频广告" },
-              { value: 1548, name: "搜索引擎" },
-            ],
+            data: data,
             emphasis: {
               itemStyle: {
                 shadowBlur: 10,
@@ -50,147 +44,51 @@ export default {
       let depChart = this.$echarts.init(document.getElementById("dep"));
       depChart.setOption(option);
     },
-    drawDeployDetails() {
-      let optionDepChart = {
-        title: {
-          text: "柱状图",
-        },
-        yAxis: {
-          type: "category",
-          data: [
-            "online1",
-            "online2",
-            "online3",
-            "battle1",
-            "battle2",
-            "battle3",
-            "center",
-            "online1",
-            "online2",
-            "online3",
-            "battle1",
-            "battle2",
-            "battle3",
-            "center",
-          ],
-        },
-        // backgroundColor: "#fff000",
-        color: ["#000000", "red", "green"],
-        xAxis: {
-          type: "value",
-        },
-        series: [
-          {
-            data: [60, 7, 32, 2, 100, 23, 87, 98, 90, 45, 7, 34, 99, 0],
-            type: "bar",
-            // animationDelay: function (idx) {
-            //   return idx * 10;
-            // },
-          },
-        ],
-      };
-      let depChart = this.$echarts.init(document.getElementById("dep"));
-      depChart.setOption(optionDepChart);
-    },
-    drawChart() {
-      // 基于准备好的dom，初始化echarts实例
-      let payload = this.$echarts.init(document.getElementById("payload"));
-      // 指定图表的配置项和数据
-      let optionPayload = {
-        title: {
-          text: "柱状图",
-        },
-        legend: {},
-        tooltip: {},
-        dataset: {
-          source: [
-            ["product", "内存", "在线人数", "数据包"],
-            ["10.30.14.109", 23123, 32443, 33423],
-            ["10.30.14.239", 34324, 23223, 7656],
-            ["10.30.14.101", 8797, 6544, 9878],
-            ["10.30.14.185", 63354, 5435, 33423],
-          ],
-        },
-        xAxis: { type: "category" },
-        yAxis: {},
-        // Declare several bar series, each will be mapped
-        // to a column of dataset.source by default.
-        series: [{ type: "bar" }, { type: "bar" }, { type: "bar" }],
-      };
+    getAndDrawTaskList: async function () {
+      try {
+        const ret = await this.$httpc.get("/web/dep/progress");
+        let tempList = [];
+        let success = 0,
+          failed = 0,
+          processing = 0;
+        for (let i = 0; i < ret.data.length; i += 5) {
+          tempList[i / 5] = [
+            ret.data[i], //start time
+            ret.data[i + 1], //depid
+            ret.data[i + 2], //depuuid
+            ret.data[i + 3], //depstatus
+            ret.data[i + 4], //awake countdown
+          ];
+          if (ret.data[i + 3] == 6) {
+            success += 1;
+          } else if (ret.data[i + 3] < 0) {
+            failed += 1;
+          } else {
+            processing += 1;
+          }
+        }
 
-      // 使用刚指定的配置项和数据显示图表。
-      payload.setOption(optionPayload);
-
-      let nOption = {
-        title: {
-          text: "压力图(qps)",
-        },
-        tooltip: {
-          trigger: "axis",
-        },
-        legend: {
-          data: ["online", "battle", "api", "mysql", "redis"],
-        },
-        grid: {
-          left: "3%",
-          right: "4%",
-          bottom: "3%",
-          containLabel: true,
-        },
-        toolbox: {
-          feature: {
-            saveAsImage: {},
-          },
-        },
-        xAxis: {
-          type: "category",
-          boundaryGap: false,
-          data: ["13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"],
-        },
-        yAxis: {
-          type: "value",
-        },
-        series: [
-          {
-            name: "online",
-            type: "line",
-            stack: "总量",
-            data: [120, 132, 101, 134, 90, 230, 210],
-          },
-          {
-            name: "battle",
-            type: "line",
-            stack: "总量",
-            data: [220, 182, 191, 234, 290, 330, 310],
-          },
-          {
-            name: "api",
-            type: "line",
-            stack: "总量",
-            data: [150, 232, 201, 154, 190, 330, 410],
-          },
-          {
-            name: "redis",
-            type: "line",
-            stack: "总量",
-            data: [320, 332, 301, 334, 390, 330, 320],
-          },
-          {
-            name: "mysql",
-            type: "line",
-            stack: "总量",
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-          },
-        ],
-      };
-      let np = this.$echarts.init(document.getElementById("np"));
-      np.setOption(nOption);
+        let data = [];
+        if (success > 0) {
+          data.push({ value: success, name: "成功" });
+        }
+        if (failed > 0) {
+          data.push({ value: failed, name: "失败" });
+        }
+        if (processing > 0) {
+          data.push({ value: processing, name: "进行中" });
+        }
+        this.drawDeployTotal(data);
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `获取任务进度列表失败 : ${e.data || e.message}`
+        );
+      }
     },
   },
-  mounted() {
-    this.drawDeployTotal()
-    // this.drawDeployDetails();
-    // this.drawChart();
+  mounted: function () {
+    this.getAndDrawTaskList();
   },
 };
 </script>

@@ -16,10 +16,11 @@ const state = {
     },
     DevOpsMask: 0,
     GROUP: {
-        0: "管理员",
-        1: "普通用户",
-        2: "游客",
-        3: "未激活"
+        0: "whosyourdaddy",
+        1: "管理员",
+        2: "普通用户",
+        3: "游客",
+        4: "未激活"
     },
     SERVER_TYPE: ["online", "battle", "match", "team", "center"],
     REPO_TYPE: ["svn"],

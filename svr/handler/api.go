@@ -8,6 +8,7 @@ import (
 	"github.com/adayswait/mojo/cmd"
 	"github.com/adayswait/mojo/db"
 	"github.com/adayswait/mojo/global"
+	"github.com/adayswait/mojo/mlog"
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/session"
 	"github.com/google/goexpect"
@@ -230,7 +231,7 @@ func DeleteDB(c *fiber.Ctx) {
 			"data": "session invalid"})
 		return
 	}
-	if int(group.(int64)) > int(global.GROUP_UNDEF) {
+	if int(group.(int64)) > int(global.GROUP_ADMIN) {
 		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
 			"data": "no right to do this"})
 		return
@@ -343,7 +344,8 @@ func ProgressList(c *fiber.Ctx) {
 		awakeTime, exist := global.DepTypeAwakeTime.Load(
 			depInfo.(global.DepInfo).Type)
 		if exist {
-			ret = append(ret, strconv.FormatInt(awakeTime.(int64), 10))
+			ret = append(ret,
+				strconv.FormatInt(awakeTime.(int64)-time.Now().Unix(), 10))
 		} else {
 			ret = append(ret, "0")
 		}
@@ -369,32 +371,103 @@ func DeleteDep(c *fiber.Ctx) {
 }
 
 func BreakDep(c *fiber.Ctx) {
+	const breakSecond = 120
+	const renewSecond = 60
+	//op = view(查看); break(打断); renew(续期); cancel(取消所有break操作,立即重启)
 	breakDepParam := struct {
 		DepUuid string `json:"depuuid"`
+		Op      string `json:"op"`
 	}{}
 	err := c.QueryParser(&breakDepParam)
-	if err == nil {
-		if len(breakDepParam.DepUuid) == 0 {
-			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
-				"data": `can't find url param depuuid`})
-			return
+	if err != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+			"data": err.Error()})
+		return
+	}
+	if len(breakDepParam.DepUuid) == 0 {
+		c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+			"err": `can't find url param depuuid`})
+		return
+	}
+	depStatus, existStatus := global.Depuuid2DepStatus.Load(breakDepParam.DepUuid)
+	retcode := global.RET_OK
+	var reterr string
+	if existStatus {
+		if depStatus.(int) >= global.DEP_STATUS_STOP_SERVER {
+			retcode = global.RET_ERR_DEP_BREAK_TOO_LATE
+			reterr = `it's too late to break this deployment`
 		}
-		depInfo, exist := global.Depuuid2DepInfo.Load(breakDepParam.DepUuid)
+	} else {
+		c.JSON(fiber.Map{"code": global.RET_ERR_DEP_EXPIRED,
+			"err": `deployment status expired`})
+		return
+	}
+	depInfo, existInfo := global.Depuuid2DepInfo.Load(breakDepParam.DepUuid)
+	if !existInfo {
+		c.JSON(fiber.Map{"code": global.RET_ERR_DEP_EXPIRED,
+			"err": `deployment info expired`})
+		return
+	}
+	nowSec := time.Now().Unix()
+	awakeTime, loaded := global.DepTypeAwakeTime.Load(depInfo.(global.DepInfo).Type)
+	if !loaded {
+		if retcode == global.RET_OK {
+			retcode = global.RET_ERR_FORCE_DEP_CANT_BREAK
+			reterr = `can't break forced deployment`
+		}
+		awakeTime = (int64)(0)
+	}
 
-		if exist {
-			global.DepTypeAwakeTime.Store(depInfo.(global.DepInfo).Type,
-				time.Now().Unix()+3*60)
-			c.JSON(fiber.Map{"code": global.RET_OK,
-				"data": time.Now().Unix() + 3*60})
-			return
-		} else {
-			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
-				"data": `invalid url param depuuid`})
-			return
+	tooLate := false
+	if awakeTime.(int64) <= nowSec {
+		tooLate = true
+		if retcode == global.RET_OK {
+			retcode = global.RET_ERR_DEP_BREAK_TOO_LATE
+			reterr = `it's too late to break this deployment`
 		}
 	}
-	c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
-		"data": err.Error()})
+	if !tooLate {
+		if breakDepParam.Op == "break" {
+			//打断操作, 不足2分钟的补足2分钟, 超过的不作任何处理
+			if awakeTime.(int64)-nowSec < breakSecond {
+				awakeTime = nowSec + breakSecond
+				global.DepTypeAwakeTime.Store(depInfo.(global.DepInfo).Type,
+					awakeTime)
+			}
+		} else if breakDepParam.Op == "renew" {
+			//续期操作
+			awakeTime = awakeTime.(int64) + renewSecond
+			global.DepTypeAwakeTime.Store(depInfo.(global.DepInfo).Type,
+				awakeTime)
+		} else if breakDepParam.Op == "cancel" {
+			//取消操作
+			global.DepTypeAwakeTime.Delete(depInfo.(global.DepInfo).Type)
+		} else {
+			//view only, nop
+		}
+	}
+	if breakDepParam.Op == "view" {
+		retcode = global.RET_OK
+		reterr = ""
+	}
+
+	ret := []string{}
+
+	//type
+	ret = append(ret, depInfo.(global.DepInfo).Type)
+
+	//countdown
+	if tooLate {
+		ret = append(ret, "0")
+	} else {
+		ret = append(ret, strconv.FormatInt(awakeTime.(int64)-nowSec, 10))
+	}
+
+	//status
+	ret = append(ret, strconv.Itoa(depStatus.(int)))
+	c.JSON(fiber.Map{"code": retcode,
+		"data": ret, "err": reterr})
+
 	return
 }
 
@@ -409,10 +482,10 @@ func Test(c *fiber.Ctx) {
 	}
 	checkedOutRE := regexp.MustCompile(">")
 	ret, _, err2 := e.Expect(checkedOutRE, timeout)
-	fmt.Println(ret, err2)
+	mlog.Log(ret, err2)
 	e.Send("1+1\n")
 	ret2, _, err3 := e.Expect(checkedOutRE, timeout)
-	fmt.Println(ret2, err3)
+	mlog.Log(ret2, err3)
 	c.JSON(fiber.Map{"code": global.RET_OK,
 		"data": ret})
 }
