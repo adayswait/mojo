@@ -7,8 +7,8 @@
         <div id="float-ball" v-if="!menuVisible" @click="showMenuOnMobile">
           <div id="wave"></div>
         </div>
-        <div id="devopsmenucolumn" class="column is-2" v-if="menuVisible">
-          <div id="devopsmenu" class="box" ref="devopsmenu">
+        <div class="column is-2" v-if="menuVisible">
+          <div id="devopsmenu" class="box">
             <aside class="menu">
               <p class="menu-label">HOME</p>
               <ul class="menu-list">
@@ -98,7 +98,7 @@
             </aside>
           </div>
         </div>
-        <div id="bodycolumn" class="column">
+        <div class="column" ref="devopsBody">
           <div id="mask" v-if="this.$store.state.DevOpsMask!=0"></div>
           <div id="loading" v-if="this.$store.state.DevOpsMask!=0">
             <div class="loading3">
@@ -144,12 +144,24 @@ export default {
     focus: function (target) {
       this.currFocus = target;
       this.hideMenuOnMobile();
+      if (!this.$mojoapi.isMobile()) {
+        this.$refs.devopsBody &&
+          this.$refs.devopsBody.scrollIntoView({
+            behavior: "smooth",
+            block: "start", //垂直方向
+            inline: "center", //水平方向
+          });
+      }
     },
     hideMenuOnMobile: function () {
-      this.menuVisible = false;
+      if (this.$mojoapi.isMobile()) {
+        this.menuVisible = false;
+      }
     },
     showMenuOnMobile: function () {
-      this.menuVisible = true;
+      if (this.$mojoapi.isMobile()) {
+        this.menuVisible = true;
+      }
     },
   },
   mounted: function () {
@@ -319,7 +331,7 @@ export default {
   height: 30px;
   background-color: #fff;
   margin-left: 5%;
-  top: 10%;
+  top: 50%;
   z-index: 9;
 }
 #wave {

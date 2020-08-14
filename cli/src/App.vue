@@ -19,7 +19,7 @@ export default {
   name: "app",
   components: {
     Header,
-    // Footer
+    // Footer,
     Notification,
   },
 };
