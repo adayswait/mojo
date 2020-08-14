@@ -59,7 +59,7 @@ export default {
     login: async function () {
       try {
         this.loginBoxVisible = false;
-        const ret = await this.$httpc.get("/web/auth/login", {
+        const ret = await this.$mojoapi.get("/web/auth/login", {
           user: this.usr || undefined,
           passwd: this.passwd || undefined,
         });
@@ -103,7 +103,7 @@ export default {
           this.err = "ensure your password is the same";
           return;
         }
-        await this.$httpc.get("/web/auth/register", {
+        await this.$mojoapi.get("/web/auth/register", {
           user: this.usr,
           passwd: this.passwd,
         });

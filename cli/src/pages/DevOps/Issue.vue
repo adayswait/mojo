@@ -86,9 +86,12 @@ export default {
   },
   methods: {
     chat2Developer: async function () {
+      if (this.developerText.length === 0) {
+        return this.$store.commit("warn", `什么都没说呀`);
+      }
       try {
         this.btnDevLoading = true;
-        await this.$httpc.post(`/web/chat/dev`, {
+        await this.$mojoapi.post(`/web/chat/dev`, {
           message: this.developerText,
         });
         this.$store.commit("info", `我们已经收到你的建议啦(●･◡･●)ﾉ♥`);
@@ -99,9 +102,12 @@ export default {
       this.btnDevLoading = false;
     },
     chat2Group: async function () {
+       if (this.groupText.length === 0) {
+        return this.$store.commit("warn", `什么都没说呀`);
+      }
       try {
         this.btnGroupLoading = true;
-        await this.$httpc.post(`/web/chat/group`, {
+        await this.$mojoapi.post(`/web/chat/group`, {
           message: this.groupText,
         });
         this.$store.commit("info", `☝ᖗ乛◡乛ᖘ☝ 完美`);

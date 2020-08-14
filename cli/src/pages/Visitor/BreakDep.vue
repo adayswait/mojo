@@ -76,7 +76,7 @@ export default {
   data: function () {
     return {
       title: "BreakDep",
-      countDown: 0,
+      countDown: "-",
       depType: "unknown",
       depStatus: "unknown",
       err: undefined,
@@ -114,7 +114,7 @@ export default {
         this.btnRenewLoading = true;
       }
       try {
-        const ret = await this.$httpc.get("/web/visitor/breakdep", {
+        const ret = await this.$mojoapi.get("/web/visitor/breakdep", {
           depuuid: this.$route.query.depuuid,
           op: op,
         });
@@ -126,6 +126,13 @@ export default {
         this.depType = e.data ? e.data[0] : "unknown";
         this.countDown = e.data ? e.data[1] : 0;
         this.depStatus = e.data ? e.data[2] : "unknown";
+      }
+      if (this.epStatus == this.progressDesc.length - 1) {
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.timer = null;
+        }
+        this.countDown = "-";
       }
       if (op == "cancel") {
         this.btnCancelLoading = false;

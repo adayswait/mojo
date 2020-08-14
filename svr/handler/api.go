@@ -61,7 +61,7 @@ func Login(c *fiber.Ctx) {
 	} else {
 		cookie := new(fiber.Cookie)
 		cookie.Name = global.ACCESS_TOKEN
-		cookie.Expires = time.Now().Add(24 * time.Hour)
+		cookie.Expires = time.Now().Add(365 * 24 * time.Hour) // maybe too long
 		cookie.Value = accessToken
 		c.Cookie(cookie)
 	}

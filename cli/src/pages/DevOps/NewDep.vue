@@ -199,7 +199,7 @@ export default {
           params.period = `{${this.versionStartTime}}:{${this.versionEndTime}}`;
           delete params.limit;
         }
-        let ret = await this.$httpc.get("/web/dep/commithistory", params);
+        let ret = await this.$mojoapi.get("/web/dep/commithistory", params);
         const formatData = ret.data.split("\n");
         let tempList = [];
         //奇数下标的是有效信息
@@ -236,7 +236,7 @@ export default {
       }
       this.updateMask(1);
       try {
-        let ret = await this.$httpc.get("/web/dep/commithistory", {
+        let ret = await this.$mojoapi.get("/web/dep/commithistory", {
           repourl: this.currUrl,
           version: this.rversion,
         });
@@ -272,7 +272,7 @@ export default {
     },
     getServerSvnUrl: async function (type) {
       try {
-        let ret = await this.$httpc.get(
+        let ret = await this.$mojoapi.get(
           `/web/db/${this.dbDevTableName}/${type}`
         );
         return JSON.parse(ret.data).url;
@@ -293,7 +293,7 @@ export default {
             return this.$store.commit("warn", `自定义上线至少选择一个服务`);
           }
         }
-        await this.$httpc.put(`/web/db/sys:ops:depbil`, {
+        await this.$mojoapi.put(`/web/db/sys:ops:depbil`, {
           value: JSON.stringify({
             title: this.depTitle,
             type: this.currServerType,
@@ -326,7 +326,7 @@ export default {
       }
       this.depRadio = 2;
       try {
-        const ret = await this.$httpc.get(`/web/db/sys:ops:depini`);
+        const ret = await this.$mojoapi.get(`/web/db/sys:ops:depini`);
         let tempList = [];
         for (let i = 0; i < ret.data.length; i += 2) {
           let info = JSON.parse(ret.data[i + 1]);
@@ -344,7 +344,7 @@ export default {
     },
     getAllDepType: async function () {
       try {
-        const ret = await this.$httpc.get(`/web/db/sys:ops:devini`);
+        const ret = await this.$mojoapi.get(`/web/db/sys:ops:devini`);
         let tempList = [];
         for (let i = 0; i < ret.data.length; i += 2) {
           tempList.push(ret.data[i]);

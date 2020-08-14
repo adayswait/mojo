@@ -1,94 +1,104 @@
 <template>
   <div id="devopsbody">
     <Login />
+
     <div class="container" v-if="this.$store.state.visible.Home">
       <div class="columns">
-        <div class="column is-2">
-          <aside class="menu">
-            <p class="menu-label">HOME</p>
-            <ul class="menu-list">
-              <li @click="focus('主页')">
-                <router-link to="/devops/home" :class="{'is-active':currFocus=='主页'}">主页</router-link>
-              </li>
-            </ul>
-            <p class="menu-label">CI/CD</p>
-            <ul class="menu-list">
-              <li>
-                <a>部署</a>
-                <!-- <a class="is-active">部署</a> -->
-                <ul>
-                  <li @click="focus('新建部署')">
-                    <router-link to="/devops/newdep" :class="{'is-active':currFocus=='新建部署'}">新建部署</router-link>
-                  </li>
-                  <!-- <li @click="focus('我的部署')">
-                    <router-link to="/devops/mydep" :class="{'is-active':currFocus=='我的部署'}">我的部署</router-link>
-                  </li>-->
-                  <li @click="focus('所有部署')">
-                    <router-link to="/devops/alldep" :class="{'is-active':currFocus=='所有部署'}">所有部署</router-link>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-            <p class="menu-label">Configuration</p>
-            <ul class="menu-list">
-              <li>
-                <a>项目配置</a>
-                <ul>
-                  <li @click="focus('机器配置')">
-                    <router-link to="/devops/macini" :class="{'is-active':currFocus=='机器配置'}">机器配置</router-link>
-                  </li>
-                  <li @click="focus('部署配置')">
-                    <router-link to="/devops/depini" :class="{'is-active':currFocus=='部署配置'}">部署配置</router-link>
-                  </li>
-                  <li @click="focus('开发配置')">
-                    <router-link to="/devops/devini" :class="{'is-active':currFocus=='开发配置'}">开发配置</router-link>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-            <p class="menu-label">Management</p>
-            <ul class="menu-list">
-              <li>
-                <a>成员管理</a>
-                <ul>
-                  <li @click="focus('所有成员')">
-                    <router-link
-                      to="/devops/manageuser"
-                      :class="{'is-active':currFocus=='所有成员'}"
-                    >所有成员</router-link>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-            <p class="menu-label">Tools</p>
-            <ul class="menu-list">
-              <li>
-                <a>工具箱</a>
-                <ul>
-                  <li @click="focus('DataView')">
-                    <router-link
-                      to="/devops/dbview"
-                      :class="{'is-active':currFocus=='DataView'}"
-                    >数据视图</router-link>
-                  </li>
-                  <li @click="focus('DevTools')">
-                    <router-link
-                      to="/devops/devtools"
-                      :class="{'is-active':currFocus=='DevTools'}"
-                    >开发工具</router-link>
-                  </li>
-                  <li @click="focus('Issue')">
-                    <router-link
-                      to="/devops/issue"
-                      :class="{'is-active':currFocus=='Issue'}"
-                    >Issue</router-link>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </aside>
+        <div id="float-ball" v-if="!menuVisible" @click="showMenuOnMobile">
+          <div id="wave"></div>
         </div>
-        <div class="column">
+        <div id="devopsmenucolumn" class="column is-2" v-if="menuVisible">
+          <div id="devopsmenu" class="box" ref="devopsmenu">
+            <aside class="menu">
+              <p class="menu-label">HOME</p>
+              <ul class="menu-list">
+                <li @click="focus('主页')">
+                  <router-link to="/devops/home" :class="{'is-active':currFocus=='主页'}">主页</router-link>
+                </li>
+              </ul>
+              <p class="menu-label">CI/CD</p>
+              <ul class="menu-list">
+                <li>
+                  <a>部署</a>
+                  <!-- <a class="is-active">部署</a> -->
+                  <ul>
+                    <li @click="focus('快捷操作')">
+                      <router-link
+                        to="/devops/quickops"
+                        :class="{'is-active':currFocus=='快捷操作'}"
+                      >快捷操作</router-link>
+                    </li>
+                    <li @click="focus('新建部署')">
+                      <router-link to="/devops/newdep" :class="{'is-active':currFocus=='新建部署'}">新建部署</router-link>
+                    </li>
+
+                    <li @click="focus('所有部署')">
+                      <router-link to="/devops/alldep" :class="{'is-active':currFocus=='所有部署'}">所有部署</router-link>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+              <p class="menu-label">Configuration</p>
+              <ul class="menu-list">
+                <li>
+                  <a>项目配置</a>
+                  <ul>
+                    <li @click="focus('机器配置')">
+                      <router-link to="/devops/macini" :class="{'is-active':currFocus=='机器配置'}">机器配置</router-link>
+                    </li>
+                    <li @click="focus('部署配置')">
+                      <router-link to="/devops/depini" :class="{'is-active':currFocus=='部署配置'}">部署配置</router-link>
+                    </li>
+                    <li @click="focus('开发配置')">
+                      <router-link to="/devops/devini" :class="{'is-active':currFocus=='开发配置'}">开发配置</router-link>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+              <p class="menu-label">Management</p>
+              <ul class="menu-list">
+                <li>
+                  <a>成员管理</a>
+                  <ul>
+                    <li @click="focus('所有成员')">
+                      <router-link
+                        to="/devops/manageuser"
+                        :class="{'is-active':currFocus=='所有成员'}"
+                      >所有成员</router-link>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+              <p class="menu-label">Tools</p>
+              <ul class="menu-list">
+                <li>
+                  <a>工具箱</a>
+                  <ul>
+                    <li @click="focus('DataView')">
+                      <router-link
+                        to="/devops/dbview"
+                        :class="{'is-active':currFocus=='DataView'}"
+                      >数据视图</router-link>
+                    </li>
+                    <li @click="focus('DevTools')">
+                      <router-link
+                        to="/devops/devtools"
+                        :class="{'is-active':currFocus=='DevTools'}"
+                      >开发工具</router-link>
+                    </li>
+                    <li @click="focus('Issue')">
+                      <router-link
+                        to="/devops/issue"
+                        :class="{'is-active':currFocus=='Issue'}"
+                      >Issue</router-link>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </aside>
+          </div>
+        </div>
+        <div id="bodycolumn" class="column">
           <div id="mask" v-if="this.$store.state.DevOpsMask!=0"></div>
           <div id="loading" v-if="this.$store.state.DevOpsMask!=0">
             <div class="loading3">
@@ -126,16 +136,26 @@ export default {
   data: function () {
     return {
       currFocus: "主页",
+      timer: null,
+      menuVisible: true,
     };
   },
   methods: {
     focus: function (target) {
       this.currFocus = target;
-      // this.$store.commit("setVisible", {
-      //   name: "DevOpsMask",
-      //   visible: false,
-      // });
+      this.hideMenuOnMobile();
     },
+    hideMenuOnMobile: function () {
+      this.menuVisible = false;
+    },
+    showMenuOnMobile: function () {
+      this.menuVisible = true;
+    },
+  },
+  mounted: function () {
+    if (this.$mojoapi.isMobile()) {
+      this.hideMenuOnMobile();
+    }
   },
   components: {
     Login,
@@ -150,6 +170,9 @@ export default {
   src: url("/consola.ttf");
 }
 
+#devopsmenu {
+  background-color: #f1f1f1;
+}
 #devopsbody {
   font-family: consolas;
 }
@@ -283,6 +306,35 @@ export default {
   }
   100% {
     transform: scale(0);
+  }
+}
+
+#float-ball {
+  overflow: hidden;
+  position: fixed;
+  padding: 2px;
+  border: 1px solid #3c9;
+  border-radius: 100%;
+  width: 30px;
+  height: 30px;
+  background-color: #fff;
+  margin-left: 5%;
+  top: 10%;
+  z-index: 9;
+}
+#wave {
+  position: relative;
+  border-radius: 100%;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(-180deg, #af8 13%, #3c9 91%);
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(1turn);
   }
 }
 </style>

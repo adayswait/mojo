@@ -22,7 +22,7 @@ export default {
         legend: {
           orient: "vertical",
           left: "left",
-          data: ["成功", "失败"],
+          data: ["成功", "失败", "进行中"],
         },
         series: [
           {
@@ -46,7 +46,7 @@ export default {
     },
     getAndDrawTaskList: async function () {
       try {
-        const ret = await this.$httpc.get("/web/dep/progress");
+        const ret = await this.$mojoapi.get("/web/dep/progress");
         let tempList = [];
         let success = 0,
           failed = 0,
@@ -69,15 +69,14 @@ export default {
         }
 
         let data = [];
-        if (success > 0) {
-          data.push({ value: success, name: "成功" });
-        }
+        data.push({ value: success, name: "成功" });
         if (failed > 0) {
           data.push({ value: failed, name: "失败" });
         }
         if (processing > 0) {
           data.push({ value: processing, name: "进行中" });
         }
+
         this.drawDeployTotal(data);
       } catch (e) {
         this.$store.commit(

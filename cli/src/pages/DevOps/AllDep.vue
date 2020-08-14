@@ -174,7 +174,7 @@ export default {
     },
     getAllDeps: async function () {
       try {
-        const ret = await this.$httpc.get(`/web/db/sys:ops:depbil`);
+        const ret = await this.$mojoapi.get(`/web/db/sys:ops:depbil`);
         let tempList = [];
         //奇数下标的是有效信息
         for (let i = 0; i < ret.data.length; i += 2) {
@@ -190,7 +190,7 @@ export default {
     },
     getProgressList: async function () {
       try {
-        const ret = await this.$httpc.get("/web/dep/progress");
+        const ret = await this.$mojoapi.get("/web/dep/progress");
         let tempList = [];
         for (let i = 0; i < ret.data.length; i += 5) {
           tempList[i / 5] = [
@@ -213,7 +213,7 @@ export default {
       }
     },
     submit: async function (idx, force) {
-      const ret = await this.$httpc.get(`/web/dep/submit`, {
+      const ret = await this.$mojoapi.get(`/web/dep/submit`, {
         depid: this.allDeps[idx][0],
         force: force || false,
       });

@@ -26,7 +26,7 @@
           </a>
         </div>
 
-        <div id="navbarDataTarget" class="navbar-menu">
+        <div id="navbarDataTarget" class="navbar-menu" :class="{'is-active':activeMenu}">
           <div class="navbar-start">
             <a class="navbar-item" href="/">Home</a>
             <a class="navbar-item" href="http://10.1.1.248:8000/fs">Documentation</a>
@@ -75,15 +75,16 @@ export default {
   data: function () {
     return {
       title: "Header",
+      activeMenu: false,
     };
   },
   methods: {
-    showSmallMenu: async function () {
-      // window.console.log("显示小菜单");
+    showSmallMenu: function () {
+      this.activeMenu = !this.activeMenu;
     },
     logout: async function () {
       try {
-        await this.$httpc.get("/web/auth/logout");
+        await this.$mojoapi.get("/web/auth/logout");
         this.$store.commit("setUserInfo", {
           user: undefined,
           group: undefined,

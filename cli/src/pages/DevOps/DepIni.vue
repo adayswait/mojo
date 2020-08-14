@@ -85,7 +85,7 @@ export default {
   methods: {
     getAllDepIni: async function () {
       try {
-        const ret = await this.$httpc.get(`/web/db/${this.dbDepTableName}`);
+        const ret = await this.$mojoapi.get(`/web/db/${this.dbDepTableName}`);
         let tempList = [];
         for (let i = 0; i < ret.data.length; i += 2) {
           tempList[i / 2] = [ret.data[i]].concat(JSON.parse(ret.data[i + 1]));
@@ -114,7 +114,7 @@ export default {
       ) {
         try {
           if (this.depIniList[idx][0]) {
-            await this.$httpc.put(
+            await this.$mojoapi.put(
               `/web/db/${this.dbDepTableName}/${this.depIniList[idx][0]}`,
               {
                 value: JSON.stringify(this.depIniList[idx].slice(1)),
@@ -122,7 +122,7 @@ export default {
             );
             this.$store.commit("info", `修改部署配置成功`);
           } else {
-            await this.$httpc.post(`/web/db/${this.dbDepTableName}`, {
+            await this.$mojoapi.post(`/web/db/${this.dbDepTableName}`, {
               value: JSON.stringify(this.depIniList[idx].slice(1)),
             });
             this.$store.commit("info", `新建部署配置成功`);
@@ -141,7 +141,7 @@ export default {
     deleteIni: async function (idx) {
       if (this.depIniList[idx][0]) {
         try {
-          await this.$httpc.del(
+          await this.$mojoapi.del(
             `/web/db/${this.dbDepTableName}/${this.depIniList[idx][0]}`
           );
           this.depIniList.splice(idx, 1);
@@ -158,7 +158,7 @@ export default {
     },
     getAllDepType: async function () {
       try {
-        const ret = await this.$httpc.get(`/web/db/sys:ops:devini`);
+        const ret = await this.$mojoapi.get(`/web/db/sys:ops:devini`);
         let tempList = [];
         for (let i = 0; i < ret.data.length; i += 2) {
           tempList.push(ret.data[i]);

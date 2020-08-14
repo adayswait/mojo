@@ -57,13 +57,13 @@
       </thead>
       <tbody class>
         <tr v-for="k in this.keyValueList" :key="k[0]">
-          <td>
+          <td style="width:20%">
             <input class="input" type="text" v-model="k[0]" />
           </td>
           <td>
             <input class="input is-info" type="text" v-model="k[1]" />
           </td>
-          <td>
+          <td style="width:20%">
             <button
               id="opsbtn"
               class="button is-primary is-vcentered is-small"
@@ -97,7 +97,7 @@ export default {
   methods: {
     getAllDBs: async function () {
       try {
-        const ret = await this.$httpc.get("/web/db");
+        const ret = await this.$mojoapi.get("/web/db");
         for (let key of ret.data) {
           this.tableList.push([key]);
         }
@@ -110,7 +110,7 @@ export default {
     },
     viewTable: async function (tableName) {
       try {
-        const ret = await this.$httpc.get(`/web/db/${tableName}`);
+        const ret = await this.$mojoapi.get(`/web/db/${tableName}`);
         this.depth = 1;
         this.breadcrumbPath[1] = tableName;
         this.keyValueList = [];
@@ -128,7 +128,7 @@ export default {
     },
     changeKey: async function (kv) {
       try {
-        await this.$httpc.put(`/web/db/${this.breadcrumbPath[1]}/${kv[0]}`, {
+        await this.$mojoapi.put(`/web/db/${this.breadcrumbPath[1]}/${kv[0]}`, {
           value: kv[1],
         });
       } catch (e) {
@@ -143,7 +143,7 @@ export default {
         if (kv[0] === undefined || kv[0] === null || kv[0].toString() === "") {
           throw new Error("无法删除空值");
         }
-        await this.$httpc.del(`/web/db/${this.breadcrumbPath[1]}/${kv[0]}`);
+        await this.$mojoapi.del(`/web/db/${this.breadcrumbPath[1]}/${kv[0]}`);
         let delIndex = null;
         for (let i = 0; i < this.keyValueList.length; i++) {
           if (kv[0] === this.keyValueList[i][0]) {

@@ -43,7 +43,7 @@ export default {
   methods: {
     getAllUser: async function () {
       try {
-        const ret = await this.$httpc.get(`/web/db/${this.dbTable}`);
+        const ret = await this.$mojoapi.get(`/web/db/${this.dbTable}`);
         let tempList = [];
         for (let i = 0; i < ret.data.length; i += 2) {
           tempList[i / 2] = [ret.data[i], JSON.parse(ret.data[i + 1])];
@@ -76,7 +76,7 @@ export default {
           return;
         }
         try {
-          await this.$httpc.put(`/web/db/${this.dbTable}/${kv[0]}`, {
+          await this.$mojoapi.put(`/web/db/${this.dbTable}/${kv[0]}`, {
             value: JSON.stringify({
               user: kv[1].user,
               group: newGroup,

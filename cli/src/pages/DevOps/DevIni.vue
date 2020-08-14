@@ -50,7 +50,7 @@ export default {
   methods: {
     getAllDevIni: async function () {
       try {
-        const ret = await this.$httpc.get(`/web/db/${this.dbDevTableName}`);
+        const ret = await this.$mojoapi.get(`/web/db/${this.dbDevTableName}`);
         let tempList = [];
         for (let i = 0; i < ret.data.length; i += 2) {
           tempList[i / 2] = [ret.data[i], JSON.parse(ret.data[i + 1])];
@@ -74,7 +74,7 @@ export default {
       if (this.devIniList[idx][1] && this.devIniList[idx][1]) {
         try {
           if (this.devIniList[idx][0]) {
-            await this.$httpc.put(
+            await this.$mojoapi.put(
               `/web/db/${this.dbDevTableName}/${this.devIniList[idx][0]}`,
               {
                 value: JSON.stringify({
@@ -100,7 +100,7 @@ export default {
     deleteIni: async function (idx) {
       if (this.devIniList[idx][0] && this.devIniList[idx][1]) {
         try {
-          await this.$httpc.del(
+          await this.$mojoapi.del(
             `/web/db/${this.dbDevTableName}/${this.devIniList[idx][0]}`
           );
           this.devIniList.splice(idx, 1);

@@ -1,4 +1,4 @@
-import httpc from './api'
+import mojoapi from './api'
 import Vue from 'vue'
 import VueClipboard from 'vue-clipboard2'
 import router from './router'
@@ -10,7 +10,7 @@ import "bulma/css/bulma.css"
 Vue.config.productionTip = false
 Vue.use(VueClipboard)
 Vue.prototype.$echarts = echarts
-Vue.prototype.$httpc = httpc
+Vue.prototype.$mojoapi = mojoapi
 new Vue({
   store,
   router,
