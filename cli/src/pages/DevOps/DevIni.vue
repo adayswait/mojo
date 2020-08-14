@@ -6,18 +6,9 @@
           <th>
             <abbr title="服务类型">服务类型</abbr>
           </th>
-          <!-- <th>
-              <abbr title="仓库类型">仓库类型</abbr>
-          </th>-->
           <th>
             <abbr title="仓库地址">仓库地址</abbr>
           </th>
-          <!-- <th>
-              <abbr title="仓库账号">仓库账号</abbr>
-            </th>
-            <th>
-              <abbr title="仓库密码">仓库密码</abbr>
-          </th>-->
           <th>
             <a class="button is-small is-rounded is-success is-vcentered" @click="newDepIni">新建</a>
           </th>
@@ -25,33 +16,13 @@
       </thead>
       <tbody class>
         <tr v-for="(k,i) in devIniList" :key="i">
-          <td>
-            <div class="dropdown is-hoverable">
-              <div class="dropdown-trigger">
-                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                  {{k[0]}}
-                  <span class="icon is-small">
-                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                  </span>
-                </button>
-              </div>
-              <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                <div class="dropdown-content">
-                  <tr v-for="t in $store.state.SERVER_TYPE" :key="t">
-                    <a
-                      class="dropdown-item"
-                      :class="{'is-active':t==k[0]}"
-                      @click="changeServerType(i,t)"
-                    >{{t}}</a>
-                  </tr>
-                </div>
-              </div>
-            </div>
+          <td style="width: 20%;">
+            <input class="input" type="text" v-model="k[0]" />
           </td>
           <td>
             <input class="input" type="text" v-model="k[1].url" />
           </td>
-          <td>
+          <td style="width: 20%;">
             <button
               id="opsbtn"
               class="button is-primary is-small is-vcentered"
@@ -93,7 +64,7 @@ export default {
       }
     },
     newDepIni: function () {
-      this.devIniList.splice(0, 0, [undefined,{}]);
+      this.devIniList.splice(0, 0, [undefined, {}]);
     },
     changeServerType: function (idx, type) {
       this.devIniList[idx][0] = type;

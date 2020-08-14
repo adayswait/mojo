@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/adayswait/mojo/handler"
+	"github.com/adayswait/mojo/utils"
 	"github.com/gofiber/cors"
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/fiber/middleware"
@@ -10,10 +11,10 @@ import (
 )
 
 func Route(app *fiber.App) {
-	app.Static("/", "./dist/")
+	app.Static("/", utils.Get3wDir())
 	app.Get("/ws", websocket.New(handler.Websocket))
 	app.Use("/fs", middleware.FileSystem(middleware.FileSystemConfig{
-		Root: http.Dir("/opt/jesse/git"),
+		Root: http.Dir(utils.GetFsDir()),
 		// Index:  "index.html",
 		Browse: true,
 	}))
@@ -30,7 +31,7 @@ func Route(app *fiber.App) {
 	//用于web页面展示的请求, 允许cookie等
 	web := app.Group("/web")
 	web.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://10.1.1.248:8080"},
+		AllowOrigins:     []string{utils.GetWebDomain()},
 		AllowCredentials: true,
 	}))
 

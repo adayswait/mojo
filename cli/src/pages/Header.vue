@@ -29,7 +29,7 @@
         <div id="navbarDataTarget" class="navbar-menu">
           <div class="navbar-start">
             <a class="navbar-item" href="/">Home</a>
-            <a class="navbar-item" href="http://10.1.1.248:3000/fs">Documentation</a>
+            <a class="navbar-item" href="http://10.1.1.248:8000/fs">Documentation</a>
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link">More</a>
               <div class="navbar-dropdown">

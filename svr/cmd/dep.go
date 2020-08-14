@@ -18,29 +18,29 @@ import (
 var dingdingStr string
 
 func init() {
-	dingdingStr = "{" +
-		`"msgtype":"actionCard",` +
-		`"actionCard":{` +
-		`"title":"内网%s更新提醒",` +
-		`"text":"#### 内网%s将于一分钟后重启\n ` +
-		`###### 打断或查看需公司内网或vpn \n ` +
-		`###### %s",` +
-		`"btnOrientation": "1",` +
-		`"btns": [` +
-		"{" +
-		`"title": "打断重启", ` +
-		`"actionURL": "%s"` +
-		"}," +
-		"{" +
-		`"title": "查看发布状态", ` +
-		`"actionURL": "%s"` +
-		"}]" +
-		"}" +
-		"}"
+	dingdingStr = `
+	{
+		"msgtype":"actionCard",
+		"actionCard":{
+			"title":"内网%s更新提醒",
+			"text":"#### 内网%s将于一分钟后重启\n ###### 打断或查看需公司内网或vpn \n ###### %s",
+			"btnOrientation": "1",
+			"btns": [
+				{
+					"title": "打断重启",
+					"actionURL": "%s"
+				},
+				{
+					"title": "查看发布状态",
+					"actionURL": "%s"
+				}
+			]
+		}
+	}`
 }
 
 func SvnDep(depInfo global.DepInfo, force bool) {
-	path := utils.GetRepoPath()
+	path := utils.GetPkgPath()
 	if len(path) == 0 {
 		path = "."
 	}
@@ -96,9 +96,9 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		markdown := fmt.Sprintf(dingdingStr, depInfo.Type, depInfo.Type,
 			time.Now().Format("2006-01-02 15:04:05"),
 			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=break",
-				utils.GetClientDomain(), depuuid),
+				utils.GetWebDomain(), depuuid),
 			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=view",
-				utils.GetClientDomain(), depuuid))
+				utils.GetWebDomain(), depuuid))
 		req.SetBody([]byte(markdown))
 
 		// 默认是application/x-www-form-urlencoded
@@ -117,7 +117,6 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		mlog.Log("dingding webhook ret:\r\n", string(b))
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SLEEP)
 		global.DepTypeAwakeTime.Store(depInfo.Type, time.Now().Unix()+60)
-		time.Sleep(time.Second * 60)
 		for {
 			breakTime, exist := global.DepTypeAwakeTime.Load(depInfo.Type)
 			if exist {

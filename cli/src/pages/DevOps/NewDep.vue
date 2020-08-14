@@ -24,7 +24,7 @@
           </div>
           <div class="dropdown-menu" id="dropdown-menu" role="menu">
             <div class="dropdown-content">
-              <tr v-for="t in $store.state.SERVER_TYPE" :key="t">
+              <tr v-for="t in depTypeList" :key="t">
                 <a
                   class="dropdown-item"
                   :class="{'is-active':t==currServerType}"
@@ -139,6 +139,7 @@ export default {
     return {
       title: "NewDep",
       depTitle: "",
+      depTypeList: [],
       currServerType: "",
       currVersion: "",
       currUrl: "",
@@ -341,9 +342,24 @@ export default {
         );
       }
     },
+    getAllDepType: async function () {
+      try {
+        const ret = await this.$httpc.get(`/web/db/sys:ops:devini`);
+        let tempList = [];
+        for (let i = 0; i < ret.data.length; i += 2) {
+          tempList.push(ret.data[i]);
+        }
+        this.depTypeList = tempList;
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `获取数据库表错误 : ${e.data || e.message}`
+        );
+      }
+    },
   },
-  beforeMount: async function () {
-    // this.updateSvnLog();
+  beforeMount: function () {
+    this.getAllDepType();
   },
 };
 </script>

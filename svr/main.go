@@ -1,9 +1,12 @@
 package main
 
-import "github.com/gofiber/fiber"
-import "github.com/adayswait/mojo/utils"
-import "github.com/adayswait/mojo/router"
-import "github.com/adayswait/mojo/ws"
+import (
+	"github.com/adayswait/mojo/mlog"
+	"github.com/adayswait/mojo/router"
+	"github.com/adayswait/mojo/utils"
+	"github.com/adayswait/mojo/ws"
+	"github.com/gofiber/fiber"
+)
 
 func main() {
 	app := fiber.New()
@@ -13,5 +16,8 @@ func main() {
 	app.Use(func(c *fiber.Ctx) {
 		c.SendStatus(404)
 	})
-	app.Listen(int(utils.GetListeningPort()))
+	err := app.Listen(int(utils.GetWebPort()))
+	if err != nil {
+		mlog.Log("Listening port:", utils.GetWebPort(), "error ", err)
+	}
 }

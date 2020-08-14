@@ -34,7 +34,7 @@
               </div>
               <div class="dropdown-menu" id="dropdown-menu" role="menu">
                 <div class="dropdown-content">
-                  <tr v-for="t in $store.state.SERVER_TYPE" :key="t">
+                  <tr v-for="t in depTypeList" :key="t">
                     <a
                       class="dropdown-item"
                       :class="{'is-active':t==k[1]}"
@@ -79,6 +79,7 @@ export default {
       depIniList: [
         ["1", "online", "example", "10.1.1.1", "/opt/splan/example"],
       ],
+      depTypeList: [],
     };
   },
   methods: {
@@ -155,9 +156,25 @@ export default {
         this.$store.commit("warn", `删除部署配置错误 : 无效项`);
       }
     },
+    getAllDepType: async function () {
+      try {
+        const ret = await this.$httpc.get(`/web/db/sys:ops:devini`);
+        let tempList = [];
+        for (let i = 0; i < ret.data.length; i += 2) {
+          tempList.push(ret.data[i]);
+        }
+        this.depTypeList = tempList;
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `获取数据库表错误 : ${e.data || e.message}`
+        );
+      }
+    },
   },
   beforeMount: function () {
     this.getAllDepIni();
+    this.getAllDepType();
   },
 };
 </script>
