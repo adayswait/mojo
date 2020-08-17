@@ -2,17 +2,20 @@
   <div class="column">
     <div class="tabs">
       <ul>
-        <li :class="{'is-active':currFocusTitle=='配表'}" @click="focus('配表')">
+        <!-- <li :class="{'is-active':currFocusTitle=='配表'}" @click="focus('配表')">
           <a>配表</a>
-        </li>
-        <li :class="{'is-active':currFocusTitle=='邮件'}" @click="focus('邮件')">
-          <a>邮件</a>
+        </li>-->
+        <li :class="{'is-active':currFocusTitle=='全服邮件'}" @click="focus('全服邮件')">
+          <a>全服邮件</a>
         </li>
         <li :class="{'is-active':currFocusTitle=='全服公告'}" @click="focus('全服公告')">
           <a>全服公告</a>
         </li>
         <li :class="{'is-active':currFocusTitle=='历史公告'}" @click="focus('历史公告')">
           <a>历史公告</a>
+        </li>
+        <li :class="{'is-active':currFocusTitle=='全服跑马灯'}" @click="focus('全服跑马灯')">
+          <a>全服跑马灯</a>
         </li>
       </ul>
     </div>
@@ -48,19 +51,35 @@
       </div>
     </div>
 
-    <div class="container" v-if="currFocusTitle=='邮件'">
+    <div class="container" v-if="currFocusTitle=='全服邮件'">
       <div class="columns">
         <div class="column is-2">
-          <input class="input has-text-centered" type="text" value="邮件标题" disabled />
+          <input class="input has-text-centered is-small" type="text" value="邮件标题" disabled />
+        </div>
+        <div class="column is-3">
+          <input class="input is-small" type="text" placeholder="邮件标题" v-model="mailTitle" />
+        </div>
+        <div class="column is-2 is-offset-1">
+          <input class="input has-text-centered is-small" type="text" value="发件人" disabled />
+        </div>
+        <div class="column is-3">
+          <input class="input is-small" type="text" placeholder="发件人" v-model="mailSender" />
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column is-2">
+          <input class="input has-text-centered is-small" type="text" value="生效日期" disabled />
         </div>
         <div class="column is-4">
-          <input class="input has-text-centered" type="text" placeholder="邮件标题" v-model="mailTitle" />
+          <date-picker v-model="timeEffect" valuetype="format"></date-picker>
+          <span class="tag is-small is-dark">00:00:00</span>
         </div>
         <div class="column is-2">
-          <input class="input has-text-centered" type="text" value="发件人" disabled />
+          <input class="input has-text-centered is-small" type="text" value="失效日期" disabled />
         </div>
         <div class="column is-4">
-          <input class="input has-text-centered" type="text" placeholder="发件人" v-model="mailSender" />
+          <date-picker v-model="timeExpire" valuetype="format"></date-picker>
+          <span class="tag is-small is-dark">23:59:59</span>
         </div>
       </div>
       <div class="columns">
@@ -113,10 +132,12 @@
 </template>
 
 <script>
+import DatePicker from "vue2-datepicker";
+import { quillEditor } from "vue-quill-editor";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
-import { quillEditor } from "vue-quill-editor";
+import "vue2-datepicker/index.css";
 export default {
   data: function () {
     return {
@@ -127,13 +148,16 @@ export default {
       },
       depTypeList: [],
       currServerType: "",
-      currFocusTitle: "",
+      currFocusTitle: "全服邮件",
       mailTitle: "",
       mailSender: "",
+      timeEffect: new Date(),
+      timeExpire: new Date(Date.now() + 7 * 24 * 3600 * 1000),
     };
   },
   components: {
     quillEditor,
+    DatePicker,
   },
   methods: {
     getAllDepType: async function () {
@@ -160,7 +184,7 @@ export default {
     focus: function (title) {
       this.currFocusTitle = title;
     },
-    sendMail: function () {
+    sendMail: async function () {
       if (this.mailTitle.length === 0) {
         return this.$store.commit("warn", "邮件标题不能为空");
       }
@@ -171,6 +195,23 @@ export default {
         return this.$store.commit("warn", "邮件内容不能为空");
       }
       window.console.log("send mail", this.mailContent);
+      await this.$mojoapi.post("/web/splan/mail", {
+        activetime: parseInt(this.timeEffect.getTime() / 1000).toString(),
+        sender: this.mailSender,
+        title: this.mailTitle,
+        regendtime: "0",
+        user: "",
+        gmail_file: "",
+        regstarttime: "0",
+        refresh: "true",
+        mailtype: "1",
+        content: this.mailContent,
+        addition: "",
+        switch: "10.1.1.43:21010",
+        deadtime: parseInt(this.timeExpire.getTime() / 1000).toString(),
+        switch_key: "123456",
+        attachment: "",
+      });
     },
     sendAnouncement: function () {
       window.console.log("send anouncement", this.announcementContent);
@@ -183,4 +224,7 @@ export default {
 </script>
 
 <style scoped>
+.tag {
+  margin-left: 5px;
+}
 </style>

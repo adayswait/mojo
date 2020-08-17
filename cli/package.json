@@ -25,7 +25,8 @@
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "vue-template-compiler": "^2.6.11",
-    "vue-quill-editor": "3.0.6"
+    "vue-quill-editor": "^3.0.6",
+    "vue2-datepicker": "^3.6.2"
   },
   "eslintConfig": {
     "root": true,

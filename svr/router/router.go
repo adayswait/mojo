@@ -60,4 +60,7 @@ func Route(app *fiber.App) {
 
 	chatWeb := web.Group("/chat")
 	chatWeb.Post("/:to", handler.Chat)
+
+	splanWeb := web.Group("/splan")
+	splanWeb.Post("/mail", handler.SplanMail)
 }
