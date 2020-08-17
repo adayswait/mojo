@@ -4,8 +4,10 @@
 
     <div class="container" v-if="this.$store.state.visible.Home">
       <div class="columns">
-        <div id="float-ball" v-if="!menuVisible" @click="showMenuOnMobile">
-          <div id="wave"></div>
+        <div class="assistive-wrap" v-if="!menuVisible" @click="showMenuOnMobile">
+          <div class="assistive-touch">
+            <span></span>
+          </div>
         </div>
         <div class="column is-2" v-if="menuVisible">
           <div id="devopsmenu" class="box">
@@ -326,26 +328,58 @@ export default {
   }
 }
 
-#float-ball {
-  overflow: hidden;
+.assistive-wrap {
+  width: 58px;
+  height: 58px;
   position: fixed;
-  padding: 2px;
-  border: 1px solid #3c9;
-  border-radius: 100%;
-  width: 30px;
-  height: 30px;
-  background-color: #fff;
-  margin-left: 5%;
   top: 50%;
+  margin-top: -29px;
+  left: 1px;
   z-index: 9;
 }
-#wave {
-  position: relative;
-  border-radius: 100%;
+
+.assistive-touch {
   width: 100%;
   height: 100%;
-  background-image: linear-gradient(-180deg, #af8 13%, #3c9 91%);
+  background: #343434;
+  border-radius: 10px;
+  opacity: 0.3;
+  position: relative;
 }
+.assistive-touch:before,
+.assistive-touch:after,
+.assistive-touch span {
+  content: "";
+  position: absolute;
+  border-radius: 100%;
+  box-shadow: 0 0 2px rgba(30, 30, 30, 0.5);
+  display: block;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.assistive-touch:before {
+  width: 42px;
+  height: 42px;
+  left: 8px;
+  top: 8px;
+  opacity: 0.5;
+}
+
+.assistive-touch span {
+  width: 34px;
+  height: 34px;
+  left: 12px;
+  top: 12px;
+}
+
+.assistive-touch:after {
+  width: 26px;
+  height: 26px;
+  left: 16px;
+  top: 16px;
+  background: #fff;
+}
+
 @keyframes rotate {
   from {
     transform: rotate(0);

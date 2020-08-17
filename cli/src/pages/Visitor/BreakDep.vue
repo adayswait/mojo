@@ -2,7 +2,7 @@
   <div class="column is-4 is-offset-4">
     <div id="breakdepprogress" class="box">
       <div class="level-item has-text-centered">
-        <p>{{progressDescCN[depStatus]}}</p>
+        <p>{{progressDescCN[depStatus]||"已过期"}}</p>
       </div>
       <progress
         class="progress"

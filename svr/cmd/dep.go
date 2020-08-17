@@ -238,7 +238,8 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			mlog.Log("stop old service passed")
 		}
 		essh.Send(idep[3] + "/start.sh\n")
-		retstart, _, estart := essh.Expect(regexp.MustCompile("启动"), 10*time.Second)
+		retstart, _, estart := essh.Expect(regexp.MustCompile("启动"),
+			10*time.Second)
 		if estart != nil {
 			mlog.Log("start new service failed", estart, retstart)
 			continue

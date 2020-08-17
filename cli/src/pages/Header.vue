@@ -8,10 +8,9 @@
     >
       <div class="container">
         <div class="navbar-brand">
-          <!-- <a class="navbar-item" href="https://github.com/adayswait">
-            <img src="./../assets/logo.png" />
-          </a>-->
-
+          <a class="navbar-item" href="/">
+            <img src="./../assets/logo.png" width="100" height="30"/>
+          </a>
           <a
             role="button"
             class="navbar-burger burger"
