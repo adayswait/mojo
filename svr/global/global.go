@@ -32,6 +32,7 @@ const (
 	RET_ERR_DEP_EXPIRED //15
 	RET_ERR_DEP_BREAK_TOO_LATE
 	RET_ERR_FORCE_DEP_CANT_BREAK
+	RET_ERR_HTTP_REQUEST
 )
 
 const (
@@ -66,3 +67,5 @@ const SESSION_KEY_USER = "user"
 const SESSION_KEY_GROUP = "group"
 
 const MD5_SALT = "mojo_salt"
+
+const DINGDING_TEXT_MSG_PATTERN = `{"msgtype": "text","text": {"content": "%s"}}`

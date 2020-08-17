@@ -29,7 +29,7 @@
         <div id="navbarDataTarget" class="navbar-menu" :class="{'is-active':activeMenu}">
           <div class="navbar-start">
             <a class="navbar-item" href="/">Home</a>
-            <a class="navbar-item" href="http://10.1.1.248:8000/fs">Documentation</a>
+            <a class="navbar-item" href="/fs">Documentation</a>
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link">More</a>
               <div class="navbar-dropdown">
@@ -111,6 +111,6 @@ export default {
 
 <style scoped>
 #header-nav {
-  background-color: #f5f5f5;
+  background-color: #f1f1f1;
 }
 </style>

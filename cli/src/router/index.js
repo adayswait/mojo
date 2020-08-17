@@ -8,6 +8,7 @@ import MyDep from "@/pages/DevOps/MyDep.vue";
 import Issue from "@/pages/DevOps/Issue.vue";
 import ManageUsr from "@/pages/DevOps/ManageUsr.vue";
 import NewDep from "@/pages/DevOps/NewDep.vue";
+import QuickOps from "@/pages/DevOps/QuickOps.vue";
 import MacIni from "@/pages/DevOps/MacIni.vue";
 import DepIni from "@/pages/DevOps/DepIni.vue";
 import DevIni from "@/pages/DevOps/DevIni.vue";
@@ -55,6 +56,10 @@ const router = new Router({
                 {
                     path: "manageuser",
                     component: ManageUsr
+                },
+                {
+                    path: "quickops",
+                    component: QuickOps
                 },
                 {
                     path: "newdep",

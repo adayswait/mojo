@@ -9,7 +9,6 @@ import (
 	"github.com/adayswait/mojo/utils"
 	"github.com/google/goexpect"
 	"github.com/google/uuid"
-	"github.com/valyala/fasthttp"
 	"golang.org/x/crypto/ssh"
 	"regexp"
 	"time"
@@ -18,12 +17,13 @@ import (
 var dingdingStr string
 
 func init() {
-	dingdingStr = `
-	{
+	dingdingStr = `{
 		"msgtype":"actionCard",
 		"actionCard":{
 			"title":"内网%s更新提醒",
-			"text":"#### 内网%s将于一分钟后重启\n ###### 打断或查看需公司内网或vpn \n ###### %s",
+			"text":"#### 内网%s将于一分钟后重启
+					###### 打断或查看需公司内网或vpn 
+					###### %s",
 			"btnOrientation": "1",
 			"btns": [
 				{
@@ -90,31 +90,20 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 
 	if !force {
 		//发布更新通知
-		req := &fasthttp.Request{}
-		req.SetRequestURI(utils.GetDingdingWebhook())
-
 		markdown := fmt.Sprintf(dingdingStr, depInfo.Type, depInfo.Type,
 			time.Now().Format("2006-01-02 15:04:05"),
 			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=break",
 				utils.GetWebDomain(), depuuid),
 			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=view",
 				utils.GetWebDomain(), depuuid))
-		req.SetBody([]byte(markdown))
 
-		// 默认是application/x-www-form-urlencoded
-		req.Header.SetContentType("application/json")
-		req.Header.SetMethod("POST")
-
-		resp := &fasthttp.Response{}
-
-		client := &fasthttp.Client{}
-		if err := client.Do(req, resp); err != nil {
-			mlog.Log("请求失败:", err.Error())
-			return
+		reth, errh := utils.HttpPost(utils.GetDingdingWebhook(), markdown)
+		if errh != nil {
+			mlog.Log("deploye webhook err:\r\n", errh.Error())
+		} else {
+			mlog.Log("deploye webhook ret:\r\n", string(reth))
 		}
-		b := resp.Body()
 
-		mlog.Log("dingding webhook ret:\r\n", string(b))
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SLEEP)
 		global.DepTypeAwakeTime.Store(depInfo.Type, time.Now().Unix()+60)
 		for {

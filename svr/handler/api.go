@@ -13,7 +13,6 @@ import (
 	"github.com/gofiber/fiber"
 	"github.com/gofiber/session"
 	"github.com/google/goexpect"
-	"github.com/valyala/fasthttp"
 	"regexp"
 	"strconv"
 	"time"
@@ -494,11 +493,13 @@ func Chat(c *fiber.Ctx) {
 	}
 	mlog.Log(user, "chat to", to, "message:", chatInfo.Message)
 
-	req := &fasthttp.Request{}
+	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, chatInfo.Message)
+	var errh error
+	var reth []byte
 	if to == "group" {
-		req.SetRequestURI(utils.GetDingdingWebhook())
+		reth, errh = utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
 	} else if to == "dev" {
-		req.SetRequestURI(utils.GetDeveloperWebhook())
+		reth, errh = utils.HttpPost(utils.GetDeveloperWebhook(), formatMsg)
 	} else {
 		if errBp := c.BodyParser(&chatInfo); errBp != nil {
 			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
@@ -506,31 +507,16 @@ func Chat(c *fiber.Ctx) {
 			return
 		}
 	}
-	chatPattern := `{
-		"msgtype": "text", 
-		"text": {
-			"content": "%s"
-		}
-	}`
 
-	formatMsg := fmt.Sprintf(chatPattern, chatInfo.Message)
-	req.SetBody([]byte(formatMsg))
-
-	// 默认是application/x-www-form-urlencoded
-	req.Header.SetContentType("application/json")
-	req.Header.SetMethod("POST")
-
-	resp := &fasthttp.Response{}
-
-	client := &fasthttp.Client{}
-	if err := client.Do(req, resp); err != nil {
-		mlog.Log("请求失败:", err.Error())
-		return
+	if errh != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_REQUEST,
+			"data": errh.Error()})
+	} else {
+		mlog.Log("chat webhook ret:\r\n", string(reth))
+		c.JSON(fiber.Map{"code": global.RET_OK,
+			"data": nil})
 	}
-	b := resp.Body()
-	mlog.Log("chat webhook ret:\r\n", string(b))
-	c.JSON(fiber.Map{"code": global.RET_OK,
-		"data": nil})
+
 }
 
 func Test(c *fiber.Ctx) {

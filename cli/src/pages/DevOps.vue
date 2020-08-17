@@ -1,5 +1,5 @@
 <template>
-  <div id="devopsbody">
+  <div id="devopsPage">
     <Login />
 
     <div class="container" v-if="this.$store.state.visible.Home">
@@ -98,7 +98,7 @@
             </aside>
           </div>
         </div>
-        <div class="column" ref="devopsBody">
+        <div class="column" id="devopsBody" ref="devopsBody">
           <div id="mask" v-if="this.$store.state.DevOpsMask!=0"></div>
           <div id="loading" v-if="this.$store.state.DevOpsMask!=0">
             <div class="loading3">
@@ -185,9 +185,14 @@ export default {
 #devopsmenu {
   background-color: #f1f1f1;
 }
-#devopsbody {
+#devopsPage {
   font-family: consolas;
 }
+
+#devopsBody {
+  min-height: 500px;
+}
+
 #mask {
   position: absolute;
   width: 100%;
