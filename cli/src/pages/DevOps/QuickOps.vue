@@ -63,7 +63,7 @@
           <date-picker class="datepicker" type="datetime" v-model="serverTime"></date-picker>
         </div>
         <div class="column is-2">
-          <a class="button is-primary is-fullwidth is-warning" @click="changeServerTime">修改</a>
+          <a class="button is-primary is-fullwidth is-warning" @click="changeServerTime" disabled>修改</a>
         </div>
       </div>
     </div>
@@ -113,7 +113,7 @@
       </div>
       <nav class="level">
         <div class="level-item has-text-centered">
-          <a class="button is-primary" @click="sendMail">发送</a>
+          <a class="button is-primary" @click="sendMail" disabled>发送</a>
         </div>
       </nav>
     </div>
@@ -141,7 +141,7 @@
       </div>
       <nav class="level">
         <div class="level-item has-text-centered">
-          <a class="button is-primary" @click="sendMail">发送</a>
+          <a class="button is-primary" @click="sendMail" disabled>发送</a>
         </div>
       </nav>
     </div>
@@ -170,7 +170,7 @@ export default {
         placeholder: "编辑内容",
       },
       depTypeList: [],
-      currServerType: "",
+      currServerType: "online",
       currFocusTitle: "快捷操作",
       mailTitle: "",
       mailSender: "",
@@ -190,7 +190,12 @@ export default {
         const ret = await this.$mojoapi.get(`/web/db/sys:ops:devini`);
         let tempList = [];
         for (let i = 0; i < ret.data.length; i += 2) {
-          tempList.push(ret.data[i]);
+          if (
+            ret.data[i].indexOf("online") !== -1 ||
+            ret.data[i].indexOf("battle") !== -1
+          ) {
+            tempList.push(ret.data[i]);
+          }
         }
         this.depTypeList = tempList;
       } catch (e) {
@@ -210,8 +215,18 @@ export default {
       let updateModule = this.currServerType;
       try {
         this.hotUpdating = true;
-        await this.$mojoapi.put(`/web/splan/config/${updateModule}`);
-        this.$store.commit("info", `热更${updateModule}配表成功`);
+        const ret = await this.$mojoapi.put(
+          `/web/splan/config/${updateModule}`
+        );
+        const retData = JSON.parse(ret.data);
+        if (retData.code == 0) {
+          this.$store.commit("info", `热更${updateModule}配表成功`);
+        } else {
+          this.$store.commit(
+            "error",
+            `热更${updateModule}配表失败:${retData.desc}`
+          );
+        }
       } catch (e) {
         this.$store.commit(
           "error",
@@ -225,16 +240,17 @@ export default {
       this.currFocusTitle = title;
     },
     sendMail: async function () {
-      if (this.mailTitle.length === 0) {
-        return this.$store.commit("warn", "邮件标题不能为空");
-      }
-      if (this.mailSender.length === 0) {
-        return this.$store.commit("warn", "发件人不能为空");
-      }
-      if (this.mailContent.length === 0) {
-        return this.$store.commit("warn", "邮件内容不能为空");
-      }
-      window.console.log("send mail", this.mailContent);
+      return this.$store.commit("warn", "under developing");
+      // if (this.mailTitle.length === 0) {
+      //   return this.$store.commit("warn", "邮件标题不能为空");
+      // }
+      // if (this.mailSender.length === 0) {
+      //   return this.$store.commit("warn", "发件人不能为空");
+      // }
+      // if (this.mailContent.length === 0) {
+      //   return this.$store.commit("warn", "邮件内容不能为空");
+      // }
+      // window.console.log("send mail", this.mailContent);
       // await this.$mojoapi.post("/web/splan/mail", {
       //   activetime: parseInt(this.timeEffect.getTime() / 1000).toString(),
       //   sender: this.mailSender,

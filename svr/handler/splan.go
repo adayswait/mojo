@@ -15,6 +15,9 @@ import (
 	"time"
 )
 
+var onlineHotUpdate = "pveBoss.json;pveDrop.json;pveEvent.json;festivalCarnivalReward.json;item.json;petEgg.json;petEvo.json;petFight.json;dropUnit.json;petLearnSkill.json;prizePool.json;eventManage.json;pet.json;exp.json;petToken.json;petSkillLvUp.json;lottery.json;activityTask.json;mapMonster.json;evoType.json;obtainGaiya.json;timeTravel.json;extremeChallenge.json;itemElemType.json;extremeLimit.json;fightSkills.json;shop.json;battleshop.json;laddershop.json;mysteriousShop.json;startrekshop.json;shopmanage.json;buyEnergy.json;releaseShop.json;expMechine.json;teamFight.json;monthSign.json;petCollect.json;seerQuiz.json;kxPackage.json;eventBossChallenge.json;eventPetAnaysis.json;activityExchange.json;achieve.json;military.json;treasureHunt.json;treasureWish.json;dailyTask.json;activityPoint.json;mainTask.json;mainTaskData.json;dailyDelegateTask.json;teamDonate.json;teamShop.json;teamShopPackage.json;teamProductionItems.json;teamTask.json;teamTech.json;petImprovement.json;improvementTime.json;encourage.json;weekSign.json;firstRecharge.json;getPhysical.json;suit.json;itemExchange.json;pvpLevel.json;equip.json;plantDescription.json;pvePlanet.json;pveSPT.json;features.json;eggExchange.json;title.json;mapItem.json;geneRecombine.json;vipPrivilege.json;starTrekBuy.json;pvePlanetBuy.json;vipLevelAward.json;vipWeekAward.json;monthCardFix.json;additive_attribute.json;natureRandom.json;petClass.json;talent.json;carnival.json;teamDonate.json;featureRandom.json;talentRandom.json;sevenPackage.json;buyCoin.json;petTest.json;starTrek.json;rankList.json;sns.json;invite.json;medalCondition.json;medal.json;fightBoss.json;braveTower.json;coolDown.json;springFestivalBag.json;dailyPayEvent.json;partyBoss.json;studyPoint.json;elemTypes.json;fightRelation.json;mainPetTraining.json;leadAwaken.json;springRedbags.json;darkArena.json;activation.json;activityWeeklyStory.json;activityPetExplore.json;attr.json;newInvention.json;activityPetTalent.json;superPetFight.json;eventBossBottom.json;extraDrop.json;petSkin.json;skinBuy.json;puniChallenge.json;skillRune.json;activityTimeLimit.json;shopMass.json;shopConsole.json;childrensDayRecharge.json;shopPackage.json;newcomerPetCollect.json;activityCard.json;newPrizePool.json;newLottery.json;battleLadder.json;roomUnit.json;castPvp.json;activityTaskReset.json;battleCondition.json;mapBossChallenge.json;mapBossBottom.json;mapBossRank.json;petTrain.json;VIPshop.json;activityLuckdraw.json;activityPetStory.json;rechargeBenefits.json;battlePass.json;battlePassTask.json;payPrizeBrandNew.json;firstPrizePool.json;dropExchange.json;checkIn.json;costPack.json;touchEvent.json;monthPet.json;pushPresent.json;activityPool.json;activityPoolFloor.json;activityLuckFloor.json;activityFreeLuckydraw.json;randomMonster.json;holidayShop.json;payEquipEvent.json"
+var battleHotUpdate = "fightSkills.json;fightAffects.json;fightRelation.json;elemTypes.json;fightFactors.json"
+
 type MailParam struct {
 	Opt          string `json:"opt"`
 	ActiveTime   string `json:"activetime"`
@@ -201,5 +204,30 @@ func SplanUpdateConfig(c *fiber.Ctx) {
 		}
 	}
 
-	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+	body := struct {
+		Modules   string `json:"modules"`    //0 表示全服
+		Opt       string `json:"opt"`        //reload_json 代表重载配表
+		JsonFiles string `json:"json_files"` //要重载的配表的名字,以;分隔
+	}{Modules: "0", Opt: "reload_json"}
+
+	var router string
+	if strings.Contains(module, "online") {
+		body.JsonFiles = onlineHotUpdate
+		router = "deal_online_cmd"
+	}
+	if strings.Contains(module, "battle") {
+		body.JsonFiles = battleHotUpdate
+		router = "deal_battle_cmd"
+	}
+	bodyData, _ := json.Marshal(body)
+
+	reth, errh := utils.HttpPost("http://10.1.1.43:21010/"+router,
+		string(bodyData))
+	if errh != nil {
+		mlog.Log("splan update config err:\r\n", errh.Error())
+	} else {
+		mlog.Log("splan update config ret:\r\n", string(reth))
+	}
+
+	c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
 }
