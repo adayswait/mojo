@@ -87,7 +87,7 @@
                 <div class="control">
                   <div class="tags has-addons">
                     <span class="tag is-dark">version</span>
-                    <span class="tag is-success">{{info[1].rversion}}</span>
+                    <span class="tag is-success">{{info[1].revision}}</span>
                   </div>
                 </div>
               </div>
@@ -121,7 +121,7 @@
             <h4>发布至</h4>
             <p>{{typeof currFoucsIdx==='number'?(allDeps[currFoucsIdx][1].list.length===0?"全服":allDeps[currFoucsIdx][1].list):"无"}}</p>
             <h4>版本号</h4>
-            <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].rversion:"无"}}</p>
+            <p>{{typeof currFoucsIdx==='number'?allDeps[currFoucsIdx][1].revision:"无"}}</p>
 
             <h4>版本描述</h4>
             <tr

@@ -26,7 +26,7 @@
         </div>
         <div class="tile is-parent">
           <article class="tile is-child notification is-info">
-            <p class="title">吐槽一下</p>
+            <p class="title">匿名聊天</p>
             <p class="subtitle">◍'ㅅ'◍</p>
             <textarea
               class="textarea"

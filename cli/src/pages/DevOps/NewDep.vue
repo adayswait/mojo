@@ -40,14 +40,9 @@
       <div class="column is-2">
         <input class="input has-text-centered" type="text" value="版本提交时间" disabled />
       </div>
-      <div class="column is-2">
-        <input class="input" type="text" placeholder="起始" v-model="versionStartTime" />
-      </div>
-      <div class="column is-2">
-        <input class="input" type="text" placeholder="终止" v-model="versionEndTime" />
-      </div>
-      <div class="column">
-        <span class="tag is-small is-dark">默认最新{{defaultSvnLogLimit}}条</span>
+      <div class="column is-3">
+        <date-picker v-model="versionTimeRange" range :lang="lang"></date-picker>
+        <span class="tag is-dark is-small">默认最新15条</span>
       </div>
     </div>
     <div class="columns">
@@ -126,13 +121,16 @@
         <a class="button is-primary is-fullwidth" @click="submit">提交上线单</a>
       </div>
       <div class="column is-3">
-        <a class="button is-primary is-fullwidth" @click="submitNewest">一键提交最新版</a>
+        <a class="button is-primary is-fullwidth is-warning" @click="submitNewest">一键提交最新版</a>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
+import "vue2-datepicker/locale/zh-cn";
 export default {
   name: "NewDep",
   data: function () {
@@ -152,12 +150,21 @@ export default {
       checkedDepRadioList: [],
       urlMap: {},
       isLoading: false,
-      rversion: null,
-      versionStartTime: "",
-      versionEndTime: "",
+      revision: null,
+      versionTimeRange: null,
       defaultSvnLogLimit: 15,
       depRadio: 1,
+
+      lang: {
+        formatLocale: {
+          firstDayOfWeek: 1,
+        },
+        monthBeforeYear: false,
+      },
     };
+  },
+  components: {
+    DatePicker,
   },
   methods: {
     changeServerType: async function (type) {
@@ -167,7 +174,7 @@ export default {
       this.depRadioList = [];
       this.versionList = [];
       if (this.versionMap[this.currServerType]) {
-        this.rversion = null;
+        this.revision = null;
         this.currUrl = this.urlMap[this.currServerType];
         this.versionList = JSON.parse(this.versionMap[this.currServerType]);
       }
@@ -176,11 +183,15 @@ export default {
       if (!this.currServerType) {
         return this.$store.commit("warn", `请先选择服务类型`);
       }
+      let svnStartTime, svnEndTime;
+      window.console.log(this.versionTimeRange);
       const reg = /^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))$|^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))\s((?:[0-1]?[0-9]{1}|2[0-3])):([0-5]?[0-9]{1}):([0-5]?[0-9]{1})$|^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))\s((?:[0-1]?[0-9]{1}|2[0-3])):([0-5]?[0-9]{1}):([0-5]?[0-9]{1})\.?(\d{3})+$/;
-      if (this.versionStartTime || this.versionEndTime) {
+      if (this.versionTimeRange && this.versionTimeRange.length == 2) {
+        svnStartTime = this.format("yyyy-MM-dd", this.versionTimeRange[0]);
+        svnEndTime = this.format("yyyy-MM-dd", this.versionTimeRange[1]);
         if (
-          reg.test(this.versionStartTime) === false ||
-          reg.test(this.versionEndTime) === false
+          reg.test(svnStartTime) === false ||
+          reg.test(svnEndTime) === false
         ) {
           return this.$store.commit("warn", `请检查你的日期格式yyyy:mm:dd`);
         }
@@ -195,8 +206,8 @@ export default {
           limit: this.defaultSvnLogLimit,
         };
 
-        if (this.versionStartTime && this.versionEndTime) {
-          params.period = `{${this.versionStartTime}}:{${this.versionEndTime}}`;
+        if (svnStartTime && svnEndTime) {
+          params.period = `{${svnStartTime}}:{${svnEndTime}}`;
           delete params.limit;
         }
         let ret = await this.$mojoapi.get("/web/dep/commithistory", params);
@@ -223,14 +234,14 @@ export default {
     selectVersion: async function (version) {
       this.currVersion = version;
 
-      this.rversion = this.currVersion.split("|")[0];
+      this.revision = this.currVersion.split("|")[0].substr(1);
       this.currMessage = [];
       if (
         this.messageMap[this.currServerType] &&
-        this.messageMap[this.currServerType][this.rversion]
+        this.messageMap[this.currServerType][this.revision]
       ) {
         this.currMessage = JSON.parse(
-          this.messageMap[this.currServerType][this.rversion]
+          this.messageMap[this.currServerType][this.revision]
         );
         return;
       }
@@ -238,13 +249,13 @@ export default {
       try {
         let ret = await this.$mojoapi.get("/web/dep/commithistory", {
           repourl: this.currUrl,
-          version: this.rversion,
+          revision: this.revision,
         });
         this.currMessage = ret.data.split("\n");
         if (!this.messageMap[this.currServerType]) {
           this.messageMap[this.currServerType] = {};
         }
-        this.messageMap[this.currServerType][this.rversion] = JSON.stringify(
+        this.messageMap[this.currServerType][this.revision] = JSON.stringify(
           this.currMessage
         );
         this.updateMask(-1);
@@ -252,7 +263,7 @@ export default {
         this.$store.commit(
           "error",
           `加载服务类型<${this.currVersion}>版本<${
-            this.rversion
+            this.revision
           }>说明信息失败 : ${e.data || e.message}`
         );
         this.updateMask(-1);
@@ -260,7 +271,7 @@ export default {
     },
     showVersion: async function () {
       if (this.versionMap[this.currServerType]) {
-        this.rversion = null;
+        this.revision = null;
         this.currUrl = this.urlMap[this.currServerType];
         this.versionList = JSON.parse(this.versionMap[this.currServerType]);
       } else {
@@ -297,7 +308,7 @@ export default {
           value: JSON.stringify({
             title: this.depTitle,
             type: this.currServerType,
-            rversion: this.rversion,
+            revision: this.revision,
             repourl: this.currUrl,
             desc: this.currMessage,
             list: this.checkedDepRadioList,
@@ -312,7 +323,7 @@ export default {
       await this.updateSvnLog();
       await this.selectVersion(this.versionList[0]);
       this.depTitle = `${this.currServerType}-${
-        this.rversion
+        this.revision
       }-${new Date().toLocaleString()}`;
       await this.submit();
     },
@@ -356,6 +367,49 @@ export default {
           `获取数据库表错误 : ${e.data || e.message}`
         );
       }
+    },
+    format: function (format, date) {
+      if (!date) {
+        date = new Date();
+      }
+      let o = {
+        "M+": date.getMonth() + 1, // month
+        "d+": date.getDate(), // day
+        "h+": date.getHours(), // hour
+        "m+": date.getMinutes(), // minute
+        "s+": date.getSeconds(), // second
+        "q+": Math.floor((date.getMonth() + 3) / 3), // quarter
+        "S+": date.getMilliseconds(),
+        // millisecond
+      };
+
+      if (/(y+)/.test(format)) {
+        format = format.replace(
+          RegExp.$1,
+          (date.getFullYear() + "").substr(4 - RegExp.$1.length)
+        );
+      }
+
+      for (let k in o) {
+        if (new RegExp("(" + k + ")").test(format)) {
+          let formatStr = "";
+          for (let i = 1; i <= RegExp.$1.length; i++) {
+            formatStr += "0";
+          }
+
+          let replaceStr = "";
+          if (RegExp.$1.length == 1) {
+            replaceStr = o[k];
+          } else {
+            formatStr = formatStr + o[k];
+            let index = ("" + o[k]).length;
+            formatStr = formatStr.substr(index);
+            replaceStr = formatStr;
+          }
+          format = format.replace(RegExp.$1, replaceStr);
+        }
+      }
+      return format;
     },
   },
   beforeMount: function () {

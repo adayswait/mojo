@@ -2,9 +2,9 @@
   <div class="column">
     <div class="tabs">
       <ul>
-        <!-- <li :class="{'is-active':currFocusTitle=='配表'}" @click="focus('配表')">
-          <a>配表</a>
-        </li>-->
+        <li :class="{'is-active':currFocusTitle=='快捷操作'}" @click="focus('快捷操作')">
+          <a>快捷操作</a>
+        </li>
         <li :class="{'is-active':currFocusTitle=='全服邮件'}" @click="focus('全服邮件')">
           <a>全服邮件</a>
         </li>
@@ -19,35 +19,52 @@
         </li>
       </ul>
     </div>
-    <div class="columns" v-if="currFocusTitle=='配表'">
-      <div class="column is-2">
-        <input class="input has-text-centered" type="text" value="服务类型" disabled />
-      </div>
-      <div class="column is-2">
-        <div class="dropdown is-hoverable">
-          <div class="dropdown-trigger">
-            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-              {{currServerType||"点击选择服务类型"}}
-              <span class="icon is-small">
-                <i class="fas fa-angle-down" aria-hidden="true"></i>
-              </span>
-            </button>
-          </div>
-          <div class="dropdown-menu" id="dropdown-menu" role="menu">
-            <div class="dropdown-content">
-              <tr v-for="t in depTypeList" :key="t">
-                <a
-                  class="dropdown-item"
-                  :class="{'is-active':t==currServerType}"
-                  @click="changeServerType(t)"
-                >{{t}}</a>
-              </tr>
+    <div class="container" v-if="currFocusTitle=='快捷操作'">
+      <div class="columns">
+        <div class="column is-2">
+          <input class="input has-text-centered" type="text" value="服务类型" disabled />
+        </div>
+        <div class="column is-3">
+          <div class="dropdown is-hoverable">
+            <div class="dropdown-trigger">
+              <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                {{currServerType||"点击选择服务类型"}}
+                <span class="icon is-small">
+                  <i class="fas fa-angle-down" aria-hidden="true"></i>
+                </span>
+              </button>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+              <div class="dropdown-content">
+                <tr v-for="t in depTypeList" :key="t">
+                  <a
+                    class="dropdown-item"
+                    :class="{'is-active':t==currServerType}"
+                    @click="changeServerType(t)"
+                  >{{t}}</a>
+                </tr>
+              </div>
             </div>
           </div>
         </div>
+        <div class="column is-2">
+          <a
+            class="button is-primary is-fullwidth"
+            @click="hotUpdateConfig"
+            :class="{'is-loading':hotUpdating}"
+          >一键热更</a>
+        </div>
       </div>
-      <div class="column is-2">
-        <a class="button is-primary is-fullwidth" @click="hotUpdate">一键热更</a>
+      <div class="columns">
+        <div class="column is-2">
+          <input class="input has-text-centered" type="text" value="修改服务器时间" disabled />
+        </div>
+        <div class="column is-3">
+          <date-picker class="datepicker" type="datetime" v-model="serverTime"></date-picker>
+        </div>
+        <div class="column is-2">
+          <a class="button is-primary is-fullwidth is-warning" @click="changeServerTime">修改</a>
+        </div>
       </div>
     </div>
 
@@ -71,14 +88,14 @@
           <input class="input has-text-centered is-small" type="text" value="生效日期" disabled />
         </div>
         <div class="column is-4">
-          <date-picker v-model="timeEffect" valuetype="format"></date-picker>
+          <date-picker v-model="timeEffect"></date-picker>
           <span class="tag is-small is-dark">00:00:00</span>
         </div>
         <div class="column is-2">
           <input class="input has-text-centered is-small" type="text" value="失效日期" disabled />
         </div>
         <div class="column is-4">
-          <date-picker v-model="timeExpire" valuetype="format"></date-picker>
+          <date-picker v-model="timeExpire"></date-picker>
           <span class="tag is-small is-dark">23:59:59</span>
         </div>
       </div>
@@ -94,11 +111,11 @@
           </div>
         </div>
       </div>
-      <div class="columns">
-        <div class="column is-12">
-          <a class="button is-primary is-fullwidth" @click="sendMail">发送</a>
+      <nav class="level">
+        <div class="level-item has-text-centered">
+          <a class="button is-primary" @click="sendMail">发送</a>
         </div>
-      </div>
+      </nav>
     </div>
 
     <div class="container" v-if="currFocusTitle=='全服公告'">
@@ -122,11 +139,17 @@
           </div>
         </div>
       </div>
-      <div class="columns">
-        <div class="column is-12">
-          <a class="button is-primary is-fullwidth" @click="sendMail">发送</a>
+      <nav class="level">
+        <div class="level-item has-text-centered">
+          <a class="button is-primary" @click="sendMail">发送</a>
         </div>
-      </div>
+      </nav>
+    </div>
+    <div class="container" v-if="currFocusTitle=='历史公告'">
+      <p>历史公告 under developing</p>
+    </div>
+    <div class="container" v-if="currFocusTitle=='全服跑马灯'">
+      <p>全服跑马灯 under developing</p>
     </div>
   </div>
 </template>
@@ -148,11 +171,13 @@ export default {
       },
       depTypeList: [],
       currServerType: "",
-      currFocusTitle: "全服邮件",
+      currFocusTitle: "快捷操作",
       mailTitle: "",
       mailSender: "",
       timeEffect: new Date(),
       timeExpire: new Date(Date.now() + 7 * 24 * 3600 * 1000),
+      serverTime: new Date(),
+      hotUpdating: false,
     };
   },
   components: {
@@ -178,9 +203,24 @@ export default {
     changeServerType: async function (type) {
       this.currServerType = type;
     },
-    hotUpdate: async function () {
-      void this.currServerType;
+    hotUpdateConfig: async function () {
+      if (this.currServerType === "") {
+        return this.$store.commit("warn", `请先选择服务类型`);
+      }
+      let updateModule = this.currServerType;
+      try {
+        this.hotUpdating = true;
+        await this.$mojoapi.put(`/web/splan/config/${updateModule}`);
+        this.$store.commit("info", `热更${updateModule}配表成功`);
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `热更${updateModule}配表错误 : ${e.data || e.message}`
+        );
+      }
+      this.hotUpdating = false;
     },
+    changeServerTime: async function () {},
     focus: function (title) {
       this.currFocusTitle = title;
     },
@@ -195,23 +235,23 @@ export default {
         return this.$store.commit("warn", "邮件内容不能为空");
       }
       window.console.log("send mail", this.mailContent);
-      await this.$mojoapi.post("/web/splan/mail", {
-        activetime: parseInt(this.timeEffect.getTime() / 1000).toString(),
-        sender: this.mailSender,
-        title: this.mailTitle,
-        regendtime: "0",
-        user: "",
-        gmail_file: "",
-        regstarttime: "0",
-        refresh: "true",
-        mailtype: "1",
-        content: this.mailContent,
-        addition: "",
-        switch: "10.1.1.43:21010",
-        deadtime: parseInt(this.timeExpire.getTime() / 1000).toString(),
-        switch_key: "123456",
-        attachment: "",
-      });
+      // await this.$mojoapi.post("/web/splan/mail", {
+      //   activetime: parseInt(this.timeEffect.getTime() / 1000).toString(),
+      //   sender: this.mailSender,
+      //   title: this.mailTitle,
+      //   regendtime: "0",
+      //   user: "",
+      //   gmail_file: "",
+      //   regstarttime: "0",
+      //   refresh: "true",
+      //   mailtype: "1",
+      //   content: this.mailContent,
+      //   addition: "",
+      //   switch: "10.1.1.43:21010",
+      //   deadtime: parseInt(this.timeExpire.getTime() / 1000).toString(),
+      //   switch_key: "123456",
+      //   attachment: "",
+      // });
     },
     sendAnouncement: function () {
       window.console.log("send anouncement", this.announcementContent);
@@ -226,5 +266,8 @@ export default {
 <style scoped>
 .tag {
   margin-left: 5px;
+}
+.datepicker {
+  margin-top: 3px;
 }
 </style>

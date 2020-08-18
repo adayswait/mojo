@@ -63,4 +63,5 @@ func Route(app *fiber.App) {
 
 	splanWeb := web.Group("/splan")
 	splanWeb.Post("/mail", handler.SplanMail)
+	splanWeb.Put("/config/:module", handler.SplanUpdateConfig)
 }

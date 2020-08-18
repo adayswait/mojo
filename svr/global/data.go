@@ -14,6 +14,20 @@ type DingDingMarkdown struct {
 	Title string `json:"title"`
 	Text  string `json:"text"`
 }
+type DingDingBtn struct {
+	Title     string `json:"title"`
+	ActionURL string `json:"actionURL"`
+}
+type DingDingActionCardContent struct {
+	Title          string        `json:"title"`
+	Text           string        `json:"text"`
+	BtnOrientation string        `json:"btnOrientation"`
+	Btns           []DingDingBtn `json:"btns"`
+}
+type DingDingActionCard struct {
+	MsgType    string                    `json:"msgtype"`
+	ActionCard DingDingActionCardContent `json:"actionCard"`
+}
 type SSHinfo struct {
 	Port   string
 	User   string
@@ -23,7 +37,7 @@ type SSHinfo struct {
 type DepInfo struct {
 	Type      string   `json:"type"`
 	RepoUrl   string   `json:"repourl"`
-	Rversion  string   `json:"rversion"`
+	Revision  string   `json:"revision"`
 	List      []string `json:list`
 	StartTime int64
 	DepId     string

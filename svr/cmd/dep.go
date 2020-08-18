@@ -10,6 +10,7 @@ import (
 	"github.com/google/goexpect"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/ssh"
+	"os/exec"
 	"regexp"
 	"time"
 )
@@ -21,9 +22,7 @@ func init() {
 		"msgtype":"actionCard",
 		"actionCard":{
 			"title":"内网%s更新提醒",
-			"text":"#### 内网%s将于一分钟后重启
-					###### 打断或查看需公司内网或vpn 
-					###### %s",
+			"text":"#### 内网%s将于一分钟后重启\n ###### 打断或查看需公司内网或vpn\n ###### %s",
 			"btnOrientation": "1",
 			"btns": [
 				{
@@ -40,53 +39,59 @@ func init() {
 }
 
 func SvnDep(depInfo global.DepInfo, force bool) {
+
+	depuuid := uuid.New().String()
+	depInfo.StartTime = time.Now().Unix()
+	global.Depuuid2DepInfo.Store(depuuid, depInfo)
+	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_NOT_START)
+
 	path := utils.GetPkgPath()
 	if len(path) == 0 {
 		path = "."
 	}
 	path = fmt.Sprintf("%s/%s/", path, depInfo.DepId)
-	coCmd := fmt.Sprintf("svn export --force -%s %s %s",
-		depInfo.Rversion, depInfo.RepoUrl, path)
-	cuCmd := fmt.Sprintf("svn cleanup %s", path)
-	depuuid := uuid.New().String()
-	depInfo.StartTime = time.Now().Unix()
-	global.Depuuid2DepInfo.Store(depuuid, depInfo)
-	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_NOT_START)
-	ecu, _, _ := expect.Spawn(cuCmd, -1)
-	defer ecu.Close()
-	ecu.Expect(regexp.MustCompile("$"), 2*time.Minute)
-	mlog.Log("svn cleanup passed")
-	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_CHECKOUT)
-	eco, _, _ := expect.Spawn(coCmd, -1)
-	defer eco.Close()
-	coStr := "Exported revision"
-	ret, matched, errcoe := eco.Expect(regexp.MustCompile(coStr),
+
+	cleanupCmd := exec.Command("rm", "-rf", path)
+	cleanupErr := cleanupCmd.Run()
+	if cleanupErr != nil {
+		mlog.Log("rm -rf", path, "err:", cleanupErr)
+		return
+	}
+	// revision := "-r" + depInfo.Revision
+	// svnExportCmd := exec.Command("svn", "export", "--force",
+	// 	revision, depInfo.RepoUrl, path)
+	// fmt.Println(svnExportCmd)
+	// svnExportErr := svnExportCmd.Run()
+	// if svnExportErr != nil {
+	// 	mlog.Log("svn export err", svnExportErr, svnExportCmd)
+	// 	return
+	// }
+	coCmd := fmt.Sprintf("svn export --force -r%s %s %s",
+		depInfo.Revision, depInfo.RepoUrl, path)
+	expectCo, _, _ := expect.Spawn(coCmd, -1)
+	defer expectCo.Close()
+	retCo, matchedCo, errCo := expectCo.Expect(
+		regexp.MustCompile("Exported revision"),
 		5*time.Minute)
-	if errcoe != nil {
-		mlog.Log(coCmd, ret)
+	if errCo != nil {
+		mlog.Log(coCmd, retCo, matchedCo, errCo)
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
-	if len(matched) == 0 {
-		mlog.Log(coCmd, ret)
+	if len(matchedCo) == 0 {
+		mlog.Log(coCmd, retCo, matchedCo)
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
 	mlog.Log("svn export passed")
 
-	ecoplan, _, _ := expect.Spawn(path+"/config/import_json_from_design.sh", -1)
-	// defer ecoplan.Close() //todo here
-	mlog.Log(path + "config/import_json_from_design.sh")
-	retcoplan, matchedcoplan, errcoplan := ecoplan.Expect(
-		regexp.MustCompile("import complete"),
-		5*time.Minute)
-	if errcoplan != nil || len(matchedcoplan) == 0 {
-		mlog.Log("import json err", retcoplan, matchedcoplan, errcoplan)
-		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
+	runImportCmd := exec.Command(path + "/config/import_json_from_design.sh")
+	runImportErr := runImportCmd.Run()
+	if runImportErr != nil {
+		mlog.Log(path+"/config/import_json_from_design.sh err:", runImportErr)
 		return
-	} else {
-		mlog.Log("import json passed")
 	}
+	mlog.Log("import json passed")
 
 	if !force {
 		//发布更新通知
@@ -173,31 +178,12 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		if exist == false {
 			continue
 		}
-		syncCmd := []string{
-			"rsync",
-			"-zarv",
-			"--copy-links",
-			fmt.Sprintf("--rsh=ssh -p %s", macini.Port),
-			fmt.Sprintf("--exclude-from=%s", utils.GetExcludeFrom()),
-			path,
-			fmt.Sprintf("%s@%s:%s", macini.User, idep[2], idep[3]),
-		}
-		ers, _, _ := expect.SpawnWithArgs(syncCmd, -1)
-		rsStr := "password:"
-		retrs, matchedrs, errrs :=
-			ers.Expect(regexp.MustCompile(rsStr), 5*time.Minute)
-		if len(matchedrs) == 1 && errrs == nil {
-			ers.Send(macini.Passwd + "\n")
-			retrsc, matchedrsc, errrsc := ers.Expect(
-				regexp.MustCompile("speedup is"), 5*time.Minute)
-			if errrsc == nil && len(matchedrsc) == 1 {
-				mlog.Log("sync succeed", idep[2], idep[3])
-			} else {
-				mlog.Log("sync failed", idep[2], idep[3], retrsc, errrsc)
-				continue
-			}
-		} else {
-			mlog.Log("sync failed", syncCmd, retrs, matchedrs, errrs)
+		rsyncErr := Rsync(path, idep[3], macini.User, macini.Passwd,
+			idep[2], macini.Port,
+			[]string{"-zarv", "--copy-links",
+				fmt.Sprintf("--exclude-from=%s", utils.GetExcludeFrom())},
+			5*time.Minute)
+		if rsyncErr != nil {
 			continue
 		}
 

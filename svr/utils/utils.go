@@ -118,7 +118,7 @@ func GetWebPort() uint16 {
 
 func GetWebDomain() string {
 	if len(mojoCnf.webDomain) == 0 {
-		mojoCnf.webDomain = mojoCnf.webHost + ":" +
+		mojoCnf.webDomain = "http://" + mojoCnf.webHost + ":" +
 			strconv.Itoa(int(mojoCnf.webPort))
 	}
 	return mojoCnf.webDomain

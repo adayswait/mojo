@@ -254,53 +254,52 @@ func DeleteDB(c *fiber.Ctx) {
 }
 
 type ParamSvn struct {
-	RepoUrl string `json:"repourl"`
-	Limit   string `json:"limit"`
-	Period  string `json:"period"`
-	Version string `json:"version"`
+	RepoUrl  string `json:"repourl"`
+	Limit    string `json:"limit"`
+	Period   string `json:"period"`
+	Revision string `json:"revision"`
 }
 
 func CommitHistory(c *fiber.Ctx) {
 	const timeout = time.Minute
 	var paramSvn ParamSvn
-	if err := c.QueryParser(&paramSvn); err == nil {
-		if len(paramSvn.RepoUrl) != 0 {
-			var cmd string
-			if len(paramSvn.Version) != 0 {
-				cmd = fmt.Sprintf("svn log -%s %s",
-					paramSvn.Version, paramSvn.RepoUrl)
-			} else if len(paramSvn.Period) != 0 {
-				cmd = fmt.Sprintf("svn log -r %s -q %s",
-					paramSvn.Period, paramSvn.RepoUrl)
-			} else {
-				if len(paramSvn.Limit) == 0 {
-					paramSvn.Limit = "10"
-				}
-				cmd = fmt.Sprintf("svn log -l %s -q %s",
-					paramSvn.Limit, paramSvn.RepoUrl)
-			}
-
-			e, _, err := expect.Spawn(cmd, -1)
-			defer e.Close()
-			if err != nil {
-				c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
-					"data": cmd})
-				return
-			}
-			ret, _, _ := e.Expect(nil, timeout)
-			c.JSON(fiber.Map{"code": global.RET_OK,
-				"data": ret})
-			return
-		} else {
-			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
-				"data": `can't find param repourl`})
-			return
-		}
-	} else {
+	err := c.QueryParser(&paramSvn)
+	if err != nil {
 		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
 			"data": err.Error()})
 		return
 	}
+	if len(paramSvn.RepoUrl) == 0 {
+		c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+			"data": `can't find param repourl`})
+		return
+	}
+	var cmd string
+	if len(paramSvn.Revision) != 0 {
+		cmd = fmt.Sprintf("svn log -r%s %s",
+			paramSvn.Revision, paramSvn.RepoUrl)
+	} else if len(paramSvn.Period) != 0 {
+		cmd = fmt.Sprintf("svn log -r %s -q %s",
+			paramSvn.Period, paramSvn.RepoUrl)
+	} else {
+		if len(paramSvn.Limit) == 0 {
+			paramSvn.Limit = "10"
+		}
+		cmd = fmt.Sprintf("svn log -l %s -q %s",
+			paramSvn.Limit, paramSvn.RepoUrl)
+	}
+	e, _, err := expect.Spawn(cmd, -1)
+	defer e.Close()
+	if err != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+			"data": cmd})
+		return
+	}
+	ret, _, _ := e.Expect(nil, timeout)
+	c.JSON(fiber.Map{"code": global.RET_OK,
+		"data": ret})
+	return
+
 }
 
 func SubmitDep(c *fiber.Ctx) {
