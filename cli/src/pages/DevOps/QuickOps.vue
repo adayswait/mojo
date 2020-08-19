@@ -47,12 +47,18 @@
             </div>
           </div>
         </div>
-        <div class="column is-2">
+        <div class="column is-4">
           <a
-            class="button is-primary is-fullwidth"
+            class="button is-primary"
             @click="hotUpdateConfig"
             :class="{'is-loading':hotUpdating}"
           >一键热更</a>
+          <label class="checkbox">
+            <input type="checkbox" v-model="withNotify" :value="true" />
+            <strong>
+              <small>通知</small>
+            </strong>
+          </label>
         </div>
       </div>
       <div class="columns">
@@ -178,6 +184,7 @@ export default {
       timeExpire: new Date(Date.now() + 7 * 24 * 3600 * 1000),
       serverTime: new Date(),
       hotUpdating: false,
+      withNotify: false,
     };
   },
   components: {
@@ -216,7 +223,8 @@ export default {
       try {
         this.hotUpdating = true;
         const ret = await this.$mojoapi.put(
-          `/web/splan/config/${updateModule}`
+          `/web/splan/config/${updateModule}`,
+          { notify: this.withNotify }
         );
         const retData = JSON.parse(ret.data);
         if (retData.code == 0) {
@@ -282,6 +290,10 @@ export default {
 <style scoped>
 .tag {
   margin-left: 5px;
+}
+.checkbox {
+  padding-left: 5px;
+  padding-top: 24px;
 }
 .datepicker {
   margin-top: 3px;

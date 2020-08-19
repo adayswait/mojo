@@ -77,7 +77,9 @@ export default {
       currDropIdx: undefined,
       dbDepTableName: "sys:ops:depini",
       depIniList: [
-        ["1", "online", "example", "10.1.1.1", "/opt/splan/example"],
+        [
+          /*序号, 服务类型,服务名,ip,路径 */
+        ],
       ],
       depTypeList: [],
     };

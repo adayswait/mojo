@@ -19,6 +19,7 @@ const local_PKG_PATH = "pkg-path"                   //版本打包存储地址
 const local_EXCLUDE_FROM = "exclude-from"           //部署除外文件路径
 const local_DINGDING_WEBHOOK = "dingding-webhook"   //钉钉通知地址
 const local_DEVELOPER_WEBHOOK = "developer-webhook" //开发者反馈通知地址
+const local_SPLAN_SWITCH_URL = "splan-switch-url"   //splan switch gm的http地址
 
 type config struct {
 	dbDir            string
@@ -32,6 +33,7 @@ type config struct {
 	excludeFrom      string
 	dingdingWebhook  string
 	developerWebhook string
+	splanSwitchUrl   string
 }
 
 var mojoCnf config
@@ -83,6 +85,8 @@ func ReadConfig() {
 			mojoCnf.dingdingWebhook = cnfArr[1]
 		case local_DEVELOPER_WEBHOOK:
 			mojoCnf.developerWebhook = cnfArr[1]
+		case local_SPLAN_SWITCH_URL:
+			mojoCnf.splanSwitchUrl = cnfArr[1]
 		default:
 
 		}
@@ -138,6 +142,10 @@ func GetDingdingWebhook() string {
 
 func GetDeveloperWebhook() string {
 	return mojoCnf.developerWebhook
+}
+
+func GetSplanSwitchUrl() string {
+	return mojoCnf.splanSwitchUrl
 }
 
 func IsPathExist(path string) bool {

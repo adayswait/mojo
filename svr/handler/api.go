@@ -492,7 +492,8 @@ func Chat(c *fiber.Ctx) {
 	}
 	mlog.Log(user, "chat to", to, "message:", chatInfo.Message)
 
-	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, chatInfo.Message)
+	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN,
+		"👻 "+chatInfo.Message)
 	var errh error
 	var reth []byte
 	if to == "group" {

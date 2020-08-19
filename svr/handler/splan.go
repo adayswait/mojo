@@ -63,7 +63,7 @@ func SplanMail(c *fiber.Ctx) {
 	mlog.Log("content:", string(body.Content))
 	bodyData, _ := json.Marshal(body)
 
-	reth, errh := utils.HttpPost("http://10.1.1.43:21010/global_mail_proc",
+	reth, errh := utils.HttpPost(utils.GetSplanSwitchUrl()+"/global_mail_proc",
 		string(bodyData))
 	if errh != nil {
 		mlog.Log("splan add global mail err:\r\n", errh.Error())
@@ -76,7 +76,7 @@ func SplanMail(c *fiber.Ctx) {
 
 func SplanUpdateConfig(c *fiber.Ctx) {
 	store := sessions.Get(c)
-	// user := store.Get(global.SESSION_KEY_USER)
+	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
 		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
@@ -213,20 +213,41 @@ func SplanUpdateConfig(c *fiber.Ctx) {
 	var router string
 	if strings.Contains(module, "online") {
 		body.JsonFiles = onlineHotUpdate
-		router = "deal_online_cmd"
+		router = "/deal_online_cmd"
 	}
 	if strings.Contains(module, "battle") {
 		body.JsonFiles = battleHotUpdate
-		router = "deal_battle_cmd"
+		router = "/deal_battle_cmd"
 	}
 	bodyData, _ := json.Marshal(body)
 
-	reth, errh := utils.HttpPost("http://10.1.1.43:21010/"+router,
+	reth, errh := utils.HttpPost(utils.GetSplanSwitchUrl()+router,
 		string(bodyData))
 	if errh != nil {
 		mlog.Log("splan update config err:\r\n", errh.Error())
-	} else {
-		mlog.Log("splan update config ret:\r\n", string(reth))
+		c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
+		return
+	}
+
+	if !strings.Contains(string(reth), `"code":0`) {
+		mlog.Log("splan update config err:\r\n", errh.Error())
+		c.JSON(fiber.Map{"code": global.RET_ERR, "data": string(reth)})
+		return
+	}
+
+	mlog.Log("splan update config ret:\r\n", string(reth))
+
+	param := struct {
+		Notify bool `json:"notify"`
+	}{}
+	if errBp := c.BodyParser(&param); errBp != nil {
+		param.Notify = false
+	}
+	if param.Notify {
+		dingMsg := fmt.Sprintf("⚠ %s提交的热更%s配表请求已执行完成", user, module)
+		formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
+		retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
+		mlog.Log("hot update webhook ret:\r\n", string(retd), errd)
 	}
 
 	c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
