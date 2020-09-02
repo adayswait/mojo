@@ -22,7 +22,7 @@
     <div class="container" v-if="currFocusTitle=='快捷操作'">
       <div class="columns">
         <div class="column is-2">
-          <input class="input has-text-centered" type="text" value="服务类型" disabled />
+          <input class="input has-text-centered" type="text" value="配表热更" disabled />
         </div>
         <div class="column is-3">
           <div class="dropdown is-hoverable">
@@ -69,7 +69,7 @@
           <date-picker class="datepicker" type="datetime" v-model="serverTime"></date-picker>
         </div>
         <div class="column is-2">
-          <a class="button is-primary is-fullwidth is-warning" @click="changeServerTime" disabled>修改</a>
+          <a class="button is-primary is-warning" @click="changeServerTime">立即修改</a>
         </div>
       </div>
     </div>
@@ -243,7 +243,55 @@ export default {
       }
       this.hotUpdating = false;
     },
-    changeServerTime: async function () {},
+    changeServerTime: async function () {
+      await this.$mojoapi.put(`/web/splan/changetime`, {
+        ip: "10.1.1.239",
+        time: this.format("yyyy-MM-dd hh:mm:ss", this.serverTime),
+      });
+    },
+    format: function (format, date) {
+      if (!date) {
+        date = new Date();
+      }
+      let o = {
+        "M+": date.getMonth() + 1, // month
+        "d+": date.getDate(), // day
+        "h+": date.getHours(), // hour
+        "m+": date.getMinutes(), // minute
+        "s+": date.getSeconds(), // second
+        "q+": Math.floor((date.getMonth() + 3) / 3), // quarter
+        "S+": date.getMilliseconds(),
+        // millisecond
+      };
+
+      if (/(y+)/.test(format)) {
+        format = format.replace(
+          RegExp.$1,
+          (date.getFullYear() + "").substr(4 - RegExp.$1.length)
+        );
+      }
+
+      for (let k in o) {
+        if (new RegExp("(" + k + ")").test(format)) {
+          let formatStr = "";
+          for (let i = 1; i <= RegExp.$1.length; i++) {
+            formatStr += "0";
+          }
+
+          let replaceStr = "";
+          if (RegExp.$1.length == 1) {
+            replaceStr = o[k];
+          } else {
+            formatStr = formatStr + o[k];
+            let index = ("" + o[k]).length;
+            formatStr = formatStr.substr(index);
+            replaceStr = formatStr;
+          }
+          format = format.replace(RegExp.$1, replaceStr);
+        }
+      }
+      return format;
+    },
     focus: function (title) {
       this.currFocusTitle = title;
     },

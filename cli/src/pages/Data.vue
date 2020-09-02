@@ -19,11 +19,11 @@
 <script>
 export default {
   name: "Data",
-  data: function() {
+  data: function () {
     return {
-      title: "Data"
+      title: "Data",
     };
-  }
+  },
 };
 </script>
 

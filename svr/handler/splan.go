@@ -9,7 +9,10 @@ import (
 	"github.com/adayswait/mojo/mlog"
 	"github.com/adayswait/mojo/utils"
 	"github.com/gofiber/fiber"
+	"github.com/google/goexpect"
+	"golang.org/x/crypto/ssh"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -251,4 +254,105 @@ func SplanUpdateConfig(c *fiber.Ctx) {
 	}
 
 	c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
+}
+
+func SplanChangeTime(c *fiber.Ctx) {
+	store := sessions.Get(c)
+	user := store.Get(global.SESSION_KEY_USER)
+	body := struct {
+		Ip   string `json:"ip"`
+		Time string `json:"time"`
+	}{}
+
+	if errBp := c.BodyParser(&body); errBp != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
+			"data": errBp.Error()})
+		return
+	}
+
+	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
+	if errm != nil {
+		mlog.Log("SplanChangeTime errm", errm)
+		c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+			"data": errm.Error()})
+		return
+	}
+	var sshport, sshuser, sshpasswd string
+
+	for i := 1; i < len(maciniInDB); i += 2 {
+		var imac []string
+		e := json.Unmarshal([]byte(maciniInDB[i]), &imac)
+		if e != nil {
+			continue
+		}
+		if imac[0] == body.Ip {
+			sshport = imac[1]
+			sshuser = imac[2]
+			sshpasswd = imac[3]
+			break
+		}
+	}
+	sshClt, errdial := ssh.Dial("tcp",
+		fmt.Sprintf("%s:%s", body.Ip, sshport),
+		&ssh.ClientConfig{
+			User:            sshuser,
+			Auth:            []ssh.AuthMethod{ssh.Password(sshpasswd)},
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		})
+	if errdial != nil {
+		mlog.Log("ssh dial failed", errdial)
+		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+			"data": errdial.Error()})
+		return
+	}
+	defer sshClt.Close()
+	mlog.Log("ssh dial passed")
+
+	essh, _, errssh := expect.SpawnSSH(sshClt, time.Minute)
+	if errssh != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+			"data": errssh.Error()})
+		return
+	}
+	defer essh.Close()
+	logined := regexp.MustCompile("$")
+	retlogin, _, elogin := essh.Expect(logined, 10*time.Second)
+	if elogin != nil {
+		mlog.Log("ssh login failed", elogin, retlogin)
+		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+			"data": elogin.Error()})
+		return
+	}
+	mlog.Log("ssh login passed", retlogin)
+	essh.Send(fmt.Sprintf("sudo date -s '%s'\n", body.Time))
+	retsd, _, esd := essh.Expect(regexp.MustCompile(
+		fmt.Sprintf("password for %s:", sshuser)),
+		10*time.Second)
+	if esd != nil {
+		mlog.Log("sudo date -s failed", esd, retsd)
+		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+			"data": elogin.Error()})
+		return
+	} else {
+		mlog.Log("sudo passed", retsd)
+	}
+	essh.Send(fmt.Sprintf("%s\n", sshpasswd))
+	retok, matched, eok := essh.Expect(regexp.MustCompile("$"),
+		5*time.Second)
+	if eok != nil {
+		mlog.Log("change server time error", eok, retok)
+		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+			"data": eok.Error()})
+		return
+	} else {
+		mlog.Log(user, "change server time ok", body.Time, retok, matched)
+	}
+
+	dingMsg := fmt.Sprintf("⚠ %s已将服务器时间修改为%s", user, body.Time)
+	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
+	retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
+	mlog.Log("change server webhook ret:\r\n", string(retd), errd)
+
+	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+	return
 }

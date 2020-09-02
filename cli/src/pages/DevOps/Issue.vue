@@ -102,7 +102,7 @@ export default {
       this.btnDevLoading = false;
     },
     chat2Group: async function () {
-       if (this.groupText.length === 0) {
+      if (this.groupText.length === 0) {
         return this.$store.commit("warn", `什么都没说呀`);
       }
       try {
