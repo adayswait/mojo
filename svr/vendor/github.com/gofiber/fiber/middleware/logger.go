@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strconv"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	fiber "github.com/gofiber/fiber"
@@ -60,6 +59,11 @@ type (
 		// Optional. Default: 15:04:05
 		TimeFormat string
 
+		// TimeZone can be specified, such as "UTC" and "America/New_York" and "Asia/Chongqing", etc
+		//
+		// Optional. Default: Local
+		TimeZone string
+
 		// Output is a writter where logs are written
 		//
 		// Default: os.Stderr
@@ -67,6 +71,9 @@ type (
 
 		// Colors are only supported if no custom Output is given
 		enableColors bool
+
+		// timeZoneLocation holds the compiled timezone
+		timeZoneLocation *time.Location
 	}
 )
 
@@ -133,6 +140,7 @@ var LoggerConfigDefault = LoggerConfig{
 	Next:       nil,
 	Format:     "#${pid} - ${time} ${status} - ${latency} ${method} ${path}\n",
 	TimeFormat: "2006/01/02 15:04:05",
+	TimeZone:   "Local",
 	Output:     os.Stderr,
 }
 
@@ -142,6 +150,7 @@ Logger allows the following config arguments in any order:
 	- Logger(next func(*fiber.Ctx) bool)
 	- Logger(output io.Writer)
 	- Logger(format string)
+	- Logger(timeZone string)
 	- Logger(timeFormat string)
 	- Logger(config LoggerConfig)
 */
@@ -157,6 +166,9 @@ func Logger(options ...interface{}) fiber.Handler {
 			case string:
 				if strings.Contains(opt, "${") {
 					config.Format = opt
+				} else if tzl := getTimeZoneLocation(opt); tzl != nil {
+					config.TimeZone = opt
+					config.timeZoneLocation = tzl
 				} else {
 					config.TimeFormat = opt
 				}
@@ -165,7 +177,7 @@ func Logger(options ...interface{}) fiber.Handler {
 			case LoggerConfig:
 				config = opt
 			default:
-				log.Fatal("Logger: the following option types are allowed: string, io.Writer, LoggerConfig")
+				panic("Logger: the following option types are allowed: string, io.Writer, LoggerConfig")
 			}
 		}
 	}
@@ -173,16 +185,13 @@ func Logger(options ...interface{}) fiber.Handler {
 	return logger(config)
 }
 
-// LoggerWithConfig is deprecated, please use Logger instead
-func LoggerWithConfig(config LoggerConfig) fiber.Handler {
-	fmt.Println("logger: `LoggerWithConfig()` is deprecated since v1.12.4, please use `Logger()`")
-	return logger(config)
-}
-
 func logger(config LoggerConfig) fiber.Handler {
 	// Set config default values
 	if config.Format == "" {
 		config.Format = LoggerConfigDefault.Format
+	}
+	if config.TimeZone == "" {
+		config.TimeZone = LoggerConfigDefault.TimeZone
 	}
 	if config.TimeFormat == "" {
 		config.TimeFormat = LoggerConfigDefault.TimeFormat
@@ -198,21 +207,18 @@ func logger(config LoggerConfig) fiber.Handler {
 
 		}
 	}
-	// Middleware settings
-	var mutex sync.RWMutex
 
 	var tmpl loggerTemplate
 	tmpl.new(config.Format, "${", "}")
 
-	timestamp := time.Now().Format(config.TimeFormat)
-	// Update date/time every second in a separate go routine
+	var timestamp atomic.Value
+	timestamp.Store(nowTimeString(config.timeZoneLocation, config.TimeFormat))
+	// Update date/time every millisecond in a separate go routine
 	if strings.Contains(config.Format, "${time}") {
 		go func() {
 			for {
-				mutex.Lock()
-				timestamp = time.Now().Format(config.TimeFormat)
-				mutex.Unlock()
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(750 * time.Millisecond)
+				timestamp.Store(nowTimeString(config.timeZoneLocation, config.TimeFormat))
 			}
 		}()
 	}
@@ -235,9 +241,7 @@ func logger(config LoggerConfig) fiber.Handler {
 		_, err := tmpl.executeFunc(buf, func(w io.Writer, tag string) (int, error) {
 			switch tag {
 			case LoggerTagTime:
-				mutex.RLock()
-				defer mutex.RUnlock()
-				return buf.WriteString(timestamp)
+				return buf.WriteString(timestamp.Load().(string))
 			case LoggerTagReferer:
 				return buf.WriteString(c.Get(fiber.HeaderReferer))
 			case LoggerTagProtocol:
@@ -352,6 +356,20 @@ func logger(config LoggerConfig) fiber.Handler {
 		}
 		bytebufferpool.Put(buf)
 	}
+}
+
+func nowTimeString(tzl *time.Location, layout string) string {
+	// This is different from Golang's time package which returns UTC, and Local is better than it
+	if tzl == nil {
+		return time.Now().Format(layout)
+	}
+	return time.Now().In(tzl).Format(layout)
+}
+
+// Use Golang's time package to determine whether the TimeZone is available
+func getTimeZoneLocation(name string) *time.Location {
+	tz, _ := time.LoadLocation(name)
+	return tz
 }
 
 // MIT License fasttemplate

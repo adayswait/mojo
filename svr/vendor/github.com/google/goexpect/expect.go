@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -21,6 +22,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/google/goterm/term"
 )
@@ -196,6 +198,8 @@ const (
 	BatchExpect
 	// BatchSwitchCase for invoking ExpectSwitchCase in a batch
 	BatchSwitchCase
+	// BatchSendSignal for invoking SendSignal in a batch.
+	BatchSendSignal
 )
 
 // TimeoutError is the error returned by all Expect functions upon timer expiry.
@@ -241,6 +245,32 @@ type Batcher interface {
 	Timeout() time.Duration
 	// Cases returns the Caser structure for SwitchCase commands.
 	Cases() []Caser
+}
+
+// BSig implements the Batcher interface for SendSignal commands.
+type BSig struct {
+	// S contains the signal.
+	S syscall.Signal
+}
+
+// Cmd returns the SendSignal command (BatchSendSignal).
+func (bs *BSig) Cmd() int {
+	return BatchSendSignal
+}
+
+// Arg returns the signal integer.
+func (bs *BSig) Arg() string {
+	return strconv.Itoa(int(bs.S))
+}
+
+// Timeout always returns 0 for BSig.
+func (bs *BSig) Timeout() time.Duration {
+	return time.Duration(0)
+}
+
+// Cases always returns nil for BSig.
+func (bs *BSig) Cases() []Caser {
+	return nil
 }
 
 // BExp implements the Batcher interface for Expect commands using the default timeout.
@@ -627,6 +657,14 @@ func (e *GExpect) ExpectBatch(batch []Batcher, timeout time.Duration) ([]BatchRe
 			if err != nil {
 				return res, err
 			}
+		case BatchSendSignal:
+			sigNr, err := strconv.Atoi(b.Arg())
+			if err != nil {
+				return res, err
+			}
+			if err := e.SendSignal(syscall.Signal(sigNr)); err != nil {
+				return res, err
+			}
 		default:
 			return res, errors.New("unknown command:" + strconv.Itoa(b.Cmd()))
 		}
@@ -638,6 +676,15 @@ func (e *GExpect) check() bool {
 	e.chkMu.RLock()
 	defer e.chkMu.RUnlock()
 	return e.chk(e)
+}
+
+// SendSignal sends a signal to the Expect controlled process.
+// Only works on Process Expecters.
+func (e *GExpect) SendSignal(sig os.Signal) error {
+	if e.cmd == nil {
+		return status.Errorf(codes.Unimplemented, "only process Expecters supported")
+	}
+	return e.cmd.Process.Signal(sig)
 }
 
 // ExpectSwitchCase checks each Case against the accumulated out buffer, sending specified
@@ -1162,8 +1209,9 @@ func (e *GExpect) Send(in string) error {
 			if err != nil {
 				log.Printf("Write to Verbose Writer failed: %v", err)
 			}
+		} else {
+			log.Printf("Sent: %q", in)
 		}
-		log.Printf("Sent: %q", in)
 	}
 
 	return nil

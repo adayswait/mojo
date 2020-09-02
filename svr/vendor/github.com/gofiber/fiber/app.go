@@ -13,17 +13,16 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
 	"reflect"
 	"runtime"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"text/tabwriter"
 	"time"
 
 	utils "github.com/gofiber/utils"
@@ -33,7 +32,7 @@ import (
 )
 
 // Version of current package
-const Version = "1.13.1"
+const Version = "1.14.5"
 
 // Map is a shortcut for map[string]interface{}, useful for JSON returns
 type Map map[string]interface{}
@@ -49,11 +48,16 @@ type Error struct {
 
 // App denotes the Fiber application.
 type App struct {
+	out   io.Writer
 	mutex sync.Mutex
 	// Route stack divided by HTTP methods
 	stack [][]*Route
+	// Route stack divided by HTTP methods and route prefixes
+	treeStack []map[string][]*Route
 	// Amount of registered routes
-	routes int
+	routesCount int
+	// Amount of registered handlers
+	handlerCount int
 	// Ctx pool
 	pool sync.Pool
 	// Fasthttp server
@@ -140,10 +144,6 @@ type Settings struct {
 	// When set to true, it will not print out the «Fiber» ASCII art and listening address.
 	// Default: false
 	DisableStartupMessage bool `json:"disable_startup_message"`
-
-	// Deprecated: Templates is deprecated please use Views.
-	// Default: nil
-	Templates Templates `json:"-"`
 
 	// Views is the interface that wraps the Render function.
 	// Default: nil
@@ -237,7 +237,8 @@ func New(settings ...*Settings) *App {
 	// Create a new app
 	app := &App{
 		// Create router stack
-		stack: make([][]*Route, len(intMethod)),
+		stack:     make([][]*Route, len(intMethod)),
+		treeStack: make([]map[string][]*Route, len(intMethod)),
 		// Create Ctx pool
 		pool: sync.Pool{
 			New: func() interface{} {
@@ -286,7 +287,7 @@ func New(settings ...*Settings) *App {
 //  app.Use(handler)
 //  app.Use("/api", handler)
 //  app.Use("/api", handler, handler)
-func (app *App) Use(args ...interface{}) *Route {
+func (app *App) Use(args ...interface{}) Router {
 	var prefix string
 	var handlers []Handler
 
@@ -300,83 +301,90 @@ func (app *App) Use(args ...interface{}) *Route {
 			panic(fmt.Sprintf("use: invalid handler %v\n", reflect.TypeOf(arg)))
 		}
 	}
-	return app.register(methodUse, prefix, handlers...)
+	app.register(methodUse, prefix, handlers...)
+	return app
 }
 
 // Get registers a route for GET methods that requests a representation
 // of the specified resource. Requests using GET should only retrieve data.
-func (app *App) Get(path string, handlers ...Handler) *Route {
-	return app.Add(MethodGet, path, handlers...)
+func (app *App) Get(path string, handlers ...Handler) Router {
+	route := app.register(MethodGet, path, handlers...)
+	// Add HEAD route
+	headRoute := route
+	app.addRoute(MethodHead, &headRoute)
+
+	return app
 }
 
 // Head registers a route for HEAD methods that asks for a response identical
 // to that of a GET request, but without the response body.
-func (app *App) Head(path string, handlers ...Handler) *Route {
+func (app *App) Head(path string, handlers ...Handler) Router {
 	return app.Add(MethodHead, path, handlers...)
 }
 
 // Post registers a route for POST methods that is used to submit an entity to the
 // specified resource, often causing a change in state or side effects on the server.
-func (app *App) Post(path string, handlers ...Handler) *Route {
+func (app *App) Post(path string, handlers ...Handler) Router {
 	return app.Add(MethodPost, path, handlers...)
 }
 
 // Put registers a route for PUT methods that replaces all current representations
 // of the target resource with the request payload.
-func (app *App) Put(path string, handlers ...Handler) *Route {
+func (app *App) Put(path string, handlers ...Handler) Router {
 	return app.Add(MethodPut, path, handlers...)
 }
 
 // Delete registers a route for DELETE methods that deletes the specified resource.
-func (app *App) Delete(path string, handlers ...Handler) *Route {
+func (app *App) Delete(path string, handlers ...Handler) Router {
 	return app.Add(MethodDelete, path, handlers...)
 }
 
 // Connect registers a route for CONNECT methods that establishes a tunnel to the
 // server identified by the target resource.
-func (app *App) Connect(path string, handlers ...Handler) *Route {
+func (app *App) Connect(path string, handlers ...Handler) Router {
 	return app.Add(MethodConnect, path, handlers...)
 }
 
 // Options registers a route for OPTIONS methods that is used to describe the
 // communication options for the target resource.
-func (app *App) Options(path string, handlers ...Handler) *Route {
+func (app *App) Options(path string, handlers ...Handler) Router {
 	return app.Add(MethodOptions, path, handlers...)
 }
 
 // Trace registers a route for TRACE methods that performs a message loop-back
 // test along the path to the target resource.
-func (app *App) Trace(path string, handlers ...Handler) *Route {
+func (app *App) Trace(path string, handlers ...Handler) Router {
 	return app.Add(MethodTrace, path, handlers...)
 }
 
 // Patch registers a route for PATCH methods that is used to apply partial
 // modifications to a resource.
-func (app *App) Patch(path string, handlers ...Handler) *Route {
+func (app *App) Patch(path string, handlers ...Handler) Router {
 	return app.Add(MethodPatch, path, handlers...)
 }
 
 // Add ...
-func (app *App) Add(method, path string, handlers ...Handler) *Route {
-	return app.register(method, path, handlers...)
+func (app *App) Add(method, path string, handlers ...Handler) Router {
+	app.register(method, path, handlers...)
+	return app
 }
 
 // Static ...
-func (app *App) Static(prefix, root string, config ...Static) *Route {
-	return app.registerStatic(prefix, root, config...)
+func (app *App) Static(prefix, root string, config ...Static) Router {
+	app.registerStatic(prefix, root, config...)
+	return app
 }
 
 // All ...
-func (app *App) All(path string, handlers ...Handler) []*Route {
-	routes := make([]*Route, len(intMethod))
-	for i, method := range intMethod {
-		routes[i] = app.Add(method, path, handlers...)
+func (app *App) All(path string, handlers ...Handler) Router {
+	for _, method := range intMethod {
+		app.Add(method, path, handlers...)
 	}
-	return routes
+	return app
 }
 
 // Group is used for Routes with common prefix to define a new sub-router with optional middleware.
-func (app *App) Group(prefix string, handlers ...Handler) *Group {
+func (app *App) Group(prefix string, handlers ...Handler) Router {
 	if len(handlers) > 0 {
 		app.register(methodUse, prefix, handlers...)
 	}
@@ -402,41 +410,23 @@ func NewError(code int, message ...string) *Error {
 //  	fmt.Printf("%s\t%s\n", r.Method, r.Path)
 //  }
 func (app *App) Routes() []*Route {
+	fmt.Println("routes is deprecated since v1.13.2, please use `app.Stack()` to access the raw router stack")
 	routes := make([]*Route, 0)
 	for m := range app.stack {
+	stackLoop:
 		for r := range app.stack[m] {
-			// Ignore HEAD routes handling GET routes
-			if m == 1 && app.stack[m][r].Method == MethodGet {
-				continue
-			}
-			// Don't duplicate USE routes
-			if app.stack[m][r].Method == methodUse {
-				duplicate := false
+			// Don't duplicate USE routesCount
+			if app.stack[m][r].use {
 				for i := range routes {
-					if routes[i].Method == methodUse && routes[i].Name == app.stack[m][r].Name {
-						duplicate = true
-						break
+					if routes[i].use && routes[i].Path == app.stack[m][r].Path {
+						continue stackLoop
 					}
 				}
-				if !duplicate {
-					routes = append(routes, app.stack[m][r])
-				}
-			} else {
-				routes = append(routes, app.stack[m][r])
 			}
+			routes = append(routes, app.stack[m][r])
 		}
 	}
-	// Sort routes by stack position
-	sort.Slice(routes, func(i, k int) bool {
-		return routes[i].pos < routes[k].pos
-	})
 	return routes
-}
-
-// Serve is deprecated, please use app.Listener()
-func (app *App) Serve(ln net.Listener, tlsconfig ...*tls.Config) error {
-	fmt.Println("serve: app.Serve() is deprecated since v1.12.5, please use app.Listener()")
-	return app.Listener(ln, tlsconfig...)
 }
 
 // Listener can be used to pass a custom listener.
@@ -444,7 +434,7 @@ func (app *App) Serve(ln net.Listener, tlsconfig ...*tls.Config) error {
 // This method does not support the Prefork feature
 // To use Prefork, please use app.Listen()
 func (app *App) Listener(ln net.Listener, tlsconfig ...*tls.Config) error {
-	// Update fiber server settings
+	// Update server settings
 	app.init()
 	// TLS config
 	if len(tlsconfig) > 0 {
@@ -477,7 +467,7 @@ func (app *App) Listen(address interface{}, tlsconfig ...*tls.Config) error {
 	if !strings.Contains(addr, ":") {
 		addr = ":" + addr
 	}
-	// Update fiber server settings
+	// Update server settings
 	app.init()
 	// Start prefork
 	if app.Settings.Prefork {
@@ -507,10 +497,17 @@ func (app *App) Listen(address interface{}, tlsconfig ...*tls.Config) error {
 
 // Handler returns the server handler.
 func (app *App) Handler() fasthttp.RequestHandler {
+	app.init()
 	return app.handler
 }
 
-// Shutdown gracefully shuts down the server without interrupting any active connections.
+// Handler returns the server handler.
+func (app *App) Stack() [][]*Route {
+	return app.stack
+}
+
+// Shutdown gracefully
+// shuts down the server without interrupting any active connections.
 // Shutdown works by first closing all open listeners and then waiting indefinitely for all connections to return to idle and then shut down.
 //
 // When Shutdown is called, Serve, ListenAndServe, and ListenAndServeTLS immediately return nil.
@@ -589,13 +586,12 @@ func (dl *disableLogger) Printf(format string, args ...interface{}) {
 }
 
 func (app *App) init() *App {
+	// Lock application
 	app.mutex.Lock()
+	defer app.mutex.Unlock()
+
 	// Load view engine if provided
 	if app.Settings != nil {
-		// Templates is replaced by Views with layout support
-		if app.Settings.Templates != nil {
-			fmt.Println("`Templates` are deprecated since v1.12.x, please use `Views` instead")
-		}
 		// Only load templates if an view engine is specified
 		if app.Settings.Views != nil {
 			if err := app.Settings.Views.Load(); err != nil {
@@ -639,15 +635,15 @@ func (app *App) init() *App {
 	app.server.IdleTimeout = app.Settings.IdleTimeout
 	app.server.ReadBufferSize = app.Settings.ReadBufferSize
 	app.server.WriteBufferSize = app.Settings.WriteBufferSize
-	app.mutex.Unlock()
+	app.buildTree()
 	return app
 }
 
 const (
 	cBlack = "\u001b[90m"
-	// cRed     = "\u001b[91m"
-	// cGreen = "\u001b[92m"
-	// cYellow  = "\u001b[93m"
+	cRed   = "\u001b[91m"
+	// cGreen  = "\u001b[92m"
+	// cYellow = "\u001b[93m"
 	// cBlue    = "\u001b[94m"
 	// cMagenta = "\u001b[95m"
 	cCyan = "\u001b[96m"
@@ -666,16 +662,20 @@ func (app *App) startupMessage(addr string, tls bool, pids string) {
 	logo += `%s  ____%s / ____(_) /_  ___  _____  %s` + "\n"
 	logo += `%s_____%s / /_  / / __ \/ _ \/ ___/  %s` + "\n"
 	logo += `%s  __%s / __/ / / /_/ /  __/ /      %s` + "\n"
-	logo += `%s    /_/   /_/_.___/\___/_/%s %s` + "\n"
-
+	logo += `%s    /_/   /_/_.___/\___/_/%s %s` + ""
+	logo += cRed + "v1.15.0 will be released on 15 September 2020 and contains breaking changes!\nPlease visit https://github.com/gofiber/fiber/issues/736 for more information.\n" + cReset
 	host, port := parseAddr(addr)
+	padding := strconv.Itoa(len(host))
+	if len(host) <= 4 {
+		padding = "5"
+	}
 	var (
-		tlsStr     = "FALSE"
-		routesLen  = len(app.Routes())
-		osName     = utils.ToUpper(runtime.GOOS)
-		memTotal   = utils.ByteSize(utils.MemoryTotal())
-		cpuThreads = runtime.NumCPU()
-		pid        = os.Getpid()
+		tlsStr       = "FALSE"
+		preforkStr   = "FALSE"
+		handlerCount = strconv.Itoa(app.handlerCount)
+		osName       = utils.ToUpper(runtime.GOOS)
+		cpuThreads   = runtime.NumCPU()
+		pid          = os.Getpid()
 	)
 	if host == "" {
 		host = "0.0.0.0"
@@ -683,27 +683,31 @@ func (app *App) startupMessage(addr string, tls bool, pids string) {
 	if tls {
 		tlsStr = "TRUE"
 	}
+	if app.Settings.Prefork {
+		preforkStr = "TRUE"
+	}
 	// tabwriter makes sure the spacing are consistent across different values
 	// colorable handles the escape sequence for stdout using ascii color codes
-	var out *tabwriter.Writer
+	host = fmt.Sprintf("%-"+padding+"s", host)
+	port = fmt.Sprintf("%-"+padding+"s", port)
+	tlsStr = fmt.Sprintf("%-"+padding+"s", tlsStr)
+	handlerCount = fmt.Sprintf("%-"+padding+"s", handlerCount)
+
+	app.out = colorable.NewColorableStdout()
 	// Check if colors are supported
 	if os.Getenv("TERM") == "dumb" ||
 		(!isatty.IsTerminal(os.Stdout.Fd()) && !isatty.IsCygwinTerminal(os.Stdout.Fd())) {
-		out = tabwriter.NewWriter(colorable.NewNonColorable(os.Stdout), 0, 0, 2, ' ', 0)
-	} else {
-		out = tabwriter.NewWriter(colorable.NewColorableStdout(), 0, 0, 2, ' ', 0)
+		app.out = colorable.NewNonColorable(os.Stdout)
 	}
 	// simple Sprintf function that defaults back to black
 	cyan := func(v interface{}) string {
 		return fmt.Sprintf("%s%v%s", cCyan, v, cBlack)
 	}
 	// Build startup banner
-	fmt.Fprintf(out, logo, cBlack, cBlack,
-		cCyan, cBlack, fmt.Sprintf(" HOST   %s\tOS      %s", cyan(host), cyan(osName)),
-		cCyan, cBlack, fmt.Sprintf(" PORT   %s\tTHREADS %s", cyan(port), cyan(cpuThreads)),
-		cCyan, cBlack, fmt.Sprintf(" TLS    %s\tMEM     %s", cyan(tlsStr), cyan(memTotal)),
-		cBlack, cyan(Version), fmt.Sprintf(" ROUTES %s\t\t\t PID     %s%s%s\n", cyan(routesLen), cyan(pid), pids, cReset),
+	fmt.Fprintf(app.out, logo, cBlack, cBlack,
+		cCyan, cBlack, fmt.Sprintf(" HOST     %s  OS      %s", cyan(host), cyan(osName)),
+		cCyan, cBlack, fmt.Sprintf(" PORT     %s  THREADS %s", cyan(port), cyan(cpuThreads)),
+		cCyan, cBlack, fmt.Sprintf(" TLS      %s  PREFORK %s", cyan(tlsStr), cyan(preforkStr)),
+		cBlack, cyan(Version), fmt.Sprintf(" HANDLERS %s  PID     %s%s%s\n", cyan(handlerCount), cyan(pid), pids, cReset),
 	)
-	// Write to io.write
-	_ = out.Flush()
 }
