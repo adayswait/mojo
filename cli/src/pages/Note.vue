@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <Login />
-    <table class="table is-striped is-fullwidth">
+    <table class="table is-striped is-fullwidth" v-if="!$store.state.visible.Login">
       <tr v-for="(note,i) in notes" :key="i">
         <div class="box">
           <article class="media is-fullwidth">
@@ -28,7 +28,7 @@
     </table>
     <br />
     <br />
-    <article class="media">
+    <article class="media" v-if="!$store.state.visible.Login">
       <!-- <figure class="media-left">
         <p class="image is-64x64">
           <img src="./../assets/logo.png" />
