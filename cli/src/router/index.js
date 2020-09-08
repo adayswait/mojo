@@ -15,6 +15,13 @@ import DevIni from "@/pages/DevOps/DevIni.vue";
 import NewUsr from "@/pages/DevOps/NewUsr.vue";
 import DBview from "@/pages/DevOps/DBview.vue";
 import DevTools from '@/pages/DevOps/DevTools.vue';
+import ElkStack from "@/pages/ElkStack.vue";
+import Kibana from '@/pages/ElkStack/Kibana.vue';
+import IFrame from "@/pages/IFrame.vue";
+import GM239 from '@/pages/IFrame/GM239.vue';
+import Plans from '@/pages/IFrame/Plans.vue'
+import DevDoc from '@/pages/IFrame/DevDoc.vue'
+import TaomeeDoc from '@/pages/IFrame/TaomeeDoc.vue'
 import Visitor from "@/pages/Visitor.vue";
 import BreakDep from "@/pages/Visitor/BreakDep.vue";
 import Data from "@/pages/Data.vue";
@@ -27,7 +34,7 @@ const router = new Router({
     routes: [
         {
             path: "/",
-            redirect: "/devops"
+            redirect: "/home"
         },
         {
             path: "/home",
@@ -102,6 +109,38 @@ const router = new Router({
                 {
                     path: "breakdep",
                     component: BreakDep
+                },
+            ]
+        },
+        {
+            path: "/elkstack",
+            component: ElkStack,
+            children: [
+                {
+                    path: "kibana",
+                    component: Kibana
+                },
+            ]
+        },
+        {
+            path: "/iframe",
+            component: IFrame,
+            children: [
+                {
+                    path: "plans",
+                    component: Plans
+                },
+                {
+                    path: "gm239",
+                    component: GM239
+                },
+                {
+                    path: "devdoc",
+                    component: DevDoc
+                },
+                {
+                    path: "taomeedoc",
+                    component: TaomeeDoc
                 },
             ]
         },

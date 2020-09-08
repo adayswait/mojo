@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -120,12 +121,14 @@ func GetWebPort() uint16 {
 	return mojoCnf.webPort
 }
 
-func GetWebDomain() string {
+func GetWebDomain() []string {
 	if len(mojoCnf.webDomain) == 0 {
 		mojoCnf.webDomain = "http://" + mojoCnf.webHost + ":" +
 			strconv.Itoa(int(mojoCnf.webPort))
+		return []string{mojoCnf.webDomain}
 	}
-	return mojoCnf.webDomain
+	fmt.Println(strings.Split(mojoCnf.webDomain, ";"))
+	return strings.Split(mojoCnf.webDomain, ";")
 }
 
 func GetPkgPath() string {

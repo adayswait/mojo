@@ -30,79 +30,79 @@
     <div class="tile is-ancestor" id="navigator">
       <div class="tile is-vertical is-9">
         <div class="tile">
-          <div class="tile is-parent">
-            <article class="tile is-child box">
+          <div class="tile is-parent" id="card">
+            <router-link to="/devops" class="tile is-child box" id="card_devops">
               <p class="title">运维</p>
-              <!-- <p class="subtitle">操作和维护线上服务</p> -->
               <div class="content">
                 <p>
                   <strong>操作和维护线上服务</strong>
                 </p>
               </div>
-            </article>
+            </router-link>
           </div>
           <div class="tile is-8 is-vertical">
             <div class="tile">
-              <div class="tile is-parent">
-                <article class="tile is-child box">
-                  <p class="title">center server</p>
-                  <p class="subtitle">
-                    <strong>操作raft集群</strong>
-                  </p>
-                </article>
+              <div class="tile is-parent" id="card">
+                <router-link to="/e404" class="tile is-child box" id="card_raft">
+                  <p class="title">Raft集群</p>
+                  <div class="content">
+                    <strong></strong>
+                  </div>
+                </router-link>
               </div>
-              <div class="tile is-parent">
-                <article class="tile is-child box">
-                  <p class="title">Seven</p>
-                  <p class="subtitle">Subtitle</p>
-                </article>
+              <div class="tile is-parent" id="card">
+                <router-link to="/iframe/taomeedoc" class="tile is-child box" id="card_taomeedoc">
+                  <p class="title">淘米账号平台文档</p>
+                  <div class="content">
+                    <strong>登录验证等账号api文档</strong>
+                  </div>
+                </router-link>
               </div>
             </div>
-            <div class="tile is-parent">
-              <article class="tile is-child box">
-                <p class="title">Eight</p>
-                <p class="subtitle">Subtitle</p>
-              </article>
+            <div class="tile is-parent" id="card">
+              <router-link to="/elkstack/kibana" class="tile is-child box" id="card_elk">
+                <p class="title">ELK Stack</p>
+                <div class="content">
+                  <strong>查看线上日志</strong>
+                </div>
+              </router-link>
             </div>
           </div>
         </div>
         <div class="tile">
-          <div class="tile is-8 is-parent">
-            <article class="tile is-child box">
-              <p class="title">Nine</p>
-              <p class="subtitle">Subtitle</p>
+          <div class="tile is-8 is-parent" id="card">
+            <router-link to="/iframe/gm239" class="tile is-child box" id="card_gm239">
+              <p class="title">内网GM</p>
+              <p class="subtitle">10.1.1.239</p>
               <div class="content">
-                <p>facilisis.</p>
+                <p>内网GM工具</p>
               </div>
-            </article>
+            </router-link>
           </div>
-          <div class="tile is-parent">
-            <article class="tile is-child box">
-              <p class="title">Ten</p>
-              <p class="subtitle">Subtitle</p>
+          <div class="tile is-parent" id="card">
+            <router-link to="/iframe/plans" class="tile is-child box is-info" id="card_plans">
+              <p class="title">QA多开</p>
               <div class="content">
-                <p>Lorem ipsum</p>
+                <p>QA前端多开页面</p>
               </div>
-            </article>
+            </router-link>
           </div>
         </div>
       </div>
-      <div class="tile is-parent">
-        <article class="tile is-child box">
+      <div class="tile is-parent" id="card">
+        <router-link to="/iframe/devdoc" class="tile is-child box" id="card_devdoc">
           <div class="content">
-            <p class="title">Eleven</p>
-            <p class="subtitle">Subtitle</p>
+            <p class="title">开发文档</p>
             <div class="content">
-              <p>Lorem ipsum dolor sit amet</p>
-              <p>Integer sollicitudin, tortor a mattis commodo, velit urna</p>
+              <p>各种各样的文档</p>
             </div>
           </div>
-        </article>
+        </router-link>
       </div>
     </div>
 
-    <!-- <div class="tile is-ancestor">
-      <div class="tile is-parent">
+    <div class="tile is-ancestor">
+      <div class="tile is-parent" id="card">
         <article class="tile is-child box">
           <p class="title">Twelve</p>
           <p class="subtitle">Subtitle</p>
@@ -111,7 +111,7 @@
           </div>
         </article>
       </div>
-      <div class="tile is-parent is-6">
+      <div class="tile is-parent is-6" id="card">
         <article class="tile is-child box">
           <p class="title">Thirteen</p>
           <p class="subtitle">Subtitle</p>
@@ -120,7 +120,7 @@
           </div>
         </article>
       </div>
-      <div class="tile is-parent">
+      <div class="tile is-parent" id="card">
         <article class="tile is-child box">
           <p class="title">Fourteen</p>
           <p class="subtitle">Subtitle</p>
@@ -129,7 +129,7 @@
           </div>
         </article>
       </div>
-    </div>-->
+    </div>
   </div>
 </template>
 
@@ -146,8 +146,8 @@ export default {
 
 <style scoped>
 @font-face {
-  font-family: fzqiudaoyu;
-  src: url("/fzqiudaoyu.ttf");
+  font-family: FZMingSTJW;
+  src: url("/FZMingSTJW.ttf");
 }
 #navigator {
   margin-top: 2%;
@@ -155,10 +155,42 @@ export default {
 article {
   cursor: pointer;
 }
+router-link {
+  text-decoration: none;
+}
+
+#card:hover {
+  filter: brightness(0.9);
+}
+/* #card_devops {
+  background-color: #eed6bb;
+}
+#card_raft {
+  background-color: rgb(160, 191, 124);
+}
+#card_elk {
+  background-color: #c298b8;
+}
+#card_gm239 {
+  background-color: #6fc7e1;
+}
+#card_devdoc {
+  background-color: rgb(204, 202, 169);
+}
+#card_taomeedoc {
+  background-color: rgb(186, 227, 217);
+}
+#card_plans {
+  background-color: rgb(219, 207, 202);
+} */
+.title {
+  color: #b8860b;
+  font-family: FZMingSTJW;
+}
 .subtitle {
-  font-family: fzqiudaoyu;
+  font-family: FZMingSTJW;
 }
 .content {
-  font-family: fzqiudaoyu;
+  font-family: FZMingSTJW;
 }
 </style>

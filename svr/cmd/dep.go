@@ -98,9 +98,9 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		markdown := fmt.Sprintf(dingdingStr, depInfo.Type, depInfo.Type,
 			time.Now().Format("2006-01-02 15:04:05"),
 			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=break",
-				utils.GetWebDomain(), depuuid),
+				utils.GetWebDomain()[0], depuuid),
 			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=view",
-				utils.GetWebDomain(), depuuid))
+				utils.GetWebDomain()[0], depuuid))
 
 		reth, errh := utils.HttpPost(utils.GetDingdingWebhook(), markdown)
 		if errh != nil {

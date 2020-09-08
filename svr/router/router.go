@@ -31,7 +31,7 @@ func Route(app *fiber.App) {
 	//用于web页面展示的请求, 允许cookie等
 	web := app.Group("/web")
 	web.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{utils.GetWebDomain()},
+		AllowOrigins:     utils.GetWebDomain(),
 		AllowCredentials: true,
 	}))
 

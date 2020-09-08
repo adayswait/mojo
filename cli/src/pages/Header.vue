@@ -32,8 +32,8 @@
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link">More</a>
               <div class="navbar-dropdown">
-                <a class="navbar-item" target="_blank" href="http://10.1.1.239">239GM</a>
-                <a class="navbar-item" target="_blank" href="http://plan_s">plan_s</a>
+                <!-- <a class="navbar-item" target="_blank" href="http://10.1.1.239">239GM</a>
+                <a class="navbar-item" target="_blank" href="http://plan_s">plan_s</a> -->
                 <a
                   class="navbar-item"
                   target="_blank"
