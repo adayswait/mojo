@@ -165,9 +165,10 @@ export default {
 </script>
 
 <style scoped>
+/* 方正黑隶简体 */
 @font-face {
-  font-family: FZMingSTJW;
-  src: url("/FZMingSTJW.ttf");
+  font-family: FZHeiLJW;
+  src: url("/FZHeiLJW.TTF");
 }
 #navigator {
   margin-top: 2%;
@@ -230,12 +231,12 @@ article {
 } */
 .title {
   color: #b8860b;
-  font-family: FZMingSTJW;
+  font-family: FZHeiLJW;
 }
 .subtitle {
-  font-family: FZMingSTJW;
+  font-family: FZHeiLJW;
 }
 .content {
-  font-family: FZMingSTJW;
+  font-family: FZHeiLJW;
 }
 </style>

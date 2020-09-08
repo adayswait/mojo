@@ -12,14 +12,15 @@
             </figure>-->
             <div class="media-content">
               <div class="content">
-                <p>
-                  <strong>{{note.user}}</strong>
+                <p id="lzname">
+                  <strong>{{note[1].user}}</strong>
                   <small>
                     发布于
-                    {{new Date(note.time).toLocaleString()}}
+                    {{new Date(note[1].time).toLocaleString()}}
                   </small>
                 </p>
-                <p v-html="note.content"></p>
+                <hr />
+                <p v-html="note[1].content"></p>
               </div>
             </div>
           </article>
@@ -86,11 +87,15 @@ export default {
   methods: {
     loadNotes: async function () {
       const ret = await this.$mojoapi.get(`/web/db/${this.tableName}`);
-      let tempList = [];
+      let sortList = [];
       for (let i = 0; i < ret.data.length; i += 2) {
-        tempList.splice(0, 0, JSON.parse(ret.data[i + 1]));
+        sortList.push([ret.data[i], JSON.parse(ret.data[i + 1])]);
       }
-      this.notes = tempList;
+      sortList.sort((a, b) => {
+        return parseInt(b[0]) - parseInt(a[0]);
+      });
+      window.console.log(sortList);
+      this.notes = sortList;
     },
     submit: async function () {
       if (this.noteContent.length === 0) {
@@ -125,13 +130,29 @@ export default {
 </script>
 
 <style scoped>
+/* 方正黑隶简体 */
+@font-face {
+  font-family: FZHeiLJW;
+  src: url("/FZHeiLJW.TTF");
+}
+table {
+  font-family: FZHeiLJW;
+}
 .container {
   margin-top: 2%;
 }
 .box {
   margin-bottom: 10px;
 }
+
 tr {
-  margin: 0;
+  margin: 0px;
+}
+hr {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+#lzname {
+  margin-bottom: 3px;
 }
 </style>
