@@ -32,6 +32,7 @@ func initDb() {
 		createBucket(global.BUCKET_OPS_DEVINI)
 		createBucket(global.BUCKET_ITEMS_DESC)
 		createBucket(global.BUCKET_OPS_DEPBIL)
+		createBucket(global.BUCKET_USR_NOTEPD)
 	}
 }
 

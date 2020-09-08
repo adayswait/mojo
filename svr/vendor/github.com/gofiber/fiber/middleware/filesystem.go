@@ -209,6 +209,8 @@ func dirList(c *fiber.Ctx, f http.File) error {
 		if !fi.IsDir() {
 			auxStr = fmt.Sprintf("file, %d bytes", fi.Size())
 			className = "file"
+		} else {
+			pathEscaped += "/"
 		}
 		c.Write(fmt.Sprintf(`<li><a href="%s" class="%s">%s</a>, %s, last modified %s</li>`,
 			pathEscaped, className, html.EscapeString(name), auxStr, fi.ModTime()))

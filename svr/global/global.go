@@ -60,6 +60,8 @@ const BUCKET_OPS_DEPINI = "sys:ops:depini"
 const BUCKET_OPS_DEVINI = "sys:ops:devini"
 const BUCKET_OPS_DEPBIL = "sys:ops:depbil"
 
+const BUCKET_USR_NOTEPD = "sys:usr:notepd"
+
 //cookie名
 const ACCESS_TOKEN = "access_token"
 

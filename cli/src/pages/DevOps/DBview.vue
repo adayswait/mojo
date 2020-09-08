@@ -24,7 +24,7 @@
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class v-if="$store.getters.userInfo.group<=1">
         <tr v-for="item in this.tableList" :key="item[0]">
           <td>
             <input class="input" type="text" v-model="item[0]" readonly />
@@ -55,7 +55,7 @@
           </th>
         </tr>
       </thead>
-      <tbody class>
+      <tbody class v-if="$store.getters.userInfo.group<=1">
         <tr v-for="k in this.keyValueList" :key="k[0]">
           <td style="width:20%">
             <input class="input" type="text" v-model="k[0]" />

@@ -20,7 +20,7 @@
           </th>
         </tr>
       </thead>
-      <tbody class>
+      <tbody v-if="$store.getters.userInfo.group<=1">
         <tr v-for="(k,i) in depIniList" :key="i">
           <td>
             <input class="input" type="text" v-model="k[1]" />

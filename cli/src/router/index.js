@@ -15,11 +15,13 @@ import DevIni from "@/pages/DevOps/DevIni.vue";
 import NewUsr from "@/pages/DevOps/NewUsr.vue";
 import DBview from "@/pages/DevOps/DBview.vue";
 import DevTools from '@/pages/DevOps/DevTools.vue';
+import Note from "@/pages/Note.vue";
 import ElkStack from "@/pages/ElkStack.vue";
 import Kibana from '@/pages/ElkStack/Kibana.vue';
 import IFrame from "@/pages/IFrame.vue";
 import GM239 from '@/pages/IFrame/GM239.vue';
 import Plans from '@/pages/IFrame/Plans.vue'
+import Cnpm from '@/pages/IFrame/Cnpm.vue';
 import DevDoc from '@/pages/IFrame/DevDoc.vue'
 import TaomeeDoc from '@/pages/IFrame/TaomeeDoc.vue'
 import Visitor from "@/pages/Visitor.vue";
@@ -123,6 +125,10 @@ const router = new Router({
             ]
         },
         {
+            path: "/note",
+            component: Note
+        },
+        {
             path: "/iframe",
             component: IFrame,
             children: [
@@ -142,6 +148,10 @@ const router = new Router({
                     path: "taomeedoc",
                     component: TaomeeDoc
                 },
+                {
+                    path: "cnpm",
+                    component: Cnpm
+                }
             ]
         },
         {

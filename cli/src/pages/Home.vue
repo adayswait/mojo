@@ -31,7 +31,7 @@
       <div class="tile is-vertical is-9">
         <div class="tile">
           <div class="tile is-parent" id="card">
-            <router-link to="/devops" class="tile is-child box" id="card_devops">
+            <router-link to="/devops" class="tile is-child box" id="card_devops" hidefocus="true">
               <p class="title">运维</p>
               <div class="content">
                 <p>
@@ -75,7 +75,9 @@
               <p class="title">内网GM</p>
               <p class="subtitle">10.1.1.239</p>
               <div class="content">
-                <p>内网GM工具</p>
+                <p>
+                  <strong>内网GM工具</strong>
+                </p>
               </div>
             </router-link>
           </div>
@@ -83,7 +85,9 @@
             <router-link to="/iframe/plans" class="tile is-child box is-info" id="card_plans">
               <p class="title">QA多开</p>
               <div class="content">
-                <p>QA前端多开页面</p>
+                <p>
+                  <strong>前端多开页面</strong>
+                </p>
               </div>
             </router-link>
           </div>
@@ -94,7 +98,17 @@
           <div class="content">
             <p class="title">开发文档</p>
             <div class="content">
-              <p>各种各样的文档</p>
+              <p>
+                <br />
+                <br />
+                <strong>语言, 标准库, 第三方库的文档</strong>
+              </p>
+              <p>
+                <strong>本目录下的文档存储在内网服务器上</strong>
+              </p>
+              <p>
+                <strong>访问速度比官网快很多</strong>
+              </p>
             </div>
           </div>
         </router-link>
@@ -103,29 +117,35 @@
 
     <div class="tile is-ancestor">
       <div class="tile is-parent" id="card">
-        <article class="tile is-child box">
-          <p class="title">Twelve</p>
-          <p class="subtitle">Subtitle</p>
+        <a
+          href="https://developer.aliyun.com/mirror/npm/package/cnpm"
+          target="_blank"
+          class="tile is-child box"
+        >
+          <p class="title">NPM Mirror</p>
           <div class="content">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut.</p>
+            <p>
+              <strong>the package manager for Node.js</strong>
+            </p>
           </div>
-        </article>
+        </a>
       </div>
       <div class="tile is-parent is-6" id="card">
-        <article class="tile is-child box">
-          <p class="title">Thirteen</p>
-          <p class="subtitle">Subtitle</p>
+        <router-link to="/note" class="tile is-child box">
+          <p class="title">记事本or留言板?</p>
           <div class="content">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis feugiat facilisis.</p>
+            <p>
+              <strong>......</strong>
+            </p>
           </div>
-        </article>
+        </router-link>
       </div>
       <div class="tile is-parent" id="card">
         <article class="tile is-child box">
-          <p class="title">Fourteen</p>
+          <p class="title">Developing</p>
           <p class="subtitle">Subtitle</p>
           <div class="content">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut.</p>
+            <p>coming soon</p>
           </div>
         </article>
       </div>
@@ -155,13 +175,38 @@ export default {
 article {
   cursor: pointer;
 }
-router-link {
-  text-decoration: none;
+#card:hover {
+  filter: brightness(1);
 }
 
-#card:hover {
-  filter: brightness(0.9);
+#card:hover::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  z-index: -1;
 }
+#card:hover::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  z-index: -2;
+  filter: blur(5px);
+}
+/* #card:hover::before, */
+#card:hover::after {
+  background: linear-gradient(
+    rgba(51, 230, 202, 0.1),
+    rgba(51, 230, 202, 0.1),
+    rgba(51, 230, 202, 0.1)
+  );
+}
+
 /* #card_devops {
   background-color: #eed6bb;
 }
