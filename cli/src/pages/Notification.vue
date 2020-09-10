@@ -11,7 +11,6 @@
             'is-info':message[1]==$store.state.MESSAGE_TYPE.INFO,
           }"
         >
-          <!-- <button class="delete"></button> -->
           {{message[2]}}
         </div>
       </tr>
@@ -32,16 +31,15 @@ export default {
 
 <style scoped>
 #blackboard {
-  position: absolute;
-  right: 0px;
+  position: fixed;
+  right: 0%;
   z-index: 100;
-  filter: alpha(Opacity=50);
-  -moz-opacity: 0.5;
+  /* filter: alpha(Opacity=50); */
   opacity: 0.5;
   pointer-events: none;
-  margin-top: 20px;
+  top: 6%;
 }
 #notice {
-  margin-bottom: 2px;
+  margin-bottom: 5px;
 }
 </style>

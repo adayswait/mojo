@@ -1,5 +1,7 @@
 <template>
   <div class="container">
+    <br />
+    <br />
     <div class="columns">
       <div class="column">
         <p>
@@ -71,7 +73,6 @@ export default {
   height: 400px;
 }
 .button is-dark {
-  /* position: absolute; */
   margin: auto auto;
 }
 .delete {

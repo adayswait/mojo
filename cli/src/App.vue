@@ -1,12 +1,10 @@
 <template>
   <div id="app">
     <Header />
-    <br />
     <Notification />
     <br />
     <br />
     <router-view />
-    <br />
     <Footer />
   </div>
 </template>
@@ -25,11 +23,4 @@ export default {
 };
 </script>
 <style>
-/* @font-face {
-  font-family: FZHeiLJW;
-  src: url("/FZHeiLJW.TTF");
-}
-#app {
-  font-family: FZHeiLJW;
-} */
 </style>;

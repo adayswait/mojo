@@ -1,5 +1,7 @@
 <template>
   <div class="container">
+    <br />
+    <br />
     <div class="columns">
       <div class="column">
         <button class="delete is-danger" @click="changeVisible(0)"></button>

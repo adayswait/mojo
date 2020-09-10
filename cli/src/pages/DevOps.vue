@@ -188,6 +188,7 @@ export default {
   background-color: #f1f1f1;
 }
 #devopsPage {
+  margin-top: 20px;
   font-family: consolas;
 }
 

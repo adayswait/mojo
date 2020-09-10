@@ -1,64 +1,66 @@
 <template>
-  <div class="container">
+  <div>
     <Login />
-    <table class="table is-striped is-fullwidth" v-if="!$store.state.visible.Login">
-      <tr v-for="(note,i) in notes" :key="i">
-        <div class="box">
-          <article class="media is-fullwidth">
-            <!-- <figure class="media-left">
+    <div class="container">
+      <table class="table is-striped is-fullwidth" v-if="!$store.state.visible.Login">
+        <tr v-for="(note,i) in notes" :key="i">
+          <div class="box">
+            <article class="media is-fullwidth">
+              <!-- <figure class="media-left">
               <p class="image is-64x64">
                 <img src="./../assets/logo.png" />
               </p>
-            </figure>-->
-            <div class="media-content">
-              <div class="content">
-                <p id="lzname">
-                  <strong>{{note[1].user}}</strong>
-                  <small>
-                    发布于
-                    {{new Date(note[1].time).toLocaleString()}}
-                  </small>
-                </p>
-                <hr />
-                <p v-html="note[1].content"></p>
+              </figure>-->
+              <div class="media-content">
+                <div class="content">
+                  <p id="lzname">
+                    <strong>{{note[1].user}}</strong>
+                    <small>
+                      发布于
+                      {{new Date(note[1].time).toLocaleString()}}
+                    </small>
+                  </p>
+                  <hr />
+                  <p v-html="note[1].content"></p>
+                </div>
               </div>
-            </div>
-          </article>
-        </div>
-      </tr>
-    </table>
-    <br />
-    <br />
-    <article class="media" v-if="!$store.state.visible.Login">
-      <!-- <figure class="media-left">
+            </article>
+          </div>
+        </tr>
+      </table>
+      <br />
+      <br />
+      <article class="media" v-if="!$store.state.visible.Login">
+        <!-- <figure class="media-left">
         <p class="image is-64x64">
           <img src="./../assets/logo.png" />
         </p>
-      </figure>-->
-      <div class="media-content">
-        <div class="field" style="height:350px;">
-          <p class="control">
-            <quill-editor
-              ref="myTextEditor"
-              v-model="noteContent"
-              :options="editorOption"
-              style="height:300px;"
-            ></quill-editor>
-          </p>
-        </div>
-        <div class="field">
-          <div class="level-item has-text-centered">
+        </figure>-->
+        <div class="media-content">
+          <div class="field" style="height:350px;">
             <p class="control">
-              <button
-                class="button is-primary"
-                @click="submit"
-                :class="{'is-loading':submitting}"
-              >记录笔记</button>
+              <quill-editor
+                ref="myTextEditor"
+                v-model="noteContent"
+                :options="editorOption"
+                style="height:300px;"
+              ></quill-editor>
             </p>
           </div>
+          <div class="field">
+            <div class="level-item has-text-centered">
+              <p class="control">
+                <button
+                  class="button is-primary"
+                  @click="submit"
+                  :class="{'is-loading':submitting}"
+                >记录笔记</button>
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </div>
   </div>
 </template>
 
@@ -139,7 +141,7 @@ table {
   font-family: FZHeiLJW;
 }
 .container {
-  margin-top: 2%;
+  margin-top: 10px;
 }
 .box {
   margin-bottom: 10px;

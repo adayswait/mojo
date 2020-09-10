@@ -1,15 +1,22 @@
 <template>
 <div>
-  <iframe title="GM239" width="100%" height="850px" src="http://10.1.1.239">
-    <head>
-      <meta http-equiv="Content-Type" content="text/html; charset=gbk" />
-    </head>
+  <iframe title="GM239" width="100%" :height="iframeHeight" src="http://10.1.1.239">
   </iframe>
 </div>
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return {
+      iframeHeight: 0,
+    };
+  },
+  mounted() {
+    //bulma navbar的默认高度为3.25rem 换算下来是52px
+    this.iframeHeight = document.documentElement.clientHeight - 60;
+  },
+};
 </script>
 
 <style scoped>
