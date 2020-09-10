@@ -20,8 +20,9 @@ import ElkStack from "@/pages/ElkStack.vue";
 import Kibana from '@/pages/ElkStack/Kibana.vue';
 import IFrame from "@/pages/IFrame.vue";
 import GM239 from '@/pages/IFrame/GM239.vue';
+import GM from '@/pages/IFrame/GM.vue';
 import Plans from '@/pages/IFrame/Plans.vue'
-import Cnpm from '@/pages/IFrame/Cnpm.vue';
+import ClientHub from '@/pages/IFrame/ClientHub.vue';
 import DevDoc from '@/pages/IFrame/DevDoc.vue'
 import TaomeeDoc from '@/pages/IFrame/TaomeeDoc.vue'
 import Visitor from "@/pages/Visitor.vue";
@@ -141,6 +142,10 @@ const router = new Router({
                     component: GM239
                 },
                 {
+                    path: "gm",
+                    component: GM
+                },
+                {
                     path: "devdoc",
                     component: DevDoc
                 },
@@ -149,8 +154,8 @@ const router = new Router({
                     component: TaomeeDoc
                 },
                 {
-                    path: "cnpm",
-                    component: Cnpm
+                    path: "clienthub",
+                    component: ClientHub
                 }
             ]
         },

@@ -43,7 +43,7 @@
           <div class="tile is-8 is-vertical">
             <div class="tile">
               <div class="tile is-parent" id="card">
-                <router-link to="/e404" class="tile is-child box" id="card_raft">
+                <router-link to="/centersvr" class="tile is-child box" id="card_raft">
                   <p class="title">Raft集群</p>
                   <div class="content">
                     <strong></strong>
@@ -73,10 +73,9 @@
           <div class="tile is-8 is-parent" id="card">
             <router-link to="/iframe/gm239" class="tile is-child box" id="card_gm239">
               <p class="title">内网GM</p>
-              <p class="subtitle">10.1.1.239</p>
               <div class="content">
                 <p>
-                  <strong>内网GM工具</strong>
+                  <strong>内网QA服</strong>
                 </p>
               </div>
             </router-link>
@@ -117,18 +116,14 @@
 
     <div class="tile is-ancestor">
       <div class="tile is-parent" id="card">
-        <a
-          href="https://developer.aliyun.com/mirror/npm/package/cnpm"
-          target="_blank"
-          class="tile is-child box"
-        >
-          <p class="title">NPM Mirror</p>
+        <router-link to="/iframe/clienthub" class="tile is-child box">
+          <p class="title">前端目录</p>
           <div class="content">
             <p>
-              <strong>the package manager for Node.js</strong>
+              <strong>客户端汇总</strong>
             </p>
           </div>
-        </a>
+        </router-link>
       </div>
       <div class="tile is-parent is-6" id="card">
         <router-link to="/note" class="tile is-child box">
@@ -140,14 +135,16 @@
           </div>
         </router-link>
       </div>
+
       <div class="tile is-parent" id="card">
-        <article class="tile is-child box">
-          <p class="title">Developing</p>
-          <p class="subtitle">Subtitle</p>
+        <router-link to="/iframe/gm" class="tile is-child box">
+          <p class="title">外网GM</p>
           <div class="content">
-            <p>coming soon</p>
+            <p>
+              <strong>外网正式服</strong>
+            </p>
           </div>
-        </article>
+        </router-link>
       </div>
     </div>
   </div>

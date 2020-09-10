@@ -63,7 +63,7 @@ const BUCKET_OPS_DEPBIL = "sys:ops:depbil"
 const BUCKET_USR_NOTEPD = "sys:usr:notepd"
 
 //cookie名
-const ACCESS_TOKEN = "access_token"
+const ACCESS_TOKEN = "mojo_access_token"
 
 //session key
 const SESSION_KEY_USER = "user"

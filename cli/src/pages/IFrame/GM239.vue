@@ -13,7 +13,4 @@ export default {};
 </script>
 
 <style scoped>
-iframe {
-  margin-top: -20px;
-}
 </style>
