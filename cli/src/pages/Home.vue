@@ -1,33 +1,7 @@
 <template>
   <div class="container">
-    <!-- <div class="tile is-ancestor">
-      <div class="tile is-parent">
-        <article class="tile is-child box">
-          <p class="title">One</p>
-          <p class="subtitle">Subtitle</p>
-        </article>
-      </div>
-      <div class="tile is-parent">
-        <article class="tile is-child box">
-          <p class="title">Two</p>
-          <p class="subtitle">Subtitle</p>
-        </article>
-      </div>
-      <div class="tile is-parent">
-        <article class="tile is-child box">
-          <p class="title">Three</p>
-          <p class="subtitle">Subtitle</p>
-        </article>
-      </div>
-      <div class="tile is-parent">
-        <article class="tile is-child box">
-          <p class="title">Four</p>
-          <p class="subtitle">Subtitle</p>
-        </article>
-      </div>
-    </div>-->
-
-    <div class="tile is-ancestor" id="navigator">
+    <!-- <audio src="/hua.mp3" loop autoplay="autoplay"></audio> -->
+    <div class="tile is-ancestor">
       <div class="tile is-vertical is-9">
         <div class="tile">
           <div class="tile is-parent" id="card">
@@ -71,6 +45,7 @@
         </div>
         <div class="tile">
           <div class="tile is-8 is-parent" id="card">
+            <!-- :to="{path:'/iframe/basic',query:{srcurl:'http://10.1.1.239'}}" -->
             <router-link to="/iframe/gm239" class="tile is-child box" id="card_gm239">
               <p class="title">内网GM</p>
               <div class="content">
@@ -147,6 +122,32 @@
         </router-link>
       </div>
     </div>
+    <!-- <div class="tile is-ancestor">
+      <div class="tile is-parent">
+        <article class="tile is-child box">
+          <p class="title">One</p>
+          <p class="subtitle">Subtitle</p>
+        </article>
+      </div>
+      <div class="tile is-parent">
+        <article class="tile is-child box">
+          <p class="title">Two</p>
+          <p class="subtitle">Subtitle</p>
+        </article>
+      </div>
+      <div class="tile is-parent">
+        <article class="tile is-child box">
+          <p class="title">Three</p>
+          <p class="subtitle">Subtitle</p>
+        </article>
+      </div>
+      <div class="tile is-parent">
+        <article class="tile is-child box">
+          <p class="title">Four</p>
+          <p class="subtitle">Subtitle</p>
+        </article>
+      </div>
+    </div> -->
   </div>
 </template>
 
@@ -167,7 +168,7 @@ export default {
   font-family: FZHeiLJW;
   src: url("/FZHeiLJW.TTF");
 }
-#navigator {
+.container {
   margin-top: 2%;
 }
 article {

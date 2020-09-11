@@ -16,6 +16,9 @@
             <abbr title="路径">路径</abbr>
           </th>
           <th>
+            <abbr title="releash后置任务脚本ar.sh执行参数">ar参数</abbr>
+          </th>
+          <th>
             <a class="button is-small is-rounded is-success is-vcentered" @click="newDepIni">新建</a>
           </th>
         </tr>
@@ -45,14 +48,17 @@
               </div>
             </div>
           </td>
-          <td>
+          <td id="servicename">
             <input class="input" type="text" v-model="k[2]" />
           </td>
-          <td>
+          <td id="serviceaddr">
             <input class="input" type="text" v-model="k[3]" />
           </td>
-          <td>
+          <td id="servicepath">
             <input class="input" type="text" v-model="k[4]" />
+          </td>
+          <td id="serviceparam">
+            <input class="input" type="text" v-model="k[5]" />
           </td>
           <td>
             <button
@@ -184,5 +190,17 @@ export default {
 <style scoped>
 #opsbtn {
   margin-top: 4px;
+}
+#servicename {
+  width: 15%;
+}
+#serviceaddr {
+  width: 15%;
+}
+#servicepath {
+  width: 30%;
+}
+#serviceparam {
+  width: 13%;
 }
 </style>

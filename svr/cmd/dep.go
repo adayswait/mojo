@@ -38,8 +38,14 @@ func init() {
 	}`
 }
 
+/*
+部署发布需要四个脚本文件
+bd.sh(可选) 拉取代码前执行 before deploy
+ad.sh(可选) 拉取代码后执行 after deploy
+br.sh(必需) 拉取代码前执行 before release 执行成功需在脚本末尾输出mojobrok
+ar.sh(必需) 拉取代码后执行 after release  执行成功需在脚本末尾输出mojoarok
+*/
 func SvnDep(depInfo global.DepInfo, force bool) {
-
 	depuuid := uuid.New().String()
 	depInfo.StartTime = time.Now().Unix()
 	global.Depuuid2DepInfo.Store(depuuid, depInfo)
@@ -51,21 +57,29 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 	}
 	path = fmt.Sprintf("%s/%s/", path, depInfo.DepId)
 
+	//deploy前置任务,bd means before deploy
+	beforeDeployShellPath := path + "bd.sh"
+	if utils.IsPathExist(beforeDeployShellPath) &&
+		!utils.IsDir(beforeDeployShellPath) {
+		beforeDeployCmd := exec.Command("bash", beforeDeployShellPath)
+		beforeDeployErr := beforeDeployCmd.Run()
+		if beforeDeployErr != nil {
+			mlog.Log("before deploy cmd run failed :", beforeDeployShellPath,
+				"error", beforeDeployErr)
+		} else {
+			mlog.Log("before deploy cmd run succeed")
+		}
+	} else {
+		mlog.Log("before deploy cmd not found")
+	}
+
+	//同步代码
 	cleanupCmd := exec.Command("rm", "-rf", path)
 	cleanupErr := cleanupCmd.Run()
 	if cleanupErr != nil {
 		mlog.Log("rm -rf", path, "err:", cleanupErr)
 		return
 	}
-	// revision := "-r" + depInfo.Revision
-	// svnExportCmd := exec.Command("svn", "export", "--force",
-	// 	revision, depInfo.RepoUrl, path)
-	// fmt.Println(svnExportCmd)
-	// svnExportErr := svnExportCmd.Run()
-	// if svnExportErr != nil {
-	// 	mlog.Log("svn export err", svnExportErr, svnExportCmd)
-	// 	return
-	// }
 	coCmd := fmt.Sprintf("svn export --force -r%s %s %s",
 		depInfo.Revision, depInfo.RepoUrl, path)
 	expectCo, _, _ := expect.Spawn(coCmd, -1)
@@ -85,13 +99,21 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 	}
 	mlog.Log("svn export passed")
 
-	runImportCmd := exec.Command(path + "/config/import_json_from_design.sh")
-	runImportErr := runImportCmd.Run()
-	if runImportErr != nil {
-		mlog.Log(path+"/config/import_json_from_design.sh err:", runImportErr)
-		return
+	//deploy后置任务,ad means after deploy
+	afterDeployShellPath := path + "ad.sh"
+	if utils.IsPathExist(afterDeployShellPath) &&
+		!utils.IsDir(afterDeployShellPath) {
+		afterDeployCmd := exec.Command("bash", afterDeployShellPath)
+		afterDeployErr := afterDeployCmd.Run()
+		if afterDeployErr != nil {
+			mlog.Log("after deploy cmd run failed :", afterDeployShellPath,
+				"error", afterDeployErr)
+		} else {
+			mlog.Log("after deploy cmd run succeed")
+		}
+	} else {
+		mlog.Log("after deploy cmd not found")
 	}
-	mlog.Log("import json passed")
 
 	if !force {
 		//发布更新通知
@@ -178,14 +200,6 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		if exist == false {
 			continue
 		}
-		rsyncErr := Rsync(path, idep[3], macini.User, macini.Passwd,
-			idep[2], macini.Port,
-			[]string{"-zarv", "--copy-links",
-				fmt.Sprintf("--exclude-from=%s", utils.GetExcludeFrom())},
-			5*time.Minute)
-		if rsyncErr != nil {
-			continue
-		}
 
 		sshClt, errdial := ssh.Dial("tcp",
 			fmt.Sprintf("%s:%s", idep[2], macini.Port),
@@ -200,7 +214,6 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		}
 		defer sshClt.Close()
 		mlog.Log("ssh dial passed")
-
 		essh, _, errssh := expect.SpawnSSH(sshClt, time.Minute)
 		if errssh != nil {
 			mlog.Log(errssh)
@@ -214,26 +227,42 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			continue
 		}
 		mlog.Log("ssh login passed")
-		essh.Send(idep[3] + "/stop.sh\n")
-		retstop, _, estop := essh.Expect(regexp.MustCompile("$"),
+
+		essh.Send("bash " + idep[3] + "/br.sh\n")
+		retstop, _, estop := essh.Expect(regexp.MustCompile("mojobrok"),
 			10*time.Second)
 		if estop != nil {
-			mlog.Log("stop old service failed", estop, retstop)
-			continue
+			mlog.Log("before release cmd exec error", estop, retstop)
 		} else {
-			mlog.Log("stop old service passed")
+			mlog.Log("before release cmd exec succeed")
 		}
-		essh.Send(idep[3] + "/start.sh\n")
-		retstart, _, estart := essh.Expect(regexp.MustCompile("启动"),
+
+		rsyncErr := Rsync(path, idep[3], macini.User, macini.Passwd,
+			idep[2], macini.Port,
+			[]string{"-zarv", "--copy-links",
+				fmt.Sprintf("--exclude-from=%s", utils.GetExcludeFrom())},
+			5*time.Minute)
+		if rsyncErr != nil {
+			continue
+		}
+
+		var arcmd string
+		if len(idep) > 4 && len(idep[4]) != 0 {
+			arcmd = "bash " + idep[3] + "/ar.sh " + idep[4] + "\n"
+		} else {
+			arcmd = "bash " + idep[3] + "/ar.sh\n"
+		}
+		essh.Send(arcmd)
+		retstart, _, estart := essh.Expect(regexp.MustCompile("mojoarok"),
 			10*time.Second)
 		if estart != nil {
-			mlog.Log("start new service failed", estart, retstart)
+			mlog.Log("after release cmd exec error", arcmd, estart, retstart)
 			continue
 		} else {
-			mlog.Log("start new service passed")
+			mlog.Log("after release cmd exec succeed", arcmd)
 		}
 	}
-	mlog.Log("dep all done")
+	mlog.Log(depInfo.DepId, "dep all done")
 	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SUCCESS)
 
 	return

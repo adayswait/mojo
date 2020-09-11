@@ -2,7 +2,7 @@
 import axios from 'axios'
 
 const httpClient = axios.create({
-    baseURL: 'http://10.1.1.248/',
+    baseURL: 'http://10.1.1.248:8000/',
     timeout: 60000,
     headers: { 'X-Custom-Header': 'mojo' },
     withCredentials: true
