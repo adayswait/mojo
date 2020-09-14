@@ -1,82 +1,88 @@
 <template>
   <div class="box">
-    <table class="table is-striped is-fullwidth has-text-centered">
-      <thead>
-        <tr>
-          <th>
-            <abbr title="服务类型">服务类型</abbr>
-          </th>
-          <th>
-            <abbr title="服务名">服务名</abbr>
-          </th>
-          <th>
-            <abbr title="地址">地址</abbr>
-          </th>
-          <th>
-            <abbr title="路径">路径</abbr>
-          </th>
-          <th>
-            <abbr title="releash后置任务脚本ar.sh执行参数">ar参数</abbr>
-          </th>
-          <th>
-            <a class="button is-small is-rounded is-success is-vcentered" @click="newDepIni">新建</a>
-          </th>
-        </tr>
-      </thead>
-      <tbody class>
-        <tr v-for="(k,i) in depIniList" :key="i">
-          <td>
-            <div class="dropdown is-hoverable">
-              <div class="dropdown-trigger">
-                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                  {{k[1]}}
-                  <span class="icon is-small">
-                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                  </span>
-                </button>
-              </div>
-              <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                <div class="dropdown-content">
-                  <tr v-for="t in depTypeList" :key="t">
-                    <a
-                      class="dropdown-item"
-                      :class="{'is-active':t==k[1]}"
-                      @click="changeServerType(i,t)"
-                    >{{t}}</a>
-                  </tr>
+    <NoRights v-if="!($store.getters.userInfo.group<=1)" />
+    <div v-if="$store.getters.userInfo.group<=1">
+      <table class="table is-striped is-fullwidth has-text-centered">
+        <thead>
+          <tr>
+            <th>
+              <abbr title="服务类型">服务类型</abbr>
+            </th>
+            <th>
+              <abbr title="服务名">服务名</abbr>
+            </th>
+            <th>
+              <abbr title="地址">地址</abbr>
+            </th>
+            <th>
+              <abbr title="路径">路径</abbr>
+            </th>
+            <th>
+              <abbr title="releash后置任务脚本ar.sh执行参数">ar参数</abbr>
+            </th>
+            <th>
+              <a class="button is-small is-rounded is-success is-vcentered" @click="newDepIni">新建</a>
+            </th>
+          </tr>
+        </thead>
+        <tbody class>
+          <tr v-for="(k,i) in depIniList" :key="i">
+            <td>
+              <div class="dropdown is-hoverable">
+                <div class="dropdown-trigger">
+                  <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                    {{k[1]}}
+                    <span class="icon is-small">
+                      <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    </span>
+                  </button>
+                </div>
+                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                  <div class="dropdown-content">
+                    <tr v-for="t in depTypeList" :key="t">
+                      <a
+                        class="dropdown-item"
+                        :class="{'is-active':t==k[1]}"
+                        @click="changeServerType(i,t)"
+                      >{{t}}</a>
+                    </tr>
+                  </div>
                 </div>
               </div>
-            </div>
-          </td>
-          <td id="servicename">
-            <input class="input" type="text" v-model="k[2]" />
-          </td>
-          <td id="serviceaddr">
-            <input class="input" type="text" v-model="k[3]" />
-          </td>
-          <td id="servicepath">
-            <input class="input" type="text" v-model="k[4]" />
-          </td>
-          <td id="serviceparam">
-            <input class="input" type="text" v-model="k[5]" />
-          </td>
-          <td>
-            <button
-              id="opsbtn"
-              class="button is-primary is-small is-vcentered"
-              @click="uploadChange(i)"
-            >修改</button>
-            <button id="opsbtn" class="button is-danger is-small" @click="deleteIni(i)">删除</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+            <td id="servicename">
+              <input class="input" type="text" v-model="k[2]" />
+            </td>
+            <td id="serviceaddr">
+              <input class="input" type="text" v-model="k[3]" />
+            </td>
+            <td id="servicepath">
+              <input class="input" type="text" v-model="k[4]" />
+            </td>
+            <td id="serviceparam">
+              <input class="input" type="text" v-model="k[5]" />
+            </td>
+            <td>
+              <button
+                id="opsbtn"
+                class="button is-primary is-small is-vcentered"
+                @click="uploadChange(i)"
+              >修改</button>
+              <button id="opsbtn" class="button is-danger is-small" @click="deleteIni(i)">删除</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script>
+import NoRights from "@/pages/ErrorPage/NoRights.vue";
 export default {
-  name: "DepIni",
+  components: {
+    NoRights,
+  },
   data: function () {
     return {
       title: "DepIni",

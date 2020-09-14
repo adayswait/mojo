@@ -17,7 +17,7 @@
           <div class="tile is-8 is-vertical">
             <div class="tile">
               <div class="tile is-parent" id="card">
-                <router-link to="/centersvr" class="tile is-child box" id="card_raft">
+                <router-link to="/iframe/raft" class="tile is-child box" id="card_raft">
                   <p class="title">Raft集群</p>
                   <div class="content">
                     <strong></strong>

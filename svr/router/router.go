@@ -46,6 +46,7 @@ func Route(app *fiber.App) {
 
 	depWeb := web.Group("/dep")
 	depWeb.Get("/test", handler.Test)
+	depWeb.Put("/create", handler.CreateDep)
 	depWeb.Get("/submit", handler.SubmitDep)
 	depWeb.Get("/commithistory", handler.CommitHistory)
 	depWeb.Get("/progress", handler.ProgressList)

@@ -229,10 +229,13 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		mlog.Log("ssh login passed")
 
 		essh.Send("bash " + idep[3] + "/br.sh\n")
-		retstop, _, estop := essh.Expect(regexp.MustCompile("mojobrok"),
+		retbr, _, ebr := essh.Expect(regexp.MustCompile("mojobrok"),
 			10*time.Second)
-		if estop != nil {
-			mlog.Log("before release cmd exec error", estop, retstop)
+		if ebr != nil {
+			//before release脚本执行错误不中断后续流程
+			//因为首次发布的时候可能没有br.sh
+			//todo 首先传输br.sh到指定位置
+			mlog.Log("before release cmd exec error", ebr, retbr)
 		} else {
 			mlog.Log("before release cmd exec succeed")
 		}
@@ -253,10 +256,10 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			arcmd = "bash " + idep[3] + "/ar.sh\n"
 		}
 		essh.Send(arcmd)
-		retstart, _, estart := essh.Expect(regexp.MustCompile("mojoarok"),
+		retar, _, ear := essh.Expect(regexp.MustCompile("mojoarok"),
 			10*time.Second)
-		if estart != nil {
-			mlog.Log("after release cmd exec error", arcmd, estart, retstart)
+		if ear != nil {
+			mlog.Log("after release cmd exec error", arcmd, ear, retar)
 			continue
 		} else {
 			mlog.Log("after release cmd exec succeed", arcmd)

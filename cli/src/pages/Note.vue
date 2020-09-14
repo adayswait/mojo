@@ -125,7 +125,7 @@ export default {
       await this.loadNotes();
     },
   },
-  beforeMount: function () {
+  mounted: function () {
     this.loadNotes();
   },
 };

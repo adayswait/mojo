@@ -1,44 +1,50 @@
 <template>
   <div class="box">
-    <table class="table is-striped is-fullwidth has-text-centered">
-      <thead>
-        <tr>
-          <th>
-            <abbr title="用户名">用户名</abbr>
-          </th>
-          <th>
-            <abbr title="用户组">用户组</abbr>
-          </th>
-          <th>
-            <abbr title="操作">修改用户组</abbr>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="kv in this.userList" :key="kv[0]">
-          <td>{{kv[1].user}}</td>
-          <td>{{$store.state.GROUP[kv[1].group]}}</td>
-          <td>
-            <button class="button is-small is-warning" @click="changeRight(true,kv)">提权</button>
-            <button class="button is-small is-dark" @click="changeRight(false,kv)">降权</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <NoRights v-if="!($store.getters.userInfo.group<=0)" />
+    <div v-if="$store.getters.userInfo.group<=0">
+      <table class="table is-striped is-fullwidth has-text-centered">
+        <thead>
+          <tr>
+            <th>
+              <abbr title="用户名">用户名</abbr>
+            </th>
+            <th>
+              <abbr title="用户组">用户组</abbr>
+            </th>
+            <th>
+              <abbr title="操作">修改用户组</abbr>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="kv in this.userList" :key="kv[0]">
+            <td>{{kv[1].user}}</td>
+            <td>{{$store.state.GROUP[kv[1].group]}}</td>
+            <td>
+              <button class="button is-small is-warning" @click="changeRight(true,kv)">提权</button>
+              <button class="button is-small is-dark" @click="changeRight(false,kv)">降权</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 
 <script>
+import NoRights from "@/pages/ErrorPage/NoRights.vue";
 export default {
   name: "QueryUsr",
   data: function () {
-    this.dbTable = "sys:token:info";
-    this.getAllUser();
     return {
       title: "QueryUsr",
       userList: [],
+      dbTable: "sys:token:info",
     };
+  },
+  components: {
+    NoRights,
   },
   methods: {
     getAllUser: async function () {
@@ -102,6 +108,9 @@ export default {
         );
       }
     },
+  },
+  mounted: function () {
+    this.getAllUser();
   },
 };
 </script>

@@ -1,56 +1,62 @@
 <template>
   <div class="box">
-    <table class="table is-striped has-text-centered">
-      <thead>
-        <tr>
-          <th>
-            <abbr title="ip地址">ipv4地址</abbr>
-          </th>
-          <th>
-            <abbr title="用于ssh登录的端口">ssh端口</abbr>
-          </th>
-          <th>
-            <abbr title="用于ssh登录和操作用户名">用户名</abbr>
-          </th>
-          <th>
-            <abbr title="ssh账号的密码">密码</abbr>
-          </th>
-          <th>
-            <a class="button is-small is-rounded is-success is-vcentered" @click="newDepIni">新建</a>
-          </th>
-        </tr>
-      </thead>
-      <tbody v-if="$store.getters.userInfo.group<=1">
-        <tr v-for="(k,i) in depIniList" :key="i">
-          <td>
-            <input class="input" type="text" v-model="k[1]" />
-          </td>
-          <td>
-            <input class="input" type="text" v-model="k[2]" />
-          </td>
-          <td>
-            <input class="input" type="text" v-model="k[3]" />
-          </td>
-          <td>
-            <input class="input" type="text" v-model="k[4]" />
-          </td>
-          <td>
-            <button
-              id="opsbtn"
-              class="button is-primary is-small is-vcentered"
-              @click="uploadChange(i)"
-            >修改</button>
-            <button id="opsbtn" class="button is-danger is-small" @click="deleteIni(i)">删除</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <NoRights v-if="!($store.getters.userInfo.group<=1)" />
+    <div v-if="$store.getters.userInfo.group<=1">
+      <table class="table is-striped has-text-centered">
+        <thead>
+          <tr>
+            <th>
+              <abbr title="ip地址">ipv4地址</abbr>
+            </th>
+            <th>
+              <abbr title="用于ssh登录的端口">ssh端口</abbr>
+            </th>
+            <th>
+              <abbr title="用于ssh登录和操作用户名">用户名</abbr>
+            </th>
+            <th>
+              <abbr title="ssh账号的密码">密码</abbr>
+            </th>
+            <th>
+              <a class="button is-small is-rounded is-success is-vcentered" @click="newDepIni">新建</a>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(k,i) in depIniList" :key="i">
+            <td>
+              <input class="input" type="text" v-model="k[1]" />
+            </td>
+            <td>
+              <input class="input" type="text" v-model="k[2]" />
+            </td>
+            <td>
+              <input class="input" type="text" v-model="k[3]" />
+            </td>
+            <td>
+              <input class="input" type="text" v-model="k[4]" />
+            </td>
+            <td>
+              <button
+                id="opsbtn"
+                class="button is-primary is-small is-vcentered"
+                @click="uploadChange(i)"
+              >修改</button>
+              <button id="opsbtn" class="button is-danger is-small" @click="deleteIni(i)">删除</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script>
+import NoRights from "@/pages/ErrorPage/NoRights.vue";
 export default {
-  name: "MacIni",
+  components: {
+    NoRights,
+  },
   data: function () {
     let dbMacTableName = "sys:ops:macini";
     return {
@@ -140,7 +146,7 @@ export default {
       }
     },
   },
-  beforeMount: function () {
+  mounted: function () {
     this.getAllMacIni();
   },
 };

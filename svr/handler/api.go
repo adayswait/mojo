@@ -192,7 +192,7 @@ func UpdateDB(c *fiber.Ctx) {
 			"data": "session invalid"})
 		return
 	}
-	if int(group.(int64)) > int(global.GROUP_ADMIN) {
+	if int(group.(int64)) > int(global.GROUP_WHOSYOURDADDY) {
 		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
 			"data": "no right to do this"})
 		return
@@ -232,7 +232,7 @@ func DeleteDB(c *fiber.Ctx) {
 			"data": "session invalid"})
 		return
 	}
-	if int(group.(int64)) > int(global.GROUP_ADMIN) {
+	if int(group.(int64)) > int(global.GROUP_WHOSYOURDADDY) {
 		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
 			"data": "no right to do this"})
 		return
@@ -299,7 +299,33 @@ func CommitHistory(c *fiber.Ctx) {
 	c.JSON(fiber.Map{"code": global.RET_OK,
 		"data": ret})
 	return
+}
 
+func CreateDep(c *fiber.Ctx) {
+	store := sessions.Get(c)
+	// user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
+		return
+	}
+	body := struct {
+		Value string `json:"value"`
+	}{}
+
+	if errBp := c.BodyParser(&body); errBp != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
+			"data": errBp.Error()})
+		return
+	}
+	err := db.Set(global.BUCKET_OPS_DEPBIL, "", body.Value)
+	if err != nil {
+		c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+			"data": err.Error()})
+		return
+	}
+	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
 func SubmitDep(c *fiber.Ctx) {

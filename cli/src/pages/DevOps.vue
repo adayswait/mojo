@@ -40,8 +40,8 @@
                   </ul>
                 </li>
               </ul>
-              <p class="menu-label">Configuration</p>
-              <ul class="menu-list">
+              <p class="menu-label" v-if="$store.getters.userInfo.group<=1">Configuration</p>
+              <ul class="menu-list" v-if="$store.getters.userInfo.group<=1">
                 <li>
                   <a>项目配置</a>
                   <ul>
@@ -57,8 +57,8 @@
                   </ul>
                 </li>
               </ul>
-              <p class="menu-label">Management</p>
-              <ul class="menu-list">
+              <p class="menu-label" v-if="$store.getters.userInfo.group<=1">Management</p>
+              <ul class="menu-list" v-if="$store.getters.userInfo.group<=1">
                 <li>
                   <a>成员管理</a>
                   <ul>
@@ -80,6 +80,7 @@
                       <router-link
                         to="/devops/dbview"
                         :class="{'is-active':currFocus=='DataView'}"
+                        v-if="$store.getters.userInfo.group<=1"
                       >数据视图</router-link>
                     </li>
                     <li @click="focus('DevTools')">

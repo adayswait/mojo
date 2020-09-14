@@ -1,44 +1,50 @@
 <template>
   <div class="box">
-    <table class="table is-striped is-fullwidth has-text-centered">
-      <thead>
-        <tr>
-          <th>
-            <abbr title="服务类型">服务类型</abbr>
-          </th>
-          <th>
-            <abbr title="仓库地址">仓库地址</abbr>
-          </th>
-          <th>
-            <a class="button is-small is-rounded is-success is-vcentered" @click="newDepIni">新建</a>
-          </th>
-        </tr>
-      </thead>
-      <tbody class>
-        <tr v-for="(k,i) in devIniList" :key="i">
-          <td style="width: 20%;">
-            <input class="input" type="text" v-model="k[0]" />
-          </td>
-          <td>
-            <input class="input" type="text" v-model="k[1].url" />
-          </td>
-          <td style="width: 20%;">
-            <button
-              id="opsbtn"
-              class="button is-primary is-small is-vcentered"
-              @click="uploadChange(i)"
-            >修改</button>
-            <button id="opsbtn" class="button is-danger is-small" @click="deleteIni(i)">删除</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <NoRights v-if="!($store.getters.userInfo.group<=1)" />
+    <div v-if="$store.getters.userInfo.group<=1">
+      <table class="table is-striped is-fullwidth has-text-centered">
+        <thead>
+          <tr>
+            <th>
+              <abbr title="服务类型">服务类型</abbr>
+            </th>
+            <th>
+              <abbr title="仓库地址">仓库地址</abbr>
+            </th>
+            <th>
+              <a class="button is-small is-rounded is-success is-vcentered" @click="newDepIni">新建</a>
+            </th>
+          </tr>
+        </thead>
+        <tbody class>
+          <tr v-for="(k,i) in devIniList" :key="i">
+            <td style="width: 20%;">
+              <input class="input" type="text" v-model="k[0]" />
+            </td>
+            <td>
+              <input class="input" type="text" v-model="k[1].url" />
+            </td>
+            <td style="width: 20%;">
+              <button
+                id="opsbtn"
+                class="button is-primary is-small is-vcentered"
+                @click="uploadChange(i)"
+              >修改</button>
+              <button id="opsbtn" class="button is-danger is-small" @click="deleteIni(i)">删除</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
 <script>
+import NoRights from "@/pages/ErrorPage/NoRights.vue";
 export default {
-  name: "DepIni",
+  components: {
+    NoRights,
+  },
   data: function () {
     return {
       title: "DepIni",
@@ -116,7 +122,7 @@ export default {
       }
     },
   },
-  beforeMount: function () {
+  mounted: function () {
     this.getAllDevIni();
   },
 };

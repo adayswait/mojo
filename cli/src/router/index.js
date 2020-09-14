@@ -20,6 +20,7 @@ import ElkStack from "@/pages/ElkStack.vue";
 import Kibana from '@/pages/ElkStack/Kibana.vue';
 import IFrame from "@/pages/IFrame.vue";
 // import BasicFrame from '@/pages/IFrame/BasicFrame.vue';
+import Raft from '@/pages/IFrame/Raft.vue';
 import GM239 from '@/pages/IFrame/GM239.vue';
 import GM from '@/pages/IFrame/GM.vue';
 import Plans from '@/pages/IFrame/Plans.vue'
@@ -138,6 +139,10 @@ const router = new Router({
                 //     path: "basic",
                 //     component: BasicFrame
                 // },
+                {
+                    path: "raft",
+                    component: Raft
+                },
                 {
                     path: "plans",
                     component: Plans

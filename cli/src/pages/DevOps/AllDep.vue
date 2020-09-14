@@ -212,6 +212,9 @@ export default {
       }
     },
     submit: async function (idx, force) {
+      if (this.$store.getters.userInfo.group > 2) {
+        return this.$store.commit("warn", `no rights`);
+      }
       const ret = await this.$mojoapi.get(`/web/dep/submit`, {
         depid: this.allDeps[idx][0],
         force: force || false,

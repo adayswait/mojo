@@ -304,7 +304,7 @@ export default {
             return this.$store.commit("warn", `自定义上线至少选择一个服务`);
           }
         }
-        await this.$mojoapi.put(`/web/db/sys:ops:depbil`, {
+        await this.$mojoapi.put(`/web/dep/create`, {
           value: JSON.stringify({
             title: this.depTitle,
             type: this.currServerType,

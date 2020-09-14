@@ -1,27 +1,18 @@
 <template>
   <div>
-    <div class="box" v-if="!($store.getters.userInfo.group<=1)">
-      <NoRights />
-    </div>
-    <div v-if="!$store.state.visible.Login && $store.getters.userInfo.group<=1">
+    <div>
       <iframe
-        id="ikibana"
-        title="kibana"
+        title="raft"
         width="100%"
         :height="iframeHeight"
-        frameborder="0"
-        src="http://10.1.1.248:8002/app/logs"
+        src="http://10.1.1.248:9500/raft_stat"
       ></iframe>
     </div>
   </div>
 </template>
 
 <script>
-import NoRights from "@/pages/ErrorPage/NoRights.vue";
 export default {
-  components: {
-    NoRights,
-  },
   data() {
     return {
       iframeHeight: 0,
@@ -35,7 +26,4 @@ export default {
 </script>
 
 <style scoped>
-.iframe {
-  bottom: 0px;
-}
 </style>
