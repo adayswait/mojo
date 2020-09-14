@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"regexp"
 	"strconv"
@@ -127,7 +126,6 @@ func GetWebDomain() []string {
 			strconv.Itoa(int(mojoCnf.webPort))
 		return []string{mojoCnf.webDomain}
 	}
-	fmt.Println(strings.Split(mojoCnf.webDomain, ";"))
 	return strings.Split(mojoCnf.webDomain, ";")
 }
 
