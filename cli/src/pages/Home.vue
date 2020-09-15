@@ -169,7 +169,7 @@ export default {
   src: url("/FZHeiLJW.TTF");
 }
 .container {
-  margin-top: 2%;
+  margin-top: 3%;
 }
 article {
   cursor: pointer;

@@ -21,4 +21,10 @@ export default {
 .column {
   padding: 0;
 }
+div {
+  height: 90%;
+}
+#router {
+  height: 100%;
+}
 </style>

@@ -188,7 +188,7 @@ func UpdateDB(c *fiber.Ctx) {
 			"data": "session invalid"})
 		return
 	}
-	if int(group.(int64)) > int(global.GROUP_WHOSYOURDADDY) {
+	if int(group.(int64)) > int(global.GROUP_ADMIN) {
 		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
 			"data": "no right to do this"})
 		return

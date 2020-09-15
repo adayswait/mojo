@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="box" v-if="!($store.getters.userInfo.group<=1)">
-      <NoRights />
+      <NoRights height="90%" width="100%" />
     </div>
     <div v-if="!$store.state.visible.Login && $store.getters.userInfo.group<=1">
       <iframe
@@ -10,7 +10,7 @@
         width="100%"
         :height="iframeHeight"
         frameborder="0"
-        src="http://10.1.1.248:8002/app/logs"
+        src="http://10.1.1.248:8002/app/discover"
       ></iframe>
     </div>
   </div>
@@ -37,5 +37,8 @@ export default {
 <style scoped>
 .iframe {
   bottom: 0px;
+}
+.box {
+  height: 100%;
 }
 </style>
