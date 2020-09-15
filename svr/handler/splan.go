@@ -18,7 +18,36 @@ import (
 	"time"
 )
 
-var onlineHotUpdate = "pveBoss.json;pveDrop.json;pveEvent.json;festivalCarnivalReward.json;item.json;petEgg.json;petEvo.json;petFight.json;dropUnit.json;petLearnSkill.json;prizePool.json;eventManage.json;pet.json;exp.json;petToken.json;petSkillLvUp.json;lottery.json;activityTask.json;mapMonster.json;evoType.json;obtainGaiya.json;timeTravel.json;extremeChallenge.json;itemElemType.json;extremeLimit.json;fightSkills.json;shop.json;battleshop.json;laddershop.json;mysteriousShop.json;startrekshop.json;shopmanage.json;buyEnergy.json;releaseShop.json;expMechine.json;teamFight.json;monthSign.json;petCollect.json;seerQuiz.json;kxPackage.json;eventBossChallenge.json;eventPetAnaysis.json;activityExchange.json;achieve.json;military.json;treasureHunt.json;treasureWish.json;dailyTask.json;activityPoint.json;mainTask.json;mainTaskData.json;dailyDelegateTask.json;teamDonate.json;teamShop.json;teamShopPackage.json;teamProductionItems.json;teamTask.json;teamTech.json;petImprovement.json;improvementTime.json;encourage.json;weekSign.json;firstRecharge.json;getPhysical.json;suit.json;itemExchange.json;pvpLevel.json;equip.json;plantDescription.json;pvePlanet.json;pveSPT.json;features.json;eggExchange.json;title.json;mapItem.json;geneRecombine.json;vipPrivilege.json;starTrekBuy.json;pvePlanetBuy.json;vipLevelAward.json;vipWeekAward.json;monthCardFix.json;additive_attribute.json;natureRandom.json;petClass.json;talent.json;carnival.json;teamDonate.json;featureRandom.json;talentRandom.json;sevenPackage.json;buyCoin.json;petTest.json;starTrek.json;rankList.json;sns.json;invite.json;medalCondition.json;medal.json;fightBoss.json;braveTower.json;coolDown.json;springFestivalBag.json;dailyPayEvent.json;partyBoss.json;studyPoint.json;elemTypes.json;fightRelation.json;mainPetTraining.json;leadAwaken.json;springRedbags.json;darkArena.json;activation.json;activityWeeklyStory.json;activityPetExplore.json;attr.json;newInvention.json;activityPetTalent.json;superPetFight.json;eventBossBottom.json;extraDrop.json;petSkin.json;skinBuy.json;puniChallenge.json;skillRune.json;activityTimeLimit.json;shopMass.json;shopConsole.json;childrensDayRecharge.json;shopPackage.json;newcomerPetCollect.json;activityCard.json;newPrizePool.json;newLottery.json;battleLadder.json;roomUnit.json;castPvp.json;activityTaskReset.json;battleCondition.json;mapBossChallenge.json;mapBossBottom.json;mapBossRank.json;petTrain.json;VIPshop.json;activityLuckdraw.json;activityPetStory.json;rechargeBenefits.json;battlePass.json;battlePassTask.json;payPrizeBrandNew.json;firstPrizePool.json;dropExchange.json;checkIn.json;costPack.json;touchEvent.json;monthPet.json;pushPresent.json;activityPool.json;activityPoolFloor.json;activityLuckFloor.json;activityFreeLuckydraw.json;randomMonster.json;holidayShop.json;payEquipEvent.json"
+var onlineHotUpdate = "pveBoss.json;pveDrop.json;pveEvent.json;festivalCarnivalReward.json;item.json;petEgg.json;" +
+	"petEvo.json;petFight.json;dropUnit.json;petLearnSkill.json;prizePool.json;eventManage.json;pet.json;exp.json;" +
+	"petToken.json;petSkillLvUp.json;lottery.json;activityTask.json;mapMonster.json;evoType.json;obtainGaiya.json;" +
+	"timeTravel.json;extremeChallenge.json;itemElemType.json;extremeLimit.json;fightSkills.json;shop.json;" +
+	"battleshop.json;laddershop.json;mysteriousShop.json;startrekshop.json;shopmanage.json;buyEnergy.json;" +
+	"releaseShop.json;expMechine.json;teamFight.json;monthSign.json;petCollect.json;seerQuiz.json;kxPackage.json;" +
+	"eventBossChallenge.json;eventPetAnaysis.json;activityExchange.json;achieve.json;military.json;treasureHunt.json;" +
+	"treasureWish.json;dailyTask.json;activityPoint.json;mainTask.json;mainTaskData.json;dailyDelegateTask.json;" +
+	"teamDonate.json;teamShop.json;teamShopPackage.json;teamProductionItems.json;teamTask.json;teamTech.json;" +
+	"petImprovement.json;improvementTime.json;encourage.json;weekSign.json;firstRecharge.json;getPhysical.json;" +
+	"suit.json;itemExchange.json;pvpLevel.json;equip.json;plantDescription.json;pvePlanet.json;pveSPT.json;" +
+	"features.json;eggExchange.json;title.json;mapItem.json;geneRecombine.json;vipPrivilege.json;starTrekBuy.json;" +
+	"pvePlanetBuy.json;vipLevelAward.json;vipWeekAward.json;monthCardFix.json;additive_attribute.json;" +
+	"natureRandom.json;petClass.json;talent.json;carnival.json;teamDonate.json;featureRandom.json;talentRandom.json;" +
+	"sevenPackage.json;buyCoin.json;petTest.json;starTrek.json;rankList.json;sns.json;invite.json;medalCondition.json;" +
+	"medal.json;fightBoss.json;braveTower.json;coolDown.json;springFestivalBag.json;dailyPayEvent.json;partyBoss.json;" +
+	"studyPoint.json;elemTypes.json;fightRelation.json;mainPetTraining.json;leadAwaken.json;springRedbags.json;" +
+	"darkArena.json;activation.json;activityWeeklyStory.json;activityPetExplore.json;attr.json;newInvention.json;" +
+	"activityPetTalent.json;superPetFight.json;eventBossBottom.json;extraDrop.json;petSkin.json;skinBuy.json;" +
+	"puniChallenge.json;skillRune.json;activityTimeLimit.json;shopMass.json;shopConsole.json;childrensDayRecharge.json;" +
+	"shopPackage.json;newcomerPetCollect.json;activityCard.json;newPrizePool.json;newLottery.json;battleLadder.json;" +
+	"roomUnit.json;castPvp.json;activityTaskReset.json;battleCondition.json;mapBossChallenge.json;mapBossBottom.json;" +
+	"mapBossRank.json;petTrain.json;VIPshop.json;activityLuckdraw.json;activityPetStory.json;rechargeBenefits.json;" +
+	"battlePass.json;battlePassTask.json;payPrizeBrandNew.json;firstPrizePool.json;dropExchange.json;checkIn.json;" +
+	"costPack.json;touchEvent.json;monthPet.json;pushPresent.json;activityPool.json;activityPoolFloor.json;" +
+	"activityLuckFloor.json;activityFreeLuckydraw.json;randomMonster.json;holidayShop.json;payEquipEvent.json;" +
+	"activityRank.json;petExchange.json;activityMission.json;enchantingDrop.json;enchantingLuckdraw.json;" +
+	"enchanting.json;petKingSeason.json;petKingRank.json;auxiliaryTaskReset;battleTypeBuff.json;" +
+	"battleAnswer.json;activityMaze.json;risisContractTask.json;activityAffect.json;nonoSkin.json;discountShop.json"
+
 var battleHotUpdate = "fightSkills.json;fightAffects.json;fightRelation.json;elemTypes.json;fightFactors.json"
 
 type MailParam struct {
@@ -43,7 +72,7 @@ type MailParam struct {
 
 func SplanMail(c *fiber.Ctx) error {
 	store := sessions.Get(c)
-	// user := store.Get(global.SESSION_KEY_USER)
+	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
@@ -60,15 +89,16 @@ func SplanMail(c *fiber.Ctx) error {
 	}
 	body.SendTime = strconv.FormatInt(time.Now().Unix(), 10)
 	body.Opt = "add_global_mail"
-	mlog.Log("content:", string(body.Content))
+	mlog.Infof("%s@%d send splan mail, content:%s",
+		user, group, string(body.Content))
 	bodyData, _ := json.Marshal(body)
 
 	reth, errh := utils.HttpPost(utils.GetSplanSwitchUrl()+"/global_mail_proc",
 		string(bodyData))
 	if errh != nil {
-		mlog.Log("splan add global mail err:\r\n", errh.Error())
+		mlog.Errorf("splan add global mail err:%s", errh)
 	} else {
-		mlog.Log("splan add global mail ret:\r\n", string(reth))
+		mlog.Infof("splan add global mail ret:%s", string(reth))
 	}
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
@@ -87,9 +117,13 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	}
 	module := c.Params("module")
 
+	mlog.Infof("%s@%d update splan config, module:%s",
+		user, group, module)
+
 	dbRet, errRepo := db.Get(global.BUCKET_OPS_DEVINI, module)
 	if errRepo != nil {
-		return c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": errRepo.Error()})
+		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+			"data": errRepo.Error()})
 	}
 	repoInfo := struct {
 		URL string `json:"url"`
@@ -103,14 +137,14 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	rmLastDirCmd := exec.Command("rm", "-rf", dirPath)
 	rmLastDirErr := rmLastDirCmd.Run()
 	if rmLastDirErr != nil {
-		mlog.Log("rm -rf", dirPath, "err:", rmLastDirErr)
+		mlog.Errorf("rm -rf %s failed, err:%s", dirPath, rmLastDirErr)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": rmLastDirErr.Error()})
 	}
 	mkNewDirCmd := exec.Command("mkdir", dirPath)
 	mkNewDirErr := mkNewDirCmd.Run()
 	if mkNewDirErr != nil {
-		mlog.Log("mkdir", dirPath, "err:", mkNewDirErr)
+		mlog.Errorf("mkdir %s failed, err:%s", dirPath, mkNewDirErr)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": mkNewDirErr.Error()})
 	}
@@ -119,12 +153,11 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 		repoInfo.URL+"/config/import_json_from_design.sh", exePath)
 	coConfigErr := coConfigCmd.Run()
 	if coConfigErr != nil {
-		mlog.Log(fmt.Sprintf("svn export --force %s %s",
-			repoInfo.URL+"/config/import_json_from_design.sh", exePath),
-			"err:", coConfigErr)
+		mlog.Errorf("svn export --force %s %s failed, err:%s",
+			repoInfo.URL+"/config/import_json_from_design.sh",
+			exePath, coConfigErr)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": coConfigErr.Error()})
-
 	}
 	if strings.Contains(module, "online") {
 		coConfigCmd2 := exec.Command("svn", "export", "--force",
@@ -137,7 +170,7 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	runImportCmd := exec.Command(exePath)
 	runImportErr := runImportCmd.Run()
 	if runImportErr != nil {
-		mlog.Log("run", exePath, "err:", runImportErr)
+		mlog.Errorf("run %s failed, err:%s", exePath, runImportErr)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": runImportErr.Error()})
 	}
@@ -145,13 +178,15 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	//开启rsync
 	depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
 	if errd != nil {
-		mlog.Log("errd", errd)
+		mlog.Errorf("iterating over all the keys in bucket : %s, err : %s",
+			global.BUCKET_OPS_DEPINI, errd)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": errd.Error()})
 	}
 	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
 	if errm != nil {
-		mlog.Log("errm", errm)
+		mlog.Errorf("iterating over all the keys in bucket : %s, err : %s",
+			global.BUCKET_OPS_MACINI, errm)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": errm.Error()})
 	}
@@ -215,17 +250,17 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	reth, errh := utils.HttpPost(utils.GetSplanSwitchUrl()+router,
 		string(bodyData))
 	if errh != nil {
-		mlog.Log("splan update config err:\r\n", errh.Error())
+		mlog.Errorf("splan update config failed, err:%s", errh)
 		return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
 
 	}
 
 	if !strings.Contains(string(reth), `"code":0`) {
-		mlog.Log("splan update config err:\r\n", errh.Error())
+		mlog.Errorf("splan update config failed, ret:%s", string(reth))
 		return c.JSON(fiber.Map{"code": global.RET_ERR, "data": string(reth)})
 	}
 
-	mlog.Log("splan update config ret:\r\n", string(reth))
+	mlog.Infof("splan update config ret:%s", string(reth))
 
 	param := struct {
 		Notify bool `json:"notify"`
@@ -237,7 +272,7 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 		dingMsg := fmt.Sprintf("⚠ %s提交的热更%s配表请求已执行完成", user, module)
 		formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
 		retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
-		mlog.Log("hot update webhook ret:\r\n", string(retd), errd)
+		mlog.Info("hot update webhook ret:%s,err:%s", string(retd), errd)
 	}
 
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
@@ -258,7 +293,7 @@ func SplanChangeTime(c *fiber.Ctx) error {
 
 	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
 	if errm != nil {
-		mlog.Log("SplanChangeTime errm", errm)
+		mlog.Errorf("SplanChangeTime err:%s", errm)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": errm.Error()})
 	}
@@ -285,12 +320,14 @@ func SplanChangeTime(c *fiber.Ctx) error {
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		})
 	if errdial != nil {
-		mlog.Log("ssh dial failed", errdial)
+		mlog.Errorf("ssh dial %s@%s:%s failed, err : %s",
+			sshuser, body.Ip, sshport, errdial)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": errdial.Error()})
 	}
 	defer sshClt.Close()
-	mlog.Log("ssh dial passed")
+	mlog.Infof("ssh dial %s@%s:%s succeed",
+		sshuser, body.Ip, sshport)
 
 	essh, _, errssh := expect.SpawnSSH(sshClt, time.Minute)
 	if errssh != nil {
@@ -301,40 +338,43 @@ func SplanChangeTime(c *fiber.Ctx) error {
 	logined := regexp.MustCompile("$")
 	retlogin, _, elogin := essh.Expect(logined, 10*time.Second)
 	if elogin != nil {
-		mlog.Log("ssh login failed", elogin, retlogin)
+		mlog.Errorf("expect ssh login failed, ret : %s, err : %s",
+			retlogin, elogin)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": elogin.Error()})
 	}
-	mlog.Log("ssh login passed", retlogin)
+	mlog.Info("expect ssh login succeed, ret:%s", retlogin)
 	essh.Send(fmt.Sprintf("sudo date -s '%s'\n", body.Time))
-	retsd, _, esd := essh.Expect(regexp.MustCompile(
+	retsd, matchedsd, esd := essh.Expect(regexp.MustCompile(
 		fmt.Sprintf("password for %s:", sshuser)),
 		10*time.Second)
 	if esd != nil {
-		mlog.Log("sudo date -s failed", esd, retsd)
+		mlog.Errorf("expect exec sudo passwd failed, ret:%s, match:%s,err:%s",
+			retsd, matchedsd, esd)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": elogin.Error()})
 	} else {
-		mlog.Log("sudo passed", retsd)
+		mlog.Infof("sudo succeed,ret:%s", retsd)
 	}
 	essh.Send(fmt.Sprintf("%s\n", sshpasswd))
 	retok, matched, eok := essh.Expect(regexp.MustCompile("$"),
 		5*time.Second)
 	if eok != nil {
-		mlog.Log("change server time error", eok, retok)
+		mlog.Errorf("sudo date -s '%s' failed ret:%s, match:%s, err:%s",
+			body.Time, retok, matched, eok)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": eok.Error()})
 	} else {
-		mlog.Log(user, "change server time ok", body.Time, retok, matched)
+		mlog.Infof("%s change server time to %s succeed, ret:%s, matched:%s",
+			user.(string), body.Time, retok, matched)
 	}
 
 	dingMsg := fmt.Sprintf("⚠ %s已将服务器时间修改为%s", user, body.Time)
 	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
 	retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
-	mlog.Log("change server webhook ret:\r\n", string(retd), errd)
+	mlog.Infof("change server webhook ret:%s, err:%s", string(retd), errd)
 
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
-
 }
 
 type ParamSvn struct {
@@ -345,6 +385,13 @@ type ParamSvn struct {
 }
 
 func CommitHistory(c *fiber.Ctx) error {
+	store := sessions.Get(c)
+	user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
+	}
 	const timeout = time.Minute
 	var paramSvn ParamSvn
 	err := c.QueryParser(&paramSvn)
@@ -378,6 +425,8 @@ func CommitHistory(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": cmd})
 	}
+	mlog.Infof("%s@%d get splan svn commit history", user, group)
+
 	ret, _, _ := e.Expect(nil, timeout)
 	return c.JSON(fiber.Map{"code": global.RET_OK,
 		"data": ret})
@@ -385,7 +434,7 @@ func CommitHistory(c *fiber.Ctx) error {
 
 func CreateDep(c *fiber.Ctx) error {
 	store := sessions.Get(c)
-	// user := store.Get(global.SESSION_KEY_USER)
+	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
@@ -404,10 +453,19 @@ func CreateDep(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": err.Error()})
 	}
+	mlog.Infof("%s@%d get splan create deployment, value:%s",
+		user, group, body.Value)
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
 func SubmitDep(c *fiber.Ctx) error {
+	store := sessions.Get(c)
+	user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
+	}
 	subDepParam := struct {
 		DepId float64 `json:"depid"`
 		Force bool    `json:"force"`
@@ -418,7 +476,8 @@ func SubmitDep(c *fiber.Ctx) error {
 			depInfoInDB, _ := db.Get(global.BUCKET_OPS_DEPBIL, depid)
 			depInfo := global.DepInfo{DepId: depid}
 			json.Unmarshal(depInfoInDB, &depInfo)
-
+			mlog.Infof("%s@%d get splan submit deployment, depid:%s",
+				user, group, depid)
 			go cmd.SvnDep(depInfo, subDepParam.Force)
 			return c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": "request submitted"})
@@ -471,6 +530,7 @@ func DeleteDep(c *fiber.Ctx) error {
 	}
 }
 
+//anyone can call this from html page, do not auth
 func BreakDep(c *fiber.Ctx) error {
 	const breakSecond = 120
 	const renewSecond = 60
@@ -583,7 +643,7 @@ func Chat(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
 			"data": errBp.Error()})
 	}
-	mlog.Log(user, "chat to", to, "message:", chatInfo.Message)
+	mlog.Infof("%s chat to %s, message:%s", user, to, chatInfo.Message)
 
 	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN,
 		"👻 "+chatInfo.Message)
@@ -601,10 +661,11 @@ func Chat(c *fiber.Ctx) error {
 	}
 
 	if errh != nil {
+		mlog.Errorf("chat webhook err:%s", errh)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_REQUEST,
 			"data": errh.Error()})
 	} else {
-		mlog.Log("chat webhook ret:\r\n", string(reth))
+		mlog.Infof("chat webhook ret:%s", string(reth))
 		return c.JSON(fiber.Map{"code": global.RET_OK,
 			"data": nil})
 	}

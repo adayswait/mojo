@@ -28,15 +28,17 @@ func Rsync(
 		retRsync, matchedRsync, errRsync := expectRsync.Expect(
 			regexp.MustCompile("speedup is"), timeout)
 		if errRsync == nil && len(matchedRsync) == 1 {
-			mlog.Log("rsync succeed", rsyncCmd)
+			mlog.Infof("rsync cmd : %s exec succeed", rsyncCmd)
 			return nil
 		} else {
-			mlog.Log("rsync failed", rsyncCmd, errRsync, matchedRsync, retRsync)
-			return fmt.Errorf("rsync cmd:%s failed", rsyncCmd)
+			mlog.Errorf("rsync cmd %s exec failed, err:%s, match:%s, ret:%s",
+				rsyncCmd, errRsync, matchedRsync, retRsync)
+			return fmt.Errorf("rsync cmd:%s exec failed", rsyncCmd)
 		}
 	} else {
-		mlog.Log("rsync rsh failed", rsyncCmd, retSSH, matchedSSH, errSSH)
-		return fmt.Errorf("rsync-ssh cmd:%s failed", rsyncCmd)
+		mlog.Infof("rsync rsh failed, cmd:%s, ret:%s,matched:%s,err:%s",
+			rsyncCmd, retSSH, matchedSSH, errSSH)
+		return fmt.Errorf("rsync rsh failed, cmd:%s", rsyncCmd)
 	}
 	return nil
 }

@@ -1,23 +1,21 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/adayswait/mojo/mlog"
 	"github.com/gofiber/websocket/v2"
 )
 
 func Websocket(c *websocket.Conn) {
-	mlog.Log(c.Locals("Host"))
 	for {
-		mt, msg, err := c.ReadMessage()
-		if err != nil {
-			mlog.Log("read:", err)
+		mt, msg, errr := c.ReadMessage()
+		if errr != nil {
+			mlog.Errorf("websocker ReadMessage err:%s", errr)
 			break
 		}
-		fmt.Printf("recv: %s", msg)
-		err = c.WriteMessage(mt, msg)
-		if err != nil {
-			mlog.Log("write:", err)
+		mlog.Infof("websocker recv:%s", msg)
+		errw := c.WriteMessage(mt, msg)
+		if errw != nil {
+			mlog.Errorf("websocker WriteMessage err:%s", errw)
 			break
 		}
 	}

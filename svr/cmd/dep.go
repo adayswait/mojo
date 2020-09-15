@@ -64,20 +64,20 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		beforeDeployCmd := exec.Command("bash", beforeDeployShellPath)
 		beforeDeployErr := beforeDeployCmd.Run()
 		if beforeDeployErr != nil {
-			mlog.Log("before deploy cmd run failed :", beforeDeployShellPath,
-				"error", beforeDeployErr)
+			mlog.Errorf("before deploy exec cmd failed, path : %s, error : %s",
+				beforeDeployShellPath, beforeDeployErr)
 		} else {
-			mlog.Log("before deploy cmd run succeed")
+			mlog.Info("before deploy exec cmd succeed")
 		}
 	} else {
-		mlog.Log("before deploy cmd not found")
+		mlog.Warning("before deploy bd.sh not found")
 	}
 
 	//同步代码
 	cleanupCmd := exec.Command("rm", "-rf", path)
 	cleanupErr := cleanupCmd.Run()
 	if cleanupErr != nil {
-		mlog.Log("rm -rf", path, "err:", cleanupErr)
+		mlog.Errorf("rm -rf %s failed, err : %s", path, cleanupErr)
 		return
 	}
 	coCmd := fmt.Sprintf("svn export --force -r%s %s %s",
@@ -87,17 +87,13 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 	retCo, matchedCo, errCo := expectCo.Expect(
 		regexp.MustCompile("Exported revision"),
 		5*time.Minute)
-	if errCo != nil {
-		mlog.Log(coCmd, retCo, matchedCo, errCo)
+	if errCo != nil || len(matchedCo) == 0 {
+		mlog.Errorf("expect run cmd : %s failed, ret : %s, match : %s, err : %s",
+			coCmd, retCo, matchedCo, errCo)
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
 		return
 	}
-	if len(matchedCo) == 0 {
-		mlog.Log(coCmd, retCo, matchedCo)
-		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_CHECKOUT)
-		return
-	}
-	mlog.Log("svn export passed")
+	mlog.Infof("expect run cmd : %s succeed", coCmd)
 
 	//deploy后置任务,ad means after deploy
 	afterDeployShellPath := path + "ad.sh"
@@ -106,13 +102,13 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		afterDeployCmd := exec.Command("bash", afterDeployShellPath)
 		afterDeployErr := afterDeployCmd.Run()
 		if afterDeployErr != nil {
-			mlog.Log("after deploy cmd run failed :", afterDeployShellPath,
-				"error", afterDeployErr)
+			mlog.Errorf("before deploy exec cmd failed, path : %s, error : %s",
+				afterDeployShellPath, afterDeployErr)
 		} else {
-			mlog.Log("after deploy cmd run succeed")
+			mlog.Info("after deploy exec cmd succeed")
 		}
 	} else {
-		mlog.Log("after deploy cmd not found")
+		mlog.Warning("after deploy ad.sh not found")
 	}
 
 	if !force {
@@ -126,9 +122,9 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 
 		reth, errh := utils.HttpPost(utils.GetDingdingWebhook(), markdown)
 		if errh != nil {
-			mlog.Log("deploye webhook err:\r\n", errh.Error())
+			mlog.Warningf("deploye webhook err : %s", errh.Error())
 		} else {
-			mlog.Log("deploye webhook ret:\r\n", string(reth))
+			mlog.Infof("deploye webhook ret : %s", string(reth))
 		}
 
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SLEEP)
@@ -150,12 +146,14 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 	depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
 	if errd != nil {
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_GETINI)
-		mlog.Log("errd", errd)
+		mlog.Errorf("iterating over all the keys in bucket : %s, err : %s",
+			global.DEP_STATUS_ERR_GETINI, errd)
 		return
 	}
 	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
 	if errm != nil {
-		mlog.Log("errm", errm)
+		mlog.Errorf("iterating over all the keys in bucket : %s, err : %s",
+			global.BUCKET_OPS_MACINI, errm)
 		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR_GETINI)
 		return
 	}
@@ -209,35 +207,40 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			})
 		if errdial != nil {
-			mlog.Log("ssh dial failed", errdial)
+			mlog.Errorf("ssh dial %s@%s:%s failed, err : %s",
+				macini.User, idep[2], macini.Port, errdial)
 			continue
 		}
 		defer sshClt.Close()
-		mlog.Log("ssh dial passed")
+		mlog.Infof("ssh dial %s@%s:%s succeed",
+			macini.User, idep[2], macini.Port)
 		essh, _, errssh := expect.SpawnSSH(sshClt, time.Minute)
 		if errssh != nil {
-			mlog.Log(errssh)
+			mlog.Errorf("expect.SpawnSSH failed, err : %s", errssh)
 			continue
 		}
 		defer essh.Close()
 		logined := regexp.MustCompile("$")
 		retlogin, _, elogin := essh.Expect(logined, 10*time.Second)
 		if elogin != nil {
-			mlog.Log("ssh login failed", elogin, retlogin)
+			mlog.Errorf("expect ssh login failed, ret : %s, err : %s",
+				retlogin, elogin)
 			continue
 		}
-		mlog.Log("ssh login passed")
+		mlog.Info("expect ssh login succeed, ret:%s", retlogin)
 
 		essh.Send("bash " + idep[3] + "/br.sh\n")
-		retbr, _, ebr := essh.Expect(regexp.MustCompile("mojobrok"),
+		retbr, matchedbr, ebr := essh.Expect(regexp.MustCompile("mojobrok"),
 			10*time.Second)
 		if ebr != nil {
 			//before release脚本执行错误不中断后续流程
 			//因为首次发布的时候可能没有br.sh
 			//todo 首先传输br.sh到指定位置
-			mlog.Log("before release cmd exec error", ebr, retbr)
+			mlog.Errorf("before release exec cmd failed,"+
+				"path:%s, ret:%s, match:%s, err:%s",
+				idep[3]+"/br.sh", retbr, matchedbr, ebr)
 		} else {
-			mlog.Log("before release cmd exec succeed")
+			mlog.Info("before release exec cmd succeed")
 		}
 
 		rsyncErr := Rsync(path, idep[3], macini.User, macini.Passwd,
@@ -256,16 +259,18 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			arcmd = "bash " + idep[3] + "/ar.sh\n"
 		}
 		essh.Send(arcmd)
-		retar, _, ear := essh.Expect(regexp.MustCompile("mojoarok"),
+		retar, matchedar, ear := essh.Expect(regexp.MustCompile("mojoarok"),
 			10*time.Second)
 		if ear != nil {
-			mlog.Log("after release cmd exec error", arcmd, ear, retar)
+			mlog.Errorf("before release exec cmd failed,"+
+				"path:%s, ret:%s, match:%s, err:%s",
+				arcmd, retar, matchedar, ear)
 			continue
 		} else {
-			mlog.Log("after release cmd exec succeed", arcmd)
+			mlog.Info("after release exec cmd succeed")
 		}
 	}
-	mlog.Log(depInfo.DepId, "dep all done")
+	mlog.Infof("deploy id:%s run over", depInfo.DepId)
 	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SUCCESS)
 
 	return

@@ -9,8 +9,6 @@ import (
 	"github.com/adayswait/mojo/mlog"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/session/v2"
-	"github.com/google/goexpect"
-	"regexp"
 	"time"
 )
 
@@ -74,17 +72,20 @@ func Login(c *fiber.Ctx) error {
 	data, _ := json.Marshal(userInfo)
 
 	//create session
-	go (func() {
+	(func() {
 		store := sessions.Get(c)
 		store.Set(global.SESSION_KEY_USER, userInfo.User)
 		store.Set(global.SESSION_KEY_GROUP, userInfo.Group)
 		defer store.Save()
 	})()
+	mlog.Infof("%s@%d login succeed", userInfo.User, userInfo.Group)
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(data)})
 }
 
 func Logout(c *fiber.Ctx) error {
 	store := sessions.Get(c)
+	user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
 	store.Destroy()
 
 	//todo
@@ -92,8 +93,8 @@ func Logout(c *fiber.Ctx) error {
 	cookie.Name = global.ACCESS_TOKEN
 	cookie.Value = ""
 	c.Cookie(cookie)
-
 	defer store.Save()
+	mlog.Infof("%s@%d logout succeed", user, group)
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
@@ -128,12 +129,13 @@ func Register(c *fiber.Ctx) error {
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	cookie.Value = accessToken
 	c.Cookie(cookie)
+	mlog.Infof("%s reigster succeed", secInfo.User)
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
 func ViewDB(c *fiber.Ctx) error {
 	store := sessions.Get(c)
-	// user := store.Get(global.SESSION_KEY_USER)
+	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
@@ -145,6 +147,7 @@ func ViewDB(c *fiber.Ctx) error {
 	}
 	table := c.Params("table")
 	if len(table) == 0 {
+		mlog.Infof("%s@%d ViewDB all buckets", user, group)
 		ret, err := db.Buckets()
 		if err != nil {
 			return c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": err.Error()})
@@ -153,12 +156,14 @@ func ViewDB(c *fiber.Ctx) error {
 	}
 	key := c.Params("key")
 	if len(key) == 0 {
+		mlog.Infof("%s@%d ViewDB bucket:%s", user, group, table)
 		ret, err := db.Keys(table)
 		if err != nil {
 			return c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": err.Error()})
 		}
 		return c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
 	} else {
+		mlog.Infof("%s@%d ViewDB bucket:%s, key:%s", user, group, table, key)
 		ret, err := db.Get(table, key)
 		if err != nil {
 			return c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": err.Error()})
@@ -170,7 +175,7 @@ func ViewDB(c *fiber.Ctx) error {
 
 func UpdateDB(c *fiber.Ctx) error {
 	store := sessions.Get(c)
-	// user := store.Get(global.SESSION_KEY_USER)
+	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
@@ -197,15 +202,19 @@ func UpdateDB(c *fiber.Ctx) error {
 	}
 	err := db.Set(table, key, body.Value)
 	if err != nil {
+		mlog.Errorf("%s@%d UpdateDB failed, err:%s, bucket:%s, key:%s, value:%s",
+			user, group, err, table, key, body.Value)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": err.Error()})
 	}
+	mlog.Infof("%s@%d UpdateDB bucket:%s, key:%s, value:%s",
+		user, group, table, key, body.Value)
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
 func DeleteDB(c *fiber.Ctx) error {
 	store := sessions.Get(c)
-	// user := store.Get(global.SESSION_KEY_USER)
+	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
@@ -223,28 +232,19 @@ func DeleteDB(c *fiber.Ctx) error {
 	}
 	err := db.Delete(table, key)
 	if err != nil {
+		mlog.Infof("%s@%d DeleteDB failed, err:%s, bucket:%s, key:%s",
+			user, group, err, table, key)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": err.Error()})
 	}
+	mlog.Infof("%s@%d DeleteDB bucket:%s, key:%s",
+		user, group, table, key)
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
 func Test(c *fiber.Ctx) error {
-	const timeout = time.Minute
-	e, _, err := expect.Spawn("node", -1)
-	defer e.Close()
-	if err != nil {
-		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
-			"data": "cmd"})
-	}
-	checkedOutRE := regexp.MustCompile(">")
-	ret, _, err2 := e.Expect(checkedOutRE, timeout)
-	mlog.Log(ret, err2)
-	e.Send("1+1\n")
-	ret2, _, err3 := e.Expect(checkedOutRE, timeout)
-	mlog.Log(ret2, err3)
 	return c.JSON(fiber.Map{"code": global.RET_OK,
-		"data": ret})
+		"data": nil})
 }
 
 var NewDB = UpdateDB

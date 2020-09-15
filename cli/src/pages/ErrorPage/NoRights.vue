@@ -1,50 +1,42 @@
 <template>
-  <canvas
-    id="lifegame"
-    width="100%"
-    height="100%"
-  >Your browser doesn't support HTML5 element canvas.</canvas>
+  <div id="stage">
+    <canvas id="lifegame">Your browser doesn't support HTML5 element canvas.</canvas>
+  </div>
 </template>
 
 <script>
+/**
+ * Life Game, a cellular automata
+ * @author adayswait
+ */
 export default {
-  methods: {},
-  mounted() {
-    /**
-     * Life Game, a cellular automata
-     * @author adayswait
-     */
-
-    /**
-     * @param life lives of each generation
-     * @param lifeSize the size of each life shown on the screen
-     * @param generationGap time(ms) between to generation
-     * @param lifegame a canvas id
-     */
-    var life = [];
-    var lifeSize = 2;
-    var generationGap = 100;
-    var world = document.getElementById("lifegame").getContext("2d");
-    var worldSizex = world.width / lifeSize;
-    var worldSizey = world.height / lifeSize;
-    world.fillStyle = "#222222";
-
-    life = createLife(life, worldSizex, worldSizey);
-    setInterval(time, generationGap);
-
-    function time() {
-      visualWorld(life, lifeSize, worldSizex, worldSizey, world);
-      life = generateWorld(life, worldSizex, worldSizey);
-    }
-
+  data() {
+    return {
+      /**
+       * @param life lives of each generation
+       * @param lifeSize the size of each life shown on the screen
+       * @param generationGap time(ms) between to generation
+       * @param lifegame a canvas id
+       */
+      life: [],
+      lifeSize: 2,
+      generationGap: 200,
+      world: undefined,
+      worldSizex: 0,
+      worldSizey: 0,
+      stageWidth: 0,
+      stageHeight: 0,
+    };
+  },
+  methods: {
     /**
      * Create the first generation
      * @param life_ An array contains many lives
      * @param worldSizex_ How many lives are there in one row
      * @param worldSizey_ How many lives are there in one line
      */
-    function createLife(life_, worldSizex_, worldSizey_) {
-      for (var worldx = 0; worldx < worldSizex; worldx++) {
+    createLife(life_, worldSizex_, worldSizey_) {
+      for (var worldx = 0; worldx < worldSizex_; worldx++) {
         life_[worldx] = [];
         for (var worldy = 0; worldy < worldSizey_; worldy++) {
           if (Math.random() > 0.7) {
@@ -55,7 +47,7 @@ export default {
         }
       }
       return life_;
-    }
+    },
 
     /**
      * generate the next generation
@@ -63,7 +55,7 @@ export default {
      * @param worldSizex_ How many lives are there in one row
      * @param worldSizey_ How many lives are there in one line
      */
-    function generateWorld(life_, worldSizex_, worldSizey_) {
+    generateWorld(life_, worldSizex_, worldSizey_) {
       var nextLife = [];
       for (var worldx = 0; worldx < worldSizex_; worldx++) {
         nextLife[worldx] = [];
@@ -119,7 +111,7 @@ export default {
         }
       }
       return nextLife;
-    }
+    },
     /**
      * show lives to world_
      * @param life_ An array contains many lives
@@ -127,7 +119,7 @@ export default {
      * @param worldSizey_ How many lives are there in one line
      * @param world_ Canvas which created to show this game
      */
-    function visualWorld(life_, lifeSize_, worldSizex_, worldSizey_, world_) {
+    visualWorld(life_, lifeSize_, worldSizex_, worldSizey_, world_) {
       world_.clearRect(0, 0, worldSizex_ * lifeSize_, worldSizey_ * lifeSize_);
       for (var worldx = 0; worldx < worldSizex_; worldx++) {
         for (var worldy = 0; worldy < worldSizey_; worldy++) {
@@ -141,14 +133,51 @@ export default {
           }
         }
       }
-    }
+    },
+    timeFlies() {
+      this.visualWorld(
+        this.life,
+        this.lifeSize,
+        this.worldSizex,
+        this.worldSizey,
+        this.world
+      );
+      this.life = this.generateWorld(
+        this.life,
+        this.worldSizex,
+        this.worldSizey
+      );
+    },
+  },
+  mounted() {
+    this.stageWidth = document.getElementById("stage").clientWidth;
+    this.stageHeight = document.getElementById("stage").clientHeight;
+    window.console.log(this.stageWidth, this.stageHeight);
+    document.getElementById("lifegame").setAttribute("width", this.stageWidth);
+    document
+      .getElementById("lifegame")
+      .setAttribute("height", this.stageHeight);
+    this.world = document.getElementById("lifegame").getContext("2d");
+    this.worldSizex =
+      document.getElementById("lifegame").offsetWidth / this.lifeSize;
+    this.worldSizey =
+      document.getElementById("lifegame").offsetHeight / this.lifeSize;
+    window.console.log(
+      document.getElementById("lifegame").offsetWidth,
+      this.worldSizex,
+      this.worldSizey
+    );
+    this.world.fillStyle = "#206020";
+
+    this.life = this.createLife(this.life, this.worldSizex, this.worldSizey);
+    setInterval(this.timeFlies.bind(this), this.generationGap);
   },
 };
 </script>
 
 <style scoped>
 div {
-  font-size: xx-large;
+  height: 100%;
 }
 </style>
 

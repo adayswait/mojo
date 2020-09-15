@@ -5,6 +5,7 @@ svr/mojo
 svr/*.db
 svr/mojo.cnf
 svr/mojo.log
+svr/logs
 
 # local env files
 .env.local
