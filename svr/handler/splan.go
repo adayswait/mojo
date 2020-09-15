@@ -41,25 +41,22 @@ type MailParam struct {
 	Attachment   string `json:"attachment"`
 }
 
-func SplanMail(c *fiber.Ctx) {
+func SplanMail(c *fiber.Ctx) error {
 	store := sessions.Get(c)
 	// user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
 			"data": "session invalid"})
-		return
 	}
 	if int(group.(int64)) > int(global.GROUP_USER) {
-		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
 			"data": "no right to do this"})
-		return
 	}
 	body := MailParam{}
 	if errBp := c.BodyParser(&body); errBp != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
 			"data": errBp.Error()})
-		return
 	}
 	body.SendTime = strconv.FormatInt(time.Now().Unix(), 10)
 	body.Opt = "add_global_mail"
@@ -73,30 +70,26 @@ func SplanMail(c *fiber.Ctx) {
 	} else {
 		mlog.Log("splan add global mail ret:\r\n", string(reth))
 	}
-
-	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
-func SplanUpdateConfig(c *fiber.Ctx) {
+func SplanUpdateConfig(c *fiber.Ctx) error {
 	store := sessions.Get(c)
 	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
 			"data": "session invalid"})
-		return
 	}
 	if int(group.(int64)) > int(global.GROUP_USER) {
-		c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_NO_RIGHT,
 			"data": "no right to do this"})
-		return
 	}
 	module := c.Params("module")
 
 	dbRet, errRepo := db.Get(global.BUCKET_OPS_DEVINI, module)
 	if errRepo != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": errRepo.Error()})
-		return
+		return c.JSON(fiber.Map{"code": global.RET_ERR_DB, "data": errRepo.Error()})
 	}
 	repoInfo := struct {
 		URL string `json:"url"`
@@ -111,17 +104,15 @@ func SplanUpdateConfig(c *fiber.Ctx) {
 	rmLastDirErr := rmLastDirCmd.Run()
 	if rmLastDirErr != nil {
 		mlog.Log("rm -rf", dirPath, "err:", rmLastDirErr)
-		c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": rmLastDirErr.Error()})
-		return
 	}
 	mkNewDirCmd := exec.Command("mkdir", dirPath)
 	mkNewDirErr := mkNewDirCmd.Run()
 	if mkNewDirErr != nil {
 		mlog.Log("mkdir", dirPath, "err:", mkNewDirErr)
-		c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": mkNewDirErr.Error()})
-		return
 	}
 
 	coConfigCmd := exec.Command("svn", "export", "--force",
@@ -131,9 +122,9 @@ func SplanUpdateConfig(c *fiber.Ctx) {
 		mlog.Log(fmt.Sprintf("svn export --force %s %s",
 			repoInfo.URL+"/config/import_json_from_design.sh", exePath),
 			"err:", coConfigErr)
-		c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": coConfigErr.Error()})
-		return
+
 	}
 	if strings.Contains(module, "online") {
 		coConfigCmd2 := exec.Command("svn", "export", "--force",
@@ -147,25 +138,22 @@ func SplanUpdateConfig(c *fiber.Ctx) {
 	runImportErr := runImportCmd.Run()
 	if runImportErr != nil {
 		mlog.Log("run", exePath, "err:", runImportErr)
-		c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": runImportErr.Error()})
-		return
 	}
 
 	//开启rsync
 	depiniInDB, errd := db.Keys(global.BUCKET_OPS_DEPINI)
 	if errd != nil {
 		mlog.Log("errd", errd)
-		c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": errd.Error()})
-		return
 	}
 	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
 	if errm != nil {
 		mlog.Log("errm", errm)
-		c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": errm.Error()})
-		return
 	}
 	macIni := make(map[string]global.SSHinfo)
 	for i := 1; i < len(maciniInDB); i += 2 {
@@ -228,14 +216,13 @@ func SplanUpdateConfig(c *fiber.Ctx) {
 		string(bodyData))
 	if errh != nil {
 		mlog.Log("splan update config err:\r\n", errh.Error())
-		c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
-		return
+		return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
+
 	}
 
 	if !strings.Contains(string(reth), `"code":0`) {
 		mlog.Log("splan update config err:\r\n", errh.Error())
-		c.JSON(fiber.Map{"code": global.RET_ERR, "data": string(reth)})
-		return
+		return c.JSON(fiber.Map{"code": global.RET_ERR, "data": string(reth)})
 	}
 
 	mlog.Log("splan update config ret:\r\n", string(reth))
@@ -253,10 +240,10 @@ func SplanUpdateConfig(c *fiber.Ctx) {
 		mlog.Log("hot update webhook ret:\r\n", string(retd), errd)
 	}
 
-	c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
+	return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
 }
 
-func SplanChangeTime(c *fiber.Ctx) {
+func SplanChangeTime(c *fiber.Ctx) error {
 	store := sessions.Get(c)
 	user := store.Get(global.SESSION_KEY_USER)
 	body := struct {
@@ -265,17 +252,15 @@ func SplanChangeTime(c *fiber.Ctx) {
 	}{}
 
 	if errBp := c.BodyParser(&body); errBp != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
 			"data": errBp.Error()})
-		return
 	}
 
 	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
 	if errm != nil {
 		mlog.Log("SplanChangeTime errm", errm)
-		c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": errm.Error()})
-		return
 	}
 	var sshport, sshuser, sshpasswd string
 
@@ -301,27 +286,24 @@ func SplanChangeTime(c *fiber.Ctx) {
 		})
 	if errdial != nil {
 		mlog.Log("ssh dial failed", errdial)
-		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": errdial.Error()})
-		return
 	}
 	defer sshClt.Close()
 	mlog.Log("ssh dial passed")
 
 	essh, _, errssh := expect.SpawnSSH(sshClt, time.Minute)
 	if errssh != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": errssh.Error()})
-		return
 	}
 	defer essh.Close()
 	logined := regexp.MustCompile("$")
 	retlogin, _, elogin := essh.Expect(logined, 10*time.Second)
 	if elogin != nil {
 		mlog.Log("ssh login failed", elogin, retlogin)
-		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": elogin.Error()})
-		return
 	}
 	mlog.Log("ssh login passed", retlogin)
 	essh.Send(fmt.Sprintf("sudo date -s '%s'\n", body.Time))
@@ -330,9 +312,8 @@ func SplanChangeTime(c *fiber.Ctx) {
 		10*time.Second)
 	if esd != nil {
 		mlog.Log("sudo date -s failed", esd, retsd)
-		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": elogin.Error()})
-		return
 	} else {
 		mlog.Log("sudo passed", retsd)
 	}
@@ -341,9 +322,8 @@ func SplanChangeTime(c *fiber.Ctx) {
 		5*time.Second)
 	if eok != nil {
 		mlog.Log("change server time error", eok, retok)
-		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": eok.Error()})
-		return
 	} else {
 		mlog.Log(user, "change server time ok", body.Time, retok, matched)
 	}
@@ -353,8 +333,8 @@ func SplanChangeTime(c *fiber.Ctx) {
 	retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
 	mlog.Log("change server webhook ret:\r\n", string(retd), errd)
 
-	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
-	return
+	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+
 }
 
 type ParamSvn struct {
@@ -364,19 +344,19 @@ type ParamSvn struct {
 	Revision string `json:"revision"`
 }
 
-func CommitHistory(c *fiber.Ctx) {
+func CommitHistory(c *fiber.Ctx) error {
 	const timeout = time.Minute
 	var paramSvn ParamSvn
 	err := c.QueryParser(&paramSvn)
 	if err != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
 			"data": err.Error()})
-		return
+
 	}
 	if len(paramSvn.RepoUrl) == 0 {
-		c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
 			"data": `can't find param repourl`})
-		return
+
 	}
 	var cmd string
 	if len(paramSvn.Revision) != 0 {
@@ -395,44 +375,39 @@ func CommitHistory(c *fiber.Ctx) {
 	e, _, err := expect.Spawn(cmd, -1)
 	defer e.Close()
 	if err != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": cmd})
-		return
 	}
 	ret, _, _ := e.Expect(nil, timeout)
-	c.JSON(fiber.Map{"code": global.RET_OK,
+	return c.JSON(fiber.Map{"code": global.RET_OK,
 		"data": ret})
-	return
 }
 
-func CreateDep(c *fiber.Ctx) {
+func CreateDep(c *fiber.Ctx) error {
 	store := sessions.Get(c)
 	// user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
 			"data": "session invalid"})
-		return
 	}
 	body := struct {
 		Value string `json:"value"`
 	}{}
 
 	if errBp := c.BodyParser(&body); errBp != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
 			"data": errBp.Error()})
-		return
 	}
 	err := db.Set(global.BUCKET_OPS_DEPBIL, "", body.Value)
 	if err != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_DB,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": err.Error()})
-		return
 	}
-	c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
 
-func SubmitDep(c *fiber.Ctx) {
+func SubmitDep(c *fiber.Ctx) error {
 	subDepParam := struct {
 		DepId float64 `json:"depid"`
 		Force bool    `json:"force"`
@@ -445,22 +420,19 @@ func SubmitDep(c *fiber.Ctx) {
 			json.Unmarshal(depInfoInDB, &depInfo)
 
 			go cmd.SvnDep(depInfo, subDepParam.Force)
-			c.JSON(fiber.Map{"code": global.RET_OK,
+			return c.JSON(fiber.Map{"code": global.RET_OK,
 				"data": "request submitted"})
-			return
 		} else {
-			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+			return c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
 				"data": `can't find param depid`})
-			return
 		}
 	} else {
-		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
 			"data": err.Error()})
-		return
 	}
 }
 
-func ProgressList(c *fiber.Ctx) {
+func ProgressList(c *fiber.Ctx) error {
 	ret := []string{}
 	global.Depuuid2DepStatus.Range(func(k, v interface{}) bool {
 		depInfo, _ := global.Depuuid2DepInfo.Load(k.(string))
@@ -479,28 +451,27 @@ func ProgressList(c *fiber.Ctx) {
 		} else {
 			ret = append(ret, "0")
 		}
-
 		return true
 	})
-	c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
-	return
+	return c.JSON(fiber.Map{"code": global.RET_OK, "data": ret})
+
 }
 
-func DeleteDep(c *fiber.Ctx) {
+//not in use
+func DeleteDep(c *fiber.Ctx) error {
 	const timeout = time.Minute
 	subDepParam := struct {
 		DepId string `json:"depid"`
 	}{}
 	if err := c.BodyParser(&subDepParam); err == nil {
-
+		return nil
 	} else {
-		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
 			"data": err.Error()})
-		return
 	}
 }
 
-func BreakDep(c *fiber.Ctx) {
+func BreakDep(c *fiber.Ctx) error {
 	const breakSecond = 120
 	const renewSecond = 60
 	//op = view(查看); break(打断); renew(续期); cancel(取消所有break操作,立即重启)
@@ -510,14 +481,12 @@ func BreakDep(c *fiber.Ctx) {
 	}{}
 	err := c.QueryParser(&breakDepParam)
 	if err != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_QUERY,
 			"data": err.Error()})
-		return
 	}
 	if len(breakDepParam.DepUuid) == 0 {
-		c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
 			"err": `can't find url param depuuid`})
-		return
 	}
 	depStatus, existStatus := global.Depuuid2DepStatus.Load(breakDepParam.DepUuid)
 	retcode := global.RET_OK
@@ -528,15 +497,13 @@ func BreakDep(c *fiber.Ctx) {
 			reterr = `it's too late to break this deployment`
 		}
 	} else {
-		c.JSON(fiber.Map{"code": global.RET_ERR_DEP_EXPIRED,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_DEP_EXPIRED,
 			"err": `deployment status expired`})
-		return
 	}
 	depInfo, existInfo := global.Depuuid2DepInfo.Load(breakDepParam.DepUuid)
 	if !existInfo {
-		c.JSON(fiber.Map{"code": global.RET_ERR_DEP_EXPIRED,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_DEP_EXPIRED,
 			"err": `deployment info expired`})
-		return
 	}
 	nowSec := time.Now().Unix()
 	awakeTime, loaded := global.DepTypeAwakeTime.Load(depInfo.(global.DepInfo).Type)
@@ -595,20 +562,17 @@ func BreakDep(c *fiber.Ctx) {
 
 	//status
 	ret = append(ret, strconv.Itoa(depStatus.(int)))
-	c.JSON(fiber.Map{"code": retcode,
+	return c.JSON(fiber.Map{"code": retcode,
 		"data": ret, "err": reterr})
-
-	return
 }
 
-func Chat(c *fiber.Ctx) {
+func Chat(c *fiber.Ctx) error {
 	store := sessions.Get(c)
 	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
 	if group == nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
 			"data": "session invalid"})
-		return
 	}
 
 	to := c.Params("to")
@@ -616,9 +580,8 @@ func Chat(c *fiber.Ctx) {
 		Message string `json:"message"`
 	}{}
 	if errBp := c.BodyParser(&chatInfo); errBp != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_BODY_PARAM,
 			"data": errBp.Error()})
-		return
 	}
 	mlog.Log(user, "chat to", to, "message:", chatInfo.Message)
 
@@ -632,18 +595,17 @@ func Chat(c *fiber.Ctx) {
 		reth, errh = utils.HttpPost(utils.GetDeveloperWebhook(), formatMsg)
 	} else {
 		if errBp := c.BodyParser(&chatInfo); errBp != nil {
-			c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
+			return c.JSON(fiber.Map{"code": global.RET_ERR_URL_PARAM,
 				"data": "err param 'to':" + to})
-			return
 		}
 	}
 
 	if errh != nil {
-		c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_REQUEST,
+		return c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_REQUEST,
 			"data": errh.Error()})
 	} else {
 		mlog.Log("chat webhook ret:\r\n", string(reth))
-		c.JSON(fiber.Map{"code": global.RET_OK,
+		return c.JSON(fiber.Map{"code": global.RET_OK,
 			"data": nil})
 	}
 }

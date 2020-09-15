@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -27,7 +26,7 @@ type config struct {
 	fsDir            string
 	wwwDir           string
 	webHost          string
-	webPort          uint16
+	webPort          string
 	webDomain        string
 	pkgPath          string
 	excludeFrom      string
@@ -73,8 +72,7 @@ func ReadConfig() {
 		case local_WEB_HOST:
 			mojoCnf.webHost = cnfArr[1]
 		case local_WEB_PORT:
-			portuint64, _ := strconv.ParseUint(cnfArr[1], 10, 16)
-			mojoCnf.webPort = uint16(portuint64)
+			mojoCnf.webPort = cnfArr[1]
 		case local_WEB_DOMAIN:
 			mojoCnf.webDomain = cnfArr[1]
 		case local_PKG_PATH:
@@ -96,10 +94,6 @@ func ReadConfig() {
 	}
 }
 
-func GetServiceHost() string {
-	return mojoCnf.webHost
-}
-
 func GetDbDir() string {
 	return mojoCnf.dbDir
 }
@@ -116,17 +110,19 @@ func Get3wDir() string {
 	return mojoCnf.wwwDir
 }
 
-func GetWebPort() uint16 {
+func GetWebHost() string {
+	return mojoCnf.webHost
+}
+
+func GetWebPort() string {
 	return mojoCnf.webPort
 }
 
-func GetWebDomain() []string {
+func GetWebDomain() string {
 	if len(mojoCnf.webDomain) == 0 {
-		mojoCnf.webDomain = "http://" + mojoCnf.webHost + ":" +
-			strconv.Itoa(int(mojoCnf.webPort))
-		return []string{mojoCnf.webDomain}
+		mojoCnf.webDomain = "http://" + mojoCnf.webHost + ":" + mojoCnf.webPort
 	}
-	return strings.Split(mojoCnf.webDomain, ";")
+	return mojoCnf.webDomain
 }
 
 func GetPkgPath() string {

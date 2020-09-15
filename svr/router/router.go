@@ -3,8 +3,9 @@ package router
 import (
 	"github.com/adayswait/mojo/handler"
 	"github.com/adayswait/mojo/utils"
-	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/adayswait/mojo/ws"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/websocket/v2"
 	"net/http"
@@ -12,10 +13,10 @@ import (
 
 func Route(app *fiber.App) {
 	app.Static("/", utils.Get3wDir())
+	app.Use("/ws", ws.New())
 	app.Get("/ws", websocket.New(handler.Websocket))
-	app.Use("/fs", middleware.FileSystem(middleware.FileSystemConfig{
-		Root: http.Dir(utils.GetFsDir()),
-		// Index:  "index.html",
+	app.Use("/fs", filesystem.New(filesystem.Config{
+		Root:   http.Dir(utils.GetFsDir()),
 		Browse: true,
 	}))
 

@@ -2,15 +2,15 @@ package ws
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 )
 
-func New() func(*fiber.Ctx) {
-	return func(c *fiber.Ctx) {
-		if c.Get("host") == "localhost:3000" {
-			c.Locals("Host", "Localhost:3000")
-			c.Next()
-			return
+func New() func(*fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		if websocket.IsWebSocketUpgrade(c) {
+			c.Locals("allowed", true)
+			return c.Next()
 		}
-		c.Status(403).Send("Request origin not allowed")
+		return fiber.ErrUpgradeRequired
 	}
 }
