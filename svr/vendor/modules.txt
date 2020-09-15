@@ -3,26 +3,32 @@ github.com/andybalholm/brotli
 # github.com/boltdb/bolt v1.3.1
 ## explicit
 github.com/boltdb/bolt
-# github.com/fasthttp/session/v2 v2.2.1
+# github.com/fasthttp/session/v2 v2.2.2
 github.com/fasthttp/session/v2
 github.com/fasthttp/session/v2/providers/memory
-# github.com/fasthttp/websocket v1.4.3-beta.1
+# github.com/fasthttp/websocket v1.4.3
 github.com/fasthttp/websocket
-# github.com/gofiber/cors v0.2.2
+# github.com/gofiber/fiber/v2 v2.0.0
 ## explicit
-github.com/gofiber/cors
-# github.com/gofiber/fiber v1.14.5
+github.com/gofiber/fiber/v2
+github.com/gofiber/fiber/v2/internal/bytebufferpool
+github.com/gofiber/fiber/v2/internal/colorable
+github.com/gofiber/fiber/v2/internal/encoding/ascii
+github.com/gofiber/fiber/v2/internal/encoding/json
+github.com/gofiber/fiber/v2/internal/isatty
+github.com/gofiber/fiber/v2/internal/schema
+github.com/gofiber/fiber/v2/middleware/cors
+github.com/gofiber/fiber/v2/middleware/filesystem
+github.com/gofiber/fiber/v2/utils
+# github.com/gofiber/session/v2 v2.0.0
 ## explicit
-github.com/gofiber/fiber
-github.com/gofiber/fiber/middleware
-# github.com/gofiber/session v1.2.5
+github.com/gofiber/session/v2
+# github.com/gofiber/websocket/v2 v2.0.0
 ## explicit
-github.com/gofiber/session
-# github.com/gofiber/utils v0.0.10
-github.com/gofiber/utils
-# github.com/gofiber/websocket v0.5.1
+github.com/gofiber/websocket/v2
+# github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 ## explicit
-github.com/gofiber/websocket
+github.com/golang/glog
 # github.com/golang/protobuf v1.4.2
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -34,19 +40,13 @@ github.com/golang/protobuf/ptypes/timestamp
 github.com/google/goexpect
 # github.com/google/goterm v0.0.0-20190703233501-fc88cf888a3f
 github.com/google/goterm/term
-# github.com/google/uuid v1.1.1
+# github.com/google/uuid v1.1.2
 ## explicit
 github.com/google/uuid
-# github.com/gorilla/schema v1.1.0
-github.com/gorilla/schema
-# github.com/klauspost/compress v1.10.7
+# github.com/klauspost/compress v1.11.0
 github.com/klauspost/compress/flate
 github.com/klauspost/compress/gzip
 github.com/klauspost/compress/zlib
-# github.com/mattn/go-colorable v0.1.7
-github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.12
-github.com/mattn/go-isatty
 # github.com/philhofer/fwd v1.0.0
 github.com/philhofer/fwd
 # github.com/savsgio/dictpool v0.0.0-20200608150529-6a3c1a8f6ab2
@@ -60,7 +60,6 @@ github.com/valyala/bytebufferpool
 # github.com/valyala/fasthttp v1.16.0
 ## explicit
 github.com/valyala/fasthttp
-github.com/valyala/fasthttp/fasthttpadaptor
 github.com/valyala/fasthttp/fasthttputil
 github.com/valyala/fasthttp/reuseport
 github.com/valyala/fasthttp/stackless
@@ -77,7 +76,7 @@ golang.org/x/crypto/internal/subtle
 golang.org/x/crypto/poly1305
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
-# golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980
+# golang.org/x/sys v0.0.0-20200909081042-eff7692f9009
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix

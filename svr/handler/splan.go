@@ -8,7 +8,7 @@ import (
 	"github.com/adayswait/mojo/global"
 	"github.com/adayswait/mojo/mlog"
 	"github.com/adayswait/mojo/utils"
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/goexpect"
 	"golang.org/x/crypto/ssh"
 	"os/exec"

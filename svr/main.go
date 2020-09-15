@@ -5,10 +5,12 @@ import (
 	"github.com/adayswait/mojo/router"
 	"github.com/adayswait/mojo/utils"
 	"github.com/adayswait/mojo/ws"
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang/glog"
 )
 
 func main() {
+	glog.Info("welcome to mojo")
 	app := fiber.New()
 	router.Route(app)
 

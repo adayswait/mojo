@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/adayswait/mojo/mlog"
-	"github.com/gofiber/websocket"
+	"github.com/gofiber/websocket/v2"
 )
 
 func Websocket(c *websocket.Conn) {

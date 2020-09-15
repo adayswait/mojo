@@ -3,10 +3,10 @@ package router
 import (
 	"github.com/adayswait/mojo/handler"
 	"github.com/adayswait/mojo/utils"
-	"github.com/gofiber/cors"
-	"github.com/gofiber/fiber"
-	"github.com/gofiber/fiber/middleware"
-	"github.com/gofiber/websocket"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	"github.com/gofiber/websocket/v2"
 	"net/http"
 )
 
