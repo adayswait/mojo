@@ -6,7 +6,7 @@ cd ./svr
 mv ./mojo ./../
 cd ..
 cd ./cli
-npm install
+npm install --unsafe-perm
 npm run build
 cp -r ./dist ./../
 cd ..
