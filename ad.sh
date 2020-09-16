@@ -9,4 +9,4 @@ cd ./cli
 npm run build
 cp -r ./dist ./../
 cd ..
-rm -rf `ls|egrep -v "(mojo|dist)"`
+rm -rf `ls|egrep -v "(mojo|dist|br.sh|ar.sh)"`
