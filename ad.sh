@@ -6,6 +6,7 @@ cd ./svr
 mv ./mojo ./../
 cd ..
 cd ./cli
+npm install
 npm run build
 cp -r ./dist ./../
 cd ..
