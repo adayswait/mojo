@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"os/exec"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -116,9 +117,9 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		markdown := fmt.Sprintf(dingdingStr, depInfo.Type, depInfo.Type,
 			time.Now().Format("2006-01-02 15:04:05"),
 			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=break",
-				utils.GetWebDomain()[0], depuuid),
+				strings.Split(utils.GetWebDomain(), ",")[0], depuuid),
 			fmt.Sprintf("%s/#/visitor/breakdep?depuuid=%s&op=view",
-				utils.GetWebDomain()[0], depuuid))
+				strings.Split(utils.GetWebDomain(), ",")[0], depuuid))
 
 		reth, errh := utils.HttpPost(utils.GetDingdingWebhook(), markdown)
 		if errh != nil {
@@ -162,6 +163,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		var imac []string
 		e := json.Unmarshal([]byte(maciniInDB[i]), &imac)
 		if e != nil {
+			mlog.Errorf("json.Unmarshal : %s, err:%v", depiniInDB[i], e)
 			continue
 		}
 		_, exist := macIni[imac[0]]
@@ -179,6 +181,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		var idep []string
 		e := json.Unmarshal([]byte(depiniInDB[i]), &idep)
 		if e != nil {
+			mlog.Errorf("json.Unmarshal : %s, err:%v", depiniInDB[i], e)
 			continue
 		}
 		if idep[0] != depInfo.Type {
@@ -196,6 +199,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		}
 		macini, exist := macIni[idep[2]]
 		if exist == false {
+			mlog.Errorf("macIni[%s] doesn't exist", idep[2])
 			continue
 		}
 
@@ -249,6 +253,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 				fmt.Sprintf("--exclude-from=%s", utils.GetExcludeFrom())},
 			5*time.Minute)
 		if rsyncErr != nil {
+			mlog.Errorf("rsync err:%v", rsyncErr)
 			continue
 		}
 
