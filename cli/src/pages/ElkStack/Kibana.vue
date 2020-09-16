@@ -1,6 +1,11 @@
 <template>
   <div>
-    <div class="box" height="100%" width="100%" v-if="!($store.getters.userInfo.group<=1)">
+    <div
+      class="box"
+      height="100%"
+      width="100%"
+      v-if="!$store.state.visible.Login && $store.getters.userInfo.group>1"
+    >
       <NoRights height="100%" width="100%" />
     </div>
     <div v-if="!$store.state.visible.Login && $store.getters.userInfo.group<=1">

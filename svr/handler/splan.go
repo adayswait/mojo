@@ -96,7 +96,7 @@ func SplanMail(c *fiber.Ctx) error {
 	reth, errh := utils.HttpPost(utils.GetSplanSwitchUrl()+"/global_mail_proc",
 		string(bodyData))
 	if errh != nil {
-		mlog.Errorf("splan add global mail err:%s", errh)
+		mlog.Errorf("splan add global mail err:%v", errh)
 	} else {
 		mlog.Infof("splan add global mail ret:%s", string(reth))
 	}
@@ -137,14 +137,14 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	rmLastDirCmd := exec.Command("rm", "-rf", dirPath)
 	rmLastDirErr := rmLastDirCmd.Run()
 	if rmLastDirErr != nil {
-		mlog.Errorf("rm -rf %s failed, err:%s", dirPath, rmLastDirErr)
+		mlog.Errorf("rm -rf %s failed, err:%v", dirPath, rmLastDirErr)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": rmLastDirErr.Error()})
 	}
 	mkNewDirCmd := exec.Command("mkdir", dirPath)
 	mkNewDirErr := mkNewDirCmd.Run()
 	if mkNewDirErr != nil {
-		mlog.Errorf("mkdir %s failed, err:%s", dirPath, mkNewDirErr)
+		mlog.Errorf("mkdir %s failed, err:%v", dirPath, mkNewDirErr)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": mkNewDirErr.Error()})
 	}
@@ -153,7 +153,7 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 		repoInfo.URL+"/config/import_json_from_design.sh", exePath)
 	coConfigErr := coConfigCmd.Run()
 	if coConfigErr != nil {
-		mlog.Errorf("svn export --force %s %s failed, err:%s",
+		mlog.Errorf("svn export --force %s %s failed, err:%v",
 			repoInfo.URL+"/config/import_json_from_design.sh",
 			exePath, coConfigErr)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
@@ -170,7 +170,7 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	runImportCmd := exec.Command(exePath)
 	runImportErr := runImportCmd.Run()
 	if runImportErr != nil {
-		mlog.Errorf("run %s failed, err:%s", exePath, runImportErr)
+		mlog.Errorf("run %s failed, err:%v", exePath, runImportErr)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": runImportErr.Error()})
 	}
@@ -250,7 +250,7 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	reth, errh := utils.HttpPost(utils.GetSplanSwitchUrl()+router,
 		string(bodyData))
 	if errh != nil {
-		mlog.Errorf("splan update config failed, err:%s", errh)
+		mlog.Errorf("splan update config failed, err:%v", errh)
 		return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
 
 	}
@@ -272,7 +272,7 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 		dingMsg := fmt.Sprintf("⚠ %s提交的热更%s配表请求已执行完成", user, module)
 		formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
 		retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
-		mlog.Info("hot update webhook ret:%s,err:%s", string(retd), errd)
+		mlog.Info("hot update webhook ret:%s,err:%v", string(retd), errd)
 	}
 
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
@@ -293,7 +293,7 @@ func SplanChangeTime(c *fiber.Ctx) error {
 
 	maciniInDB, errm := db.Keys(global.BUCKET_OPS_MACINI)
 	if errm != nil {
-		mlog.Errorf("SplanChangeTime err:%s", errm)
+		mlog.Errorf("SplanChangeTime err:%v", errm)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": errm.Error()})
 	}
@@ -349,7 +349,7 @@ func SplanChangeTime(c *fiber.Ctx) error {
 		fmt.Sprintf("password for %s:", sshuser)),
 		10*time.Second)
 	if esd != nil {
-		mlog.Errorf("expect exec sudo passwd failed, ret:%s, match:%s,err:%s",
+		mlog.Errorf("expect exec sudo passwd failed, ret:%s, match:%s,err:%v",
 			retsd, matchedsd, esd)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": elogin.Error()})
@@ -360,7 +360,7 @@ func SplanChangeTime(c *fiber.Ctx) error {
 	retok, matched, eok := essh.Expect(regexp.MustCompile("$"),
 		5*time.Second)
 	if eok != nil {
-		mlog.Errorf("sudo date -s '%s' failed ret:%s, match:%s, err:%s",
+		mlog.Errorf("sudo date -s '%s' failed ret:%s, match:%s, err:%v",
 			body.Time, retok, matched, eok)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": eok.Error()})
@@ -372,7 +372,7 @@ func SplanChangeTime(c *fiber.Ctx) error {
 	dingMsg := fmt.Sprintf("⚠ %s已将服务器时间修改为%s", user, body.Time)
 	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
 	retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
-	mlog.Infof("change server webhook ret:%s, err:%s", string(retd), errd)
+	mlog.Infof("change servertime webhook ret:%s, err:%v", string(retd), errd.Error())
 
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
@@ -661,7 +661,7 @@ func Chat(c *fiber.Ctx) error {
 	}
 
 	if errh != nil {
-		mlog.Errorf("chat webhook err:%s", errh)
+		mlog.Errorf("chat webhook err:%v", errh)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_HTTP_REQUEST,
 			"data": errh.Error()})
 	} else {

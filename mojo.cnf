@@ -1,0 +1,12 @@
+db-dir ./
+log-dir ./
+fs-dir /root/docs
+www-dir ./dist
+web-host 10.1.1.1
+web-port 80
+web-domain http://10.1.1.1:80,http://example.com
+pkg-path /opt/depak
+exclude-from /srv/exclude.list
+dingding-webhook https://oapi.dingtalk.com/robot/send?access_token=abc
+developer-webhook https://oapi.dingtalk.com/robot/send?access_token=abc
+splan-switch-url http://10.1.1.1:3000

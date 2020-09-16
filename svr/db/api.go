@@ -1,6 +1,8 @@
 package db
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +14,14 @@ import (
 type UserInfo struct {
 	User  string `json:"user"`
 	Group int    `json:"group"`
+}
+
+func createAdminAccount(parsswd string) {
+	tempMD5 := md5.New()
+	tempMD5.Write([]byte(parsswd))
+	tempMD5.Write([]byte(global.MD5_SALT))
+	passwdMD5 := hex.EncodeToString(tempMD5.Sum(nil))
+	Register("admin", passwdMD5)
 }
 
 func Register(user, passwd string) error {

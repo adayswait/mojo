@@ -202,7 +202,7 @@ func UpdateDB(c *fiber.Ctx) error {
 	}
 	err := db.Set(table, key, body.Value)
 	if err != nil {
-		mlog.Errorf("%s@%d UpdateDB failed, err:%s, bucket:%s, key:%s, value:%s",
+		mlog.Errorf("%s@%d UpdateDB failed, err:%v, bucket:%s, key:%s, value:%s",
 			user, group, err, table, key, body.Value)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": err.Error()})
@@ -232,7 +232,7 @@ func DeleteDB(c *fiber.Ctx) error {
 	}
 	err := db.Delete(table, key)
 	if err != nil {
-		mlog.Infof("%s@%d DeleteDB failed, err:%s, bucket:%s, key:%s",
+		mlog.Infof("%s@%d DeleteDB failed, err:%v, bucket:%s, key:%s",
 			user, group, err, table, key)
 		return c.JSON(fiber.Map{"code": global.RET_ERR_DB,
 			"data": err.Error()})
