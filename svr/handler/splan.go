@@ -141,7 +141,7 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_OS_EXEC_CMD_RUN,
 			"data": rmLastDirErr.Error()})
 	}
-	mkNewDirCmd := exec.Command("mkdir", dirPath)
+	mkNewDirCmd := exec.Command("mkdir", "-p", dirPath)
 	mkNewDirErr := mkNewDirCmd.Run()
 	if mkNewDirErr != nil {
 		mlog.Errorf("mkdir %s failed, err:%v", dirPath, mkNewDirErr)

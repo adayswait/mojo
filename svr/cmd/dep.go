@@ -84,7 +84,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 	coCmd := fmt.Sprintf("svn export --force -r%s %s %s",
 		depInfo.Revision, depInfo.RepoUrl, path)
 	expectCo, _, _ := expect.Spawn(coCmd, -1)
-	defer expectCo.Close()
+	// defer expectCo.Close()
 	retCo, matchedCo, errCo := expectCo.Expect(
 		regexp.MustCompile("Exported revision"),
 		5*time.Minute)
@@ -176,6 +176,9 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		}
 	}
 
+	var totalN = 0
+	var failedN = 0
+
 	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SYNC)
 	for i := 1; i < len(depiniInDB); i += 2 {
 		var idep []string
@@ -184,6 +187,8 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			mlog.Errorf("json.Unmarshal : %s, err:%v", depiniInDB[i], e)
 			continue
 		}
+
+		//过滤掉非本次发布类型的服务
 		if idep[0] != depInfo.Type {
 			continue
 		}
@@ -194,12 +199,16 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 				break
 			}
 		}
+
+		//过滤掉不再发布列表中的服务
 		if !inList && len(depInfo.List) != 0 {
 			continue
 		}
+		totalN += 1
 		macini, exist := macIni[idep[2]]
 		if exist == false {
 			mlog.Errorf("macIni[%s] doesn't exist", idep[2])
+			failedN += 1
 			continue
 		}
 
@@ -213,6 +222,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		if errdial != nil {
 			mlog.Errorf("ssh dial %s@%s:%s failed, err : %s",
 				macini.User, idep[2], macini.Port, errdial)
+			failedN += 1
 			continue
 		}
 		defer sshClt.Close()
@@ -220,6 +230,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			macini.User, idep[2], macini.Port)
 		essh, _, errssh := expect.SpawnSSH(sshClt, time.Minute)
 		if errssh != nil {
+			failedN += 1
 			mlog.Errorf("expect.SpawnSSH failed, err : %s", errssh)
 			continue
 		}
@@ -229,18 +240,33 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 		if elogin != nil {
 			mlog.Errorf("expect ssh login failed, ret : %s, err : %s",
 				retlogin, elogin)
+			failedN += 1
 			continue
 		}
 		mlog.Info("expect ssh login succeed, ret:%s", retlogin)
 
-		essh.Send("bash " + idep[3] + "/br.sh\n")
+		mkdircmd := "mkdir -p " + idep[3] + " && echo mojomkdirok\n"
+		essh.Send(mkdircmd)
+		retmkdir, matchedmkdir, emkdir := essh.Expect(regexp.MustCompile("mojomkdirok"),
+			10*time.Second)
+		if emkdir != nil {
+			mlog.Errorf("before rsync mkdir failed, "+
+				"cmd:%s, ret:%s, match:%s, err:%s",
+				mkdircmd, retmkdir, matchedmkdir, emkdir)
+			failedN += 1
+			continue
+		} else {
+			mlog.Info("before rsync mkdir succeed")
+		}
+
+		essh.Send("bash " + idep[3] + "/br.sh  && echo mojobrok\n")
 		retbr, matchedbr, ebr := essh.Expect(regexp.MustCompile("mojobrok"),
 			10*time.Second)
 		if ebr != nil {
 			//before release脚本执行错误不中断后续流程
 			//因为首次发布的时候可能没有br.sh
 			//todo 首先传输br.sh到指定位置
-			mlog.Errorf("before release exec cmd failed,"+
+			mlog.Errorf("before release exec cmd failed, "+
 				"path:%s, ret:%s, match:%s, err:%s",
 				idep[3]+"/br.sh", retbr, matchedbr, ebr)
 		} else {
@@ -254,14 +280,15 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			5*time.Minute)
 		if rsyncErr != nil {
 			mlog.Errorf("rsync err:%v", rsyncErr)
+			failedN += 1
 			continue
 		}
 
 		var arcmd string
 		if len(idep) > 4 && len(idep[4]) != 0 {
-			arcmd = "bash " + idep[3] + "/ar.sh " + idep[4] + "\n"
+			arcmd = "bash " + idep[3] + "/ar.sh " + idep[4] + " && echo mojoarok\n"
 		} else {
-			arcmd = "bash " + idep[3] + "/ar.sh\n"
+			arcmd = "bash " + idep[3] + "/ar.sh && echo mojoarok\n"
 		}
 		essh.Send(arcmd)
 		retar, matchedar, ear := essh.Expect(regexp.MustCompile("mojoarok"),
@@ -270,13 +297,19 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			mlog.Errorf("before release exec cmd failed,"+
 				"path:%s, ret:%s, match:%s, err:%s",
 				arcmd, retar, matchedar, ear)
+			failedN += 1
 			continue
 		} else {
 			mlog.Info("after release exec cmd succeed")
 		}
 	}
-	mlog.Infof("deploy id:%s run over", depInfo.DepId)
-	global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SUCCESS)
+	mlog.Infof("deploy id:%s run over,total:%d, failed:%d",
+		depInfo.DepId, totalN, failedN)
+	if totalN != 0 && failedN == 0 {
+		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_SUCCESS)
+	} else {
+		global.Depuuid2DepStatus.Store(depuuid, global.DEP_STATUS_ERR)
+	}
 
 	return
 }

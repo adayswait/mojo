@@ -39,7 +39,7 @@
                           :class="{'is-success':info[3]==progressDesc.length-1,
                         'is-warning':info[3]!=progressDesc.length-1&& info[3]>=0,
                         'is-danger':info[3]<0}"
-                        >{{progressDesc[info[3]]}}</span>
+                        >{{(info[3]>=0)?progressDesc[info[3]]:'发布失败'}}</span>
                       </div>
                     </div>
 

@@ -36,9 +36,8 @@ func Rsync(
 			return fmt.Errorf("rsync cmd:%s exec failed", rsyncCmd)
 		}
 	} else {
-		mlog.Infof("rsync rsh failed, cmd:%s, ret:%s,matched:%s,err:%s",
+		mlog.Errorf("rsync rsh failed, cmd:%s, ret:%s,matched:%s,err:%s",
 			rsyncCmd, retSSH, matchedSSH, errSSH)
 		return fmt.Errorf("rsync rsh failed, cmd:%s", rsyncCmd)
 	}
-	return nil
 }
