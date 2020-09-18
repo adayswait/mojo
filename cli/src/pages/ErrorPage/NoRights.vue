@@ -175,5 +175,3 @@ div {
   height: 100%;
 }
 </style>
-
---bthread_concurrency=6 --crash_on_fatal_log=true --raft_max_segment_size=8388608 --raft_sync=true --ip=10.1.1.43 --port=8602 --conf=10.1.1.248:8600:0,10.1.1.248:8601:0:0,10.1.1.43:8602:0,
