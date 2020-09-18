@@ -243,7 +243,7 @@ func SvnDep(depInfo global.DepInfo, force bool) {
 			failedN += 1
 			continue
 		}
-		mlog.Info("expect ssh login succeed, ret:%s", retlogin)
+		mlog.Infof("expect ssh login succeed, ret:%s", retlogin)
 
 		mkdircmd := "mkdir -p " + idep[3] + " && echo mojomkdirok\n"
 		essh.Send(mkdircmd)

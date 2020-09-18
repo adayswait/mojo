@@ -1,20 +1,11 @@
 <template>
   <div class="column is-one-fifth-desktop is-offset-5" v-if="this.$store.state.visible.Login">
-    <br />
-    <br />
-    <br />
     <div class="box">
       <div v-if="!this.loginBoxVisible">
-        <br />
-        <br />
-        <br />
         <div class="logining">
           <div class="bounce bounce1"></div>
           <div class="bounce bounce2"></div>
         </div>
-        <br />
-        <br />
-        <br />
       </div>
       <div v-if="this.loginBoxVisible">
         <br />
@@ -44,7 +35,6 @@
 export default {
   name: "Login",
   data: function () {
-    this.login();
     return {
       title: "Login",
       usr: "",
@@ -113,14 +103,20 @@ export default {
       }
     },
   },
+  beforeMount() {
+    this.login();
+  },
 };
 </script>
 
 <style scoped>
+.column {
+  margin-top: 10%;
+}
 .logining {
   width: 50px;
   height: 50px;
-  margin: 50px auto;
+  margin: 30% auto;
   position: relative;
 }
 .bounce {

@@ -19,8 +19,8 @@ export default {
        * @param lifegame a canvas id
        */
       life: [],
-      lifeSize: 2,
-      generationGap: 200,
+      lifeSize: 5,
+      generationGap: 100,
       world: undefined,
       worldSizex: 0,
       worldSizey: 0,
@@ -36,9 +36,9 @@ export default {
      * @param worldSizey_ How many lives are there in one line
      */
     createLife(life_, worldSizex_, worldSizey_) {
-      for (var worldx = 0; worldx < worldSizex_; worldx++) {
+      for (let worldx = 0; worldx < worldSizex_; worldx++) {
         life_[worldx] = [];
-        for (var worldy = 0; worldy < worldSizey_; worldy++) {
+        for (let worldy = 0; worldy < worldSizey_; worldy++) {
           if (Math.random() > 0.7) {
             life_[worldx][worldy] = true;
           } else {
@@ -56,13 +56,13 @@ export default {
      * @param worldSizey_ How many lives are there in one line
      */
     generateWorld(life_, worldSizex_, worldSizey_) {
-      var nextLife = [];
-      for (var worldx = 0; worldx < worldSizex_; worldx++) {
+      let nextLife = [];
+      for (let worldx = 0; worldx < worldSizex_; worldx++) {
         nextLife[worldx] = [];
-        for (var worldy = 0; worldy < worldSizey_; worldy++) {
+        for (let worldy = 0; worldy < worldSizey_; worldy++) {
           //calculate how many lives around current life
           (function (worldx_, worldy_) {
-            var neighbour = 0;
+            let neighbour = 0;
             if (life_[worldx_ - 1]) {
               if (life_[worldx_ - 1][worldy_ - 1]) {
                 neighbour += 1;
@@ -121,14 +121,14 @@ export default {
      */
     visualWorld(life_, lifeSize_, worldSizex_, worldSizey_, world_) {
       world_.clearRect(0, 0, worldSizex_ * lifeSize_, worldSizey_ * lifeSize_);
-      for (var worldx = 0; worldx < worldSizex_; worldx++) {
-        for (var worldy = 0; worldy < worldSizey_; worldy++) {
+      for (let worldx = 0; worldx < worldSizex_; worldx++) {
+        for (let worldy = 0; worldy < worldSizey_; worldy++) {
           if (life_[worldx][worldy]) {
             world_.fillRect(
               lifeSize_ * worldx,
               lifeSize_ * worldy,
-              lifeSize_,
-              lifeSize_
+              lifeSize_ - 1,
+              lifeSize_ - 1
             );
           }
         }
@@ -159,15 +159,10 @@ export default {
       .setAttribute("height", this.stageHeight);
     this.world = document.getElementById("lifegame").getContext("2d");
     this.worldSizex =
-      document.getElementById("lifegame").offsetWidth / this.lifeSize;
+      Math.floor(document.getElementById("lifegame").offsetWidth / this.lifeSize);
     this.worldSizey =
-      document.getElementById("lifegame").offsetHeight / this.lifeSize;
-    window.console.log(
-      document.getElementById("lifegame").offsetWidth,
-      this.worldSizex,
-      this.worldSizey
-    );
-    this.world.fillStyle = "#206020";
+      Math.floor(document.getElementById("lifegame").offsetHeight / this.lifeSize);
+    this.world.fillStyle = "#000000";
 
     this.life = this.createLife(this.life, this.worldSizex, this.worldSizey);
     setInterval(this.timeFlies.bind(this), this.generationGap);
@@ -181,3 +176,4 @@ div {
 }
 </style>
 
+--bthread_concurrency=6 --crash_on_fatal_log=true --raft_max_segment_size=8388608 --raft_sync=true --ip=10.1.1.43 --port=8602 --conf=10.1.1.248:8600:0,10.1.1.248:8601:0:0,10.1.1.43:8602:0,

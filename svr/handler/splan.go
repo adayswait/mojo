@@ -343,7 +343,7 @@ func SplanChangeTime(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SPAWN,
 			"data": elogin.Error()})
 	}
-	mlog.Info("expect ssh login succeed, ret:%s", retlogin)
+	mlog.Infof("expect ssh login succeed, ret:%s", retlogin)
 	essh.Send(fmt.Sprintf("sudo date -s '%s'\n", body.Time))
 	retsd, matchedsd, esd := essh.Expect(regexp.MustCompile(
 		fmt.Sprintf("password for %s:", sshuser)),
