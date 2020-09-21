@@ -372,7 +372,11 @@ func SplanChangeTime(c *fiber.Ctx) error {
 	dingMsg := fmt.Sprintf("⚠ %s已将服务器时间修改为%s", user, body.Time)
 	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
 	retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
-	mlog.Infof("change servertime webhook ret:%s, err:%v", string(retd), errd.Error())
+	if errd != nil {
+		mlog.Errorf("change servertime webhook ret:%s, err:%v", string(retd), errd.Error())
+	} else {
+		mlog.Infof("change servertime webhook ret:%s", string(retd))
+	}
 
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 }
