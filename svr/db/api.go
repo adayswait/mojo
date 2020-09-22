@@ -16,12 +16,50 @@ type UserInfo struct {
 	Group int    `json:"group"`
 }
 
-func createAdminAccount(parsswd string) {
+func createAdminAccount(passwd string) {
 	tempMD5 := md5.New()
-	tempMD5.Write([]byte(parsswd))
+	tempMD5.Write([]byte(passwd))
 	tempMD5.Write([]byte(global.MD5_SALT))
 	passwdMD5 := hex.EncodeToString(tempMD5.Sum(nil))
-	Register("admin", passwdMD5)
+	user := "admin"
+	rwLock.Lock()
+	/*createAdminErr := */ localDB.Update(func(tx *bolt.Tx) error {
+		bup := tx.Bucket([]byte(global.BUCKET_USR_PASSWD))
+		if bup == nil {
+			return fmt.Errorf("bucket:%s is nil", global.BUCKET_USR_PASSWD)
+		}
+		existUser := bup.Get([]byte(user))
+		if len(existUser) != 0 {
+			return errors.New("user already exist")
+		}
+		eup := bup.Put([]byte(user), []byte(passwdMD5))
+		if eup != nil {
+			return eup
+		}
+		info := UserInfo{User: user, Group: int(global.GROUP_WHOSYOURDADDY)}
+
+		infoData, ejn := json.Marshal(info)
+		if ejn != nil {
+			return ejn
+		}
+		bti := tx.Bucket([]byte(global.BUCKET_TOKEN_INFO))
+		if bti == nil {
+			return fmt.Errorf("bucket:%s is nil", global.BUCKET_TOKEN_INFO)
+		}
+		token := uuid.New().String()
+		eti := bti.Put([]byte(token), []byte(string(infoData)))
+		if eti != nil {
+			return eti
+		}
+
+		but := tx.Bucket([]byte(global.BUCKET_USER_TOKEN))
+		if but == nil {
+			return fmt.Errorf("bucket:%s is nil", global.BUCKET_USER_TOKEN)
+		}
+		eut := but.Put([]byte(user), []byte(token))
+		return eut
+	})
+	defer rwLock.Unlock()
 }
 
 func Register(user, passwd string) error {
