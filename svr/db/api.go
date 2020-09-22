@@ -28,10 +28,6 @@ func createAdminAccount(passwd string) {
 		if bup == nil {
 			return fmt.Errorf("bucket:%s is nil", global.BUCKET_USR_PASSWD)
 		}
-		existUser := bup.Get([]byte(user))
-		if len(existUser) != 0 {
-			return errors.New("user already exist")
-		}
 		eup := bup.Put([]byte(user), []byte(passwdMD5))
 		if eup != nil {
 			return eup
