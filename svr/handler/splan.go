@@ -269,10 +269,10 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 		param.Notify = false
 	}
 	if param.Notify {
-		dingMsg := fmt.Sprintf("⚠ %s提交的热更%s配表请求已执行完成", user, module)
+		dingMsg := fmt.Sprintf("⚠ %s提交的更新%s配表请求已执行完成", user, module)
 		formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
 		retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
-		mlog.Info("hot update webhook ret:%s,err:%v", string(retd), errd)
+		mlog.Infof("hot update webhook ret:%s,err:%v", string(retd), errd)
 	}
 
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
@@ -650,7 +650,7 @@ func Chat(c *fiber.Ctx) error {
 	mlog.Infof("%s chat to %s, message:%s", user, to, chatInfo.Message)
 
 	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN,
-		"👻 "+chatInfo.Message)
+		"💬 "+chatInfo.Message)
 	var errh error
 	var reth []byte
 	if to == "group" {

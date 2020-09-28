@@ -10,4 +10,4 @@ npm install --unsafe-perm
 npm run build
 cp -r ./dist ./../
 cd ..
-rm -rf `ls|egrep -v "(mojo|dist|br.sh|ar.sh)"`
+rm -rf `ls|grep -vE "(mojo|dist|br.sh|ar.sh)"`
