@@ -32,8 +32,24 @@ func createAdminAccount(passwd string) {
 		if eup != nil {
 			return eup
 		}
-		info := UserInfo{User: user, Group: int(global.GROUP_WHOSYOURDADDY)}
 
+		but := tx.Bucket([]byte(global.BUCKET_USER_TOKEN))
+		if but == nil {
+			return fmt.Errorf("bucket:%s is nil", global.BUCKET_USER_TOKEN)
+		}
+		var token []byte
+		oldToken := but.Get([]byte(user))
+		if len(oldToken) != 0 {
+			token = oldToken
+		} else {
+			token = []byte(uuid.New().String())
+			eut := but.Put([]byte(user), token)
+			if eut != nil {
+				return eut
+			}
+		}
+
+		info := UserInfo{User: user, Group: int(global.GROUP_WHOSYOURDADDY)}
 		infoData, ejn := json.Marshal(info)
 		if ejn != nil {
 			return ejn
@@ -42,18 +58,9 @@ func createAdminAccount(passwd string) {
 		if bti == nil {
 			return fmt.Errorf("bucket:%s is nil", global.BUCKET_TOKEN_INFO)
 		}
-		token := uuid.New().String()
-		eti := bti.Put([]byte(token), []byte(string(infoData)))
-		if eti != nil {
-			return eti
-		}
 
-		but := tx.Bucket([]byte(global.BUCKET_USER_TOKEN))
-		if but == nil {
-			return fmt.Errorf("bucket:%s is nil", global.BUCKET_USER_TOKEN)
-		}
-		eut := but.Put([]byte(user), []byte(token))
-		return eut
+		eti := bti.Put(token, []byte(string(infoData)))
+		return eti
 	})
 	defer rwLock.Unlock()
 }
