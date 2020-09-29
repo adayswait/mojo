@@ -297,7 +297,7 @@ export default {
       serverTime: new Date(),
       hotUpdating: false,
       withNotify: false,
-      timeLocker: "jesse",
+      timeLocker: "",
     };
   },
   components: {
