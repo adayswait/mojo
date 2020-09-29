@@ -317,19 +317,6 @@ func SplanLockTime(c *fiber.Ctx) error {
 		splanTimeLockerRWlock.RUnlock()
 		return c.JSON(fiber.Map{"code": global.RET_OK, "data": timeLocker})
 	}
-
-}
-func SplanQueryTimeLocker(c *fiber.Ctx) error {
-	store := sessions.Get(c)
-	group := store.Get(global.SESSION_KEY_GROUP)
-	if group == nil {
-		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
-			"data": "session invalid"})
-	}
-	splanTimeLockerRWlock.RLock()
-	defer splanTimeLockerRWlock.RUnlock()
-	timeLocker := splanTimeLocker
-	return c.JSON(fiber.Map{"code": global.RET_OK, "data": timeLocker})
 }
 
 func SplanChangeTime(c *fiber.Ctx) error {
