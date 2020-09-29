@@ -66,5 +66,8 @@ func Route(app *fiber.App) {
 	splanWeb := web.Group("/splan")
 	splanWeb.Post("/mail", handler.SplanMail)
 	splanWeb.Put("/changetime", handler.SplanChangeTime)
+	splanWeb.Get("/timelocker", handler.SplanLockTime)
+	splanWeb.Put("/timelocker", handler.SplanLockTime)
+	splanWeb.Delete("/timelocker", handler.SplanLockTime)
 	splanWeb.Put("/config/:module", handler.SplanUpdateConfig)
 }

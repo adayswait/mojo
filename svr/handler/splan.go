@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -49,6 +50,9 @@ var onlineHotUpdate = "pveBoss.json;pveDrop.json;pveEvent.json;festivalCarnivalR
 	"battleAnswer.json;activityMaze.json;risisContractTask.json;activityAffect.json;nonoSkin.json;discountShop.json"
 
 var battleHotUpdate = "fightSkills.json;fightAffects.json;fightRelation.json;elemTypes.json;fightFactors.json"
+
+var splanTimeLocker = ""
+var splanTimeLockerRWlock = &sync.RWMutex{}
 
 type MailParam struct {
 	Opt          string `json:"opt"`
@@ -269,7 +273,8 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 		param.Notify = false
 	}
 	if param.Notify {
-		dingMsg := fmt.Sprintf("⚠ %s提交的更新%s配表请求已执行完成", user, module)
+		dingMsg := fmt.Sprintf("⚠ %s提交的更新 [ %s ] 配表请求已执行完成",
+			user, module)
 		formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
 		retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
 		mlog.Infof("hot update webhook ret:%s,err:%v", string(retd), errd)
@@ -278,9 +283,71 @@ func SplanUpdateConfig(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"code": global.RET_OK, "data": string(reth)})
 }
 
+func SplanLockTime(c *fiber.Ctx) error {
+	store := sessions.Get(c)
+	user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
+	}
+	mlog.Infof("%s@%d %s timelocker", user, group, c.Method())
+	if c.Method() == "PUT" {
+		splanTimeLockerRWlock.Lock()
+		splanTimeLocker = user.(string)
+		splanTimeLockerRWlock.Unlock()
+		dingMsg := fmt.Sprintf("⚠ %s已锁定服务器时间", user)
+		formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
+		retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
+		mlog.Infof("put time locker webhook ret:%s,err:%v", string(retd), errd)
+		return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+	} else if c.Method() == "DELETE" {
+		splanTimeLockerRWlock.Lock()
+		splanTimeLocker = ""
+		splanTimeLockerRWlock.Unlock()
+		dingMsg := fmt.Sprintf("⚠ %s已解除服务器时间锁定", user)
+		formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
+		retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
+		mlog.Infof("delete time locker webhook ret:%s,err:%v",
+			string(retd), errd)
+		return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
+	} else { //must be get
+		splanTimeLockerRWlock.RLock()
+		timeLocker := splanTimeLocker
+		splanTimeLockerRWlock.RUnlock()
+		return c.JSON(fiber.Map{"code": global.RET_OK, "data": timeLocker})
+	}
+
+}
+func SplanQueryTimeLocker(c *fiber.Ctx) error {
+	store := sessions.Get(c)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
+	}
+	splanTimeLockerRWlock.RLock()
+	defer splanTimeLockerRWlock.RUnlock()
+	timeLocker := splanTimeLocker
+	return c.JSON(fiber.Map{"code": global.RET_OK, "data": timeLocker})
+}
+
 func SplanChangeTime(c *fiber.Ctx) error {
 	store := sessions.Get(c)
 	user := store.Get(global.SESSION_KEY_USER)
+	group := store.Get(global.SESSION_KEY_GROUP)
+	if group == nil {
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
+			"data": "session invalid"})
+	}
+	splanTimeLockerRWlock.RLock()
+	timeLocker := splanTimeLocker
+	splanTimeLockerRWlock.RUnlock()
+	if len(timeLocker) != 0 {
+		data := fmt.Sprintf("locked by %s", timeLocker)
+		return c.JSON(fiber.Map{"code": global.RET_ERR, "data": data})
+	}
+
 	body := struct {
 		Ip   string `json:"ip"`
 		Time string `json:"time"`
@@ -366,14 +433,15 @@ func SplanChangeTime(c *fiber.Ctx) error {
 			"data": eok.Error()})
 	} else {
 		mlog.Infof("%s change server time to %s succeed, ret:%s, matched:%s",
-			user.(string), body.Time, retok, matched)
+			user, body.Time, retok, matched)
 	}
 
-	dingMsg := fmt.Sprintf("⚠ %s已将服务器时间修改为%s", user, body.Time)
+	dingMsg := fmt.Sprintf("⚠ %s已将服务器时间修改为 [ %s ]", user, body.Time)
 	formatMsg := fmt.Sprintf(global.DINGDING_TEXT_MSG_PATTERN, dingMsg)
 	retd, errd := utils.HttpPost(utils.GetDingdingWebhook(), formatMsg)
 	if errd != nil {
-		mlog.Errorf("change servertime webhook ret:%s, err:%v", string(retd), errd.Error())
+		mlog.Errorf("change servertime webhook ret:%s, err:%v",
+			string(retd), errd.Error())
 	} else {
 		mlog.Infof("change servertime webhook ret:%s", string(retd))
 	}

@@ -2,33 +2,57 @@
   <div class="column">
     <div class="tabs">
       <ul>
-        <li :class="{'is-active':currFocusTitle=='快捷操作'}" @click="focus('快捷操作')">
+        <li
+          :class="{ 'is-active': currFocusTitle == '快捷操作' }"
+          @click="focus('快捷操作')"
+        >
           <a>快捷操作</a>
         </li>
-        <li :class="{'is-active':currFocusTitle=='全服邮件'}" @click="focus('全服邮件')">
+        <li
+          :class="{ 'is-active': currFocusTitle == '全服邮件' }"
+          @click="focus('全服邮件')"
+        >
           <a>全服邮件</a>
         </li>
-        <li :class="{'is-active':currFocusTitle=='全服公告'}" @click="focus('全服公告')">
+        <li
+          :class="{ 'is-active': currFocusTitle == '全服公告' }"
+          @click="focus('全服公告')"
+        >
           <a>全服公告</a>
         </li>
-        <li :class="{'is-active':currFocusTitle=='历史公告'}" @click="focus('历史公告')">
+        <li
+          :class="{ 'is-active': currFocusTitle == '历史公告' }"
+          @click="focus('历史公告')"
+        >
           <a>历史公告</a>
         </li>
-        <li :class="{'is-active':currFocusTitle=='全服跑马灯'}" @click="focus('全服跑马灯')">
+        <li
+          :class="{ 'is-active': currFocusTitle == '全服跑马灯' }"
+          @click="focus('全服跑马灯')"
+        >
           <a>全服跑马灯</a>
         </li>
       </ul>
     </div>
-    <div class="container" v-if="currFocusTitle=='快捷操作'">
+    <div class="container" v-if="currFocusTitle == '快捷操作'">
       <div class="columns">
         <div class="column is-2">
-          <input class="input has-text-centered" type="text" value="配表热更" disabled />
+          <input
+            class="input has-text-centered"
+            type="text"
+            value="配表热更新"
+            disabled
+          />
         </div>
         <div class="column is-3">
           <div class="dropdown is-hoverable">
             <div class="dropdown-trigger">
-              <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                {{currServerType||"点击选择服务类型"}}
+              <button
+                class="button"
+                aria-haspopup="true"
+                aria-controls="dropdown-menu"
+              >
+                {{ currServerType || "点击选择服务类型" }}
                 <span class="icon is-small">
                   <i class="fas fa-angle-down" aria-hidden="true"></i>
                 </span>
@@ -39,9 +63,10 @@
                 <tr v-for="t in depTypeList" :key="t">
                   <a
                     class="dropdown-item"
-                    :class="{'is-active':t==currServerType}"
+                    :class="{ 'is-active': t == currServerType }"
                     @click="changeServerType(t)"
-                  >{{t}}</a>
+                    >{{ t }}</a
+                  >
                 </tr>
               </div>
             </div>
@@ -51,8 +76,9 @@
           <a
             class="button is-primary"
             @click="hotUpdateConfig"
-            :class="{'is-loading':hotUpdating}"
-          >一键热更</a>
+            :class="{ 'is-loading': hotUpdating }"
+            >一键更新</a
+          >
           <label class="checkbox">
             <input type="checkbox" v-model="withNotify" :value="true" />
             <strong>
@@ -63,42 +89,118 @@
       </div>
       <div class="columns">
         <div class="column is-2">
-          <input class="input has-text-centered" type="text" value="修改服务器时间" disabled />
+          <input
+            class="input has-text-centered"
+            type="text"
+            value="修改服务器时间"
+            disabled
+          />
         </div>
         <div class="column is-3">
-          <date-picker class="datepicker" type="datetime" v-model="serverTime"></date-picker>
+          <date-picker
+            class="datepicker"
+            type="datetime"
+            v-model="serverTime"
+          ></date-picker>
         </div>
         <div class="column is-2">
-          <a class="button is-primary is-warning" @click="changeServerTime">立即修改</a>
+          <a class="button is-primary is-warning" @click="changeServerTime"
+            >立即修改</a
+          >
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column is-2">
+          <input
+            class="input has-text-centered"
+            type="text"
+            value="锁定服务器时间"
+            disabled
+          />
+        </div>
+        <div class="column is-3">
+          <div class="control" id="timelocktag">
+            <div class="tags has-addons" v-if="!timeLocker">
+              <span class="tag is-primary">未锁定</span>
+            </div>
+            <div class="tags has-addons" v-if="timeLocker">
+              <span class="tag is-danger">已锁定</span>
+              <span class="tag is-info">{{ timeLocker }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="column is-2">
+          <a
+            class="button is-danger is-warning"
+            v-if="!timeLocker"
+            @click="lockServerTime(true)"
+            >立即锁定</a
+          >
+          <a
+            class="button is-danger is-warning"
+            v-if="timeLocker"
+            @click="lockServerTime(false)"
+            >强行解锁</a
+          >
         </div>
       </div>
     </div>
 
-    <div class="container" v-if="currFocusTitle=='全服邮件'">
+    <div class="container" v-if="currFocusTitle == '全服邮件'">
       <div class="columns">
         <div class="column is-2">
-          <input class="input has-text-centered is-small" type="text" value="邮件标题" disabled />
+          <input
+            class="input has-text-centered is-small"
+            type="text"
+            value="邮件标题"
+            disabled
+          />
         </div>
         <div class="column is-3">
-          <input class="input is-small" type="text" placeholder="邮件标题" v-model="mailTitle" />
+          <input
+            class="input is-small"
+            type="text"
+            placeholder="邮件标题"
+            v-model="mailTitle"
+          />
         </div>
         <div class="column is-2 is-offset-1">
-          <input class="input has-text-centered is-small" type="text" value="发件人" disabled />
+          <input
+            class="input has-text-centered is-small"
+            type="text"
+            value="发件人"
+            disabled
+          />
         </div>
         <div class="column is-3">
-          <input class="input is-small" type="text" placeholder="发件人" v-model="mailSender" />
+          <input
+            class="input is-small"
+            type="text"
+            placeholder="发件人"
+            v-model="mailSender"
+          />
         </div>
       </div>
       <div class="columns">
         <div class="column is-2">
-          <input class="input has-text-centered is-small" type="text" value="生效日期" disabled />
+          <input
+            class="input has-text-centered is-small"
+            type="text"
+            value="生效日期"
+            disabled
+          />
         </div>
         <div class="column is-4">
           <date-picker v-model="timeEffect"></date-picker>
           <span class="tag is-small is-dark">00:00:00</span>
         </div>
         <div class="column is-2">
-          <input class="input has-text-centered is-small" type="text" value="失效日期" disabled />
+          <input
+            class="input has-text-centered is-small"
+            type="text"
+            value="失效日期"
+            disabled
+          />
         </div>
         <div class="column is-4">
           <date-picker v-model="timeExpire"></date-picker>
@@ -106,13 +208,13 @@
         </div>
       </div>
       <div class="columns">
-        <div class="column is-12" style="height:400px;">
+        <div class="column is-12" style="height: 400px">
           <div>
             <quill-editor
               ref="myTextEditor"
               v-model="mailContent"
               :options="editorOption"
-              style="height:300px;"
+              style="height: 300px"
             ></quill-editor>
           </div>
         </div>
@@ -124,23 +226,33 @@
       </nav>
     </div>
 
-    <div class="container" v-if="currFocusTitle=='全服公告'">
+    <div class="container" v-if="currFocusTitle == '全服公告'">
       <div class="columns">
         <div class="column is-2">
-          <input class="input has-text-centered" type="text" value="公告标题" disabled />
+          <input
+            class="input has-text-centered"
+            type="text"
+            value="公告标题"
+            disabled
+          />
         </div>
         <div class="column is-4">
-          <input class="input has-text-centered" type="text" placeholder="公告标题" v-model="mailTitle" />
+          <input
+            class="input has-text-centered"
+            type="text"
+            placeholder="公告标题"
+            v-model="mailTitle"
+          />
         </div>
       </div>
       <div class="columns">
-        <div class="column is-12" style="height:400px;">
+        <div class="column is-12" style="height: 400px">
           <div>
             <quill-editor
               ref="myTextEditor"
               v-model="announcementContent"
               :options="editorOption"
-              style="height:300px;"
+              style="height: 300px"
             ></quill-editor>
           </div>
         </div>
@@ -151,10 +263,10 @@
         </div>
       </nav>
     </div>
-    <div class="container" v-if="currFocusTitle=='历史公告'">
+    <div class="container" v-if="currFocusTitle == '历史公告'">
       <p>历史公告 under developing</p>
     </div>
-    <div class="container" v-if="currFocusTitle=='全服跑马灯'">
+    <div class="container" v-if="currFocusTitle == '全服跑马灯'">
       <p>全服跑马灯 under developing</p>
     </div>
   </div>
@@ -185,6 +297,7 @@ export default {
       serverTime: new Date(),
       hotUpdating: false,
       withNotify: false,
+      timeLocker: "jesse",
     };
   },
   components: {
@@ -244,10 +357,48 @@ export default {
       this.hotUpdating = false;
     },
     changeServerTime: async function () {
-      await this.$mojoapi.put(`/web/splan/changetime`, {
-        ip: "10.1.1.239",
-        time: this.format("yyyy-MM-dd hh:mm:ss", this.serverTime),
-      });
+      try {
+        await this.$mojoapi.put(`/web/splan/changetime`, {
+          ip: "10.1.1.239",
+          time: this.format("yyyy-MM-dd hh:mm:ss", this.serverTime),
+        });
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `修改服务器时间错误 : ${e.data || e.message}`
+        );
+        await this.getTimeLocker();
+      }
+    },
+    lockServerTime: async function (bool) {
+      try {
+        if (bool === true) {
+          //锁定
+          await this.$mojoapi.put(`/web/splan/timelocker`);
+        } else {
+          //解锁
+          await this.$mojoapi.del(`/web/splan/timelocker`);
+        }
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `${bool ? "锁定服务器时间错误" : "解锁服务器时间错误"} : ${
+            e.data || e.message
+          }`
+        );
+      }
+      await this.getTimeLocker();
+    },
+    getTimeLocker: async function () {
+      try {
+        const ret = await this.$mojoapi.get(`/web/splan/timelocker`);
+        this.timeLocker = ret.data || "";
+      } catch (e) {
+        this.$store.commit(
+          "error",
+          `获取服务器锁定状态错误 : ${e.data || e.message}`
+        );
+      }
     },
     format: function (format, date) {
       if (!date) {
@@ -331,6 +482,7 @@ export default {
   },
   beforeMount: function () {
     this.getAllDepType();
+    this.getTimeLocker();
   },
 };
 </script>
@@ -345,5 +497,8 @@ export default {
 }
 .datepicker {
   margin-top: 3px;
+}
+#timelocktag {
+  margin-top: 8px;
 }
 </style>

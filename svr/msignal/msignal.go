@@ -35,7 +35,8 @@ func CatchSignal() {
 			mlog.Flush()
 			os.Exit(0)
 		default:
-
+			mlog.Infof("caught signal %s, nop", s.String())
+			mlog.Flush()
 		}
 	}
 }
