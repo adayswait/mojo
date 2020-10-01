@@ -287,13 +287,20 @@ func SplanLockTime(c *fiber.Ctx) error {
 	store := sessions.Get(c)
 	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
-	if group == nil {
+	if group == nil || user == nil {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
 			"data": "session invalid"})
 	}
 	mlog.Infof("%s@%d %s timelocker", user, group, c.Method())
 	if c.Method() == "PUT" {
 		splanTimeLockerRWlock.Lock()
+		if splanTimeLocker != "" {
+			timeLocker := splanTimeLocker
+			splanTimeLockerRWlock.Unlock()
+			data := fmt.Sprintf("already locked by %s", timeLocker)
+			return c.JSON(fiber.Map{"code": global.RET_ERR_SPLAN_TIME_LOCKED,
+				"data": data})
+		}
 		splanTimeLocker = user.(string)
 		splanTimeLockerRWlock.Unlock()
 		dingMsg := fmt.Sprintf("⚠ %s已锁定服务器时间", user)
@@ -303,6 +310,13 @@ func SplanLockTime(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"code": global.RET_OK, "data": nil})
 	} else if c.Method() == "DELETE" {
 		splanTimeLockerRWlock.Lock()
+		if splanTimeLocker != user.(string) && user.(string) != "admin" {
+			timeLocker := splanTimeLocker
+			splanTimeLockerRWlock.Unlock()
+			data := fmt.Sprintf("locked by %s, you can't unlock", timeLocker)
+			return c.JSON(fiber.Map{"code": global.RET_ERR_SPLAN_TIME_LOCKED,
+				"data": data})
+		}
 		splanTimeLocker = ""
 		splanTimeLockerRWlock.Unlock()
 		dingMsg := fmt.Sprintf("⚠ %s已解除服务器时间锁定", user)
@@ -323,16 +337,17 @@ func SplanChangeTime(c *fiber.Ctx) error {
 	store := sessions.Get(c)
 	user := store.Get(global.SESSION_KEY_USER)
 	group := store.Get(global.SESSION_KEY_GROUP)
-	if group == nil {
+	if group == nil || user == nil {
 		return c.JSON(fiber.Map{"code": global.RET_ERR_SESSION_INVALID,
 			"data": "session invalid"})
 	}
 	splanTimeLockerRWlock.RLock()
 	timeLocker := splanTimeLocker
 	splanTimeLockerRWlock.RUnlock()
-	if len(timeLocker) != 0 {
+	if len(timeLocker) != 0 && timeLocker != user.(string) {
 		data := fmt.Sprintf("locked by %s", timeLocker)
-		return c.JSON(fiber.Map{"code": global.RET_ERR, "data": data})
+		return c.JSON(fiber.Map{"code": global.RET_ERR_SPLAN_TIME_LOCKED,
+			"data": data})
 	}
 
 	body := struct {

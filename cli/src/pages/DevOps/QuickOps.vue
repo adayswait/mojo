@@ -130,18 +130,20 @@
           </div>
         </div>
         <div class="column is-2">
-          <a
+          <button
             class="button is-danger is-warning"
             v-if="!timeLocker"
             @click="lockServerTime(true)"
-            >立即锁定</a
           >
-          <a
+            立即锁定
+          </button>
+          <button
             class="button is-danger is-warning"
             v-if="timeLocker"
             @click="lockServerTime(false)"
-            >强行解锁</a
           >
+            解除锁定
+          </button>
         </div>
       </div>
     </div>
