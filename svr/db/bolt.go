@@ -33,6 +33,7 @@ func initDb() {
 		createBucket(global.BUCKET_ITEMS_DESC)
 		createBucket(global.BUCKET_OPS_DEPBIL)
 		createBucket(global.BUCKET_USR_NOTEPD)
+		createBucket(global.BUCKET_USR_ACOUNT)
 		createAdminAccount("m0j0spy")
 	} else {
 		log.Fatal("localDB == nil")

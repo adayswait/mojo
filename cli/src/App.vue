@@ -9,12 +9,9 @@
   </div>
 </template>
 <script>
-import Header from "@/pages/Header.vue";
-import Notification from "@/pages/Notification.vue";
-// import Footer from "@/pages/Footer.vue";
-
+const Header = () => import("@/pages/Header.vue");
+const Notification = () => "@/pages/Notification.vue";
 export default {
-  name: "app",
   components: {
     Header,
     // Footer,

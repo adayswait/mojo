@@ -1,37 +1,37 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import Home from "@/pages/Home.vue"
-import DevOps from "@/pages/DevOps.vue";
-import OpsHome from "@/pages/DevOps/Home.vue"
-import AllDep from "@/pages/DevOps/AllDep.vue";
-import MyDep from "@/pages/DevOps/MyDep.vue";
-import Issue from "@/pages/DevOps/Issue.vue";
-import ManageUsr from "@/pages/DevOps/ManageUsr.vue";
-import NewDep from "@/pages/DevOps/NewDep.vue";
-import QuickOps from "@/pages/DevOps/QuickOps.vue";
-import MacIni from "@/pages/DevOps/MacIni.vue";
-import DepIni from "@/pages/DevOps/DepIni.vue";
-import DevIni from "@/pages/DevOps/DevIni.vue";
-import NewUsr from "@/pages/DevOps/NewUsr.vue";
-import DBview from "@/pages/DevOps/DBview.vue";
-import DevTools from '@/pages/DevOps/DevTools.vue';
-import Note from "@/pages/Note.vue";
-import ElkStack from "@/pages/ElkStack.vue";
-import Kibana from '@/pages/ElkStack/Kibana.vue';
-import IFrame from "@/pages/IFrame.vue";
-// import BasicFrame from '@/pages/IFrame/BasicFrame.vue';
-import Raft from '@/pages/IFrame/Raft.vue';
-import GM239 from '@/pages/IFrame/GM239.vue';
-import GM from '@/pages/IFrame/GM.vue';
-import Plans from '@/pages/IFrame/Plans.vue'
-import ClientHub from '@/pages/IFrame/ClientHub.vue';
-import DevDoc from '@/pages/IFrame/DevDoc.vue'
-import TaomeeDoc from '@/pages/IFrame/TaomeeDoc.vue'
-import Visitor from "@/pages/Visitor.vue";
-import BreakDep from "@/pages/Visitor/BreakDep.vue";
-import Data from "@/pages/Data.vue";
-import e404 from '@/pages/E404.vue';
-import UsrInfo from '@/pages/UsrInfo.vue';
+const Home = () => import("@/pages/Home.vue")
+const DevOps = () => import("@/pages/DevOps.vue")
+const OpsHome = () => import("@/pages/DevOps/Home.vue")
+const AllDep = () => import("@/pages/DevOps/AllDep.vue")
+const MyDep = () => import("@/pages/DevOps/MyDep.vue")
+const Issue = () => import("@/pages/DevOps/Issue.vue")
+const ManageUsr = () => import("@/pages/DevOps/ManageUsr.vue")
+const NewDep = () => import("@/pages/DevOps/NewDep.vue")
+const QuickOps = () => import("@/pages/DevOps/QuickOps.vue")
+const MacIni = () => import("@/pages/DevOps/MacIni.vue")
+const DepIni = () => import("@/pages/DevOps/DepIni.vue")
+const DevIni = () => import("@/pages/DevOps/DevIni.vue")
+const NewUsr = () => import("@/pages/DevOps/NewUsr.vue")
+const DBview = () => import("@/pages/DevOps/DBview.vue")
+const DevTools = () => import('@/pages/DevOps/DevTools.vue')
+const Note = () => import("@/pages/Note.vue")
+const ElkStack = () => import("@/pages/ElkStack.vue")
+const Kibana = () => import('@/pages/ElkStack/Kibana.vue')
+const IFrame = () => import("@/pages/IFrame.vue")
+const Raft = () => import('@/pages/IFrame/Raft.vue')
+const GM239 = () => import('@/pages/IFrame/GM239.vue')
+const GM = () => import('@/pages/IFrame/GM.vue')
+const Plans = () => import('@/pages/IFrame/Plans.vue')
+const ClientHub = () => import('@/pages/IFrame/ClientHub.vue')
+const DevDoc = () => import('@/pages/IFrame/DevDoc.vue')
+const TaomeeDoc = () => import('@/pages/IFrame/TaomeeDoc.vue')
+const Visitor = () => import("@/pages/Visitor.vue")
+const BreakDep = () => import("@/pages/Visitor/BreakDep.vue")
+const Accounting = () => import("@/pages/Visitor/Accounting.vue")
+const Data = () => import("@/pages/Data.vue")
+const e404 = () => import('@/pages/E404.vue')
+const UsrInfo = () => import('@/pages/UsrInfo.vue')
 
 Vue.use(Router)
 
@@ -114,6 +114,10 @@ const router = new Router({
                 {
                     path: "breakdep",
                     component: BreakDep
+                },
+                {
+                    path: "accounting",
+                    component: Accounting
                 },
             ]
         },

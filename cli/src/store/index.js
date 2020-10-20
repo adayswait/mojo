@@ -11,6 +11,7 @@ const state = {
     visible: {
         Login: true,
         Home: false,
+        Header: true,
         Footer: true,
         UsrInfo: false,
     },

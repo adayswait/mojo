@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <header v-if="$store.state.visible.Header">
     <nav
       id="header-nav"
       class="navbar is-fixed-top has-shadow"

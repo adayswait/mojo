@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import Login from "@/pages/Login.vue";
+const Login = () => import("@/pages/Login.vue");
 export default {
   data() {
     return {

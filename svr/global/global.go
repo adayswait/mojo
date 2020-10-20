@@ -60,6 +60,7 @@ const BUCKET_OPS_MACINI = "sys:ops:macini"
 const BUCKET_OPS_DEPINI = "sys:ops:depini"
 const BUCKET_OPS_DEVINI = "sys:ops:devini"
 const BUCKET_OPS_DEPBIL = "sys:ops:depbil"
+const BUCKET_USR_ACOUNT = "sys:usr:acount"
 
 const BUCKET_USR_NOTEPD = "sys:usr:notepd"
 

@@ -1,11 +1,5 @@
 <template>
-  <div class="column is-4 is-offset-4">
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
+  <div >
     <article class="message">
       <div class="message-header">
         <p>Data Page</p>

@@ -4,7 +4,11 @@
 
     <div class="container" v-if="this.$store.state.visible.Home">
       <div class="columns">
-        <div class="assistive-wrap" v-if="!menuVisible" @click="showMenuOnMobile">
+        <div
+          class="assistive-wrap"
+          v-if="!menuVisible"
+          @click="showMenuOnMobile"
+        >
           <div class="assistive-touch">
             <span></span>
           </div>
@@ -15,7 +19,11 @@
               <p class="menu-label">HOME</p>
               <ul class="menu-list">
                 <li @click="focus('主页')">
-                  <router-link to="/devops/home" :class="{'is-active':currFocus=='主页'}">主页</router-link>
+                  <router-link
+                    to="/devops/home"
+                    :class="{ 'is-active': currFocus == '主页' }"
+                    >主页</router-link
+                  >
                 </li>
               </ul>
               <p class="menu-label">CI/CD</p>
@@ -27,46 +35,72 @@
                     <li @click="focus('快捷操作')">
                       <router-link
                         to="/devops/quickops"
-                        :class="{'is-active':currFocus=='快捷操作'}"
-                      >快捷操作</router-link>
+                        :class="{ 'is-active': currFocus == '快捷操作' }"
+                        >快捷操作</router-link
+                      >
                     </li>
                     <li @click="focus('新建部署')">
-                      <router-link to="/devops/newdep" :class="{'is-active':currFocus=='新建部署'}">新建部署</router-link>
+                      <router-link
+                        to="/devops/newdep"
+                        :class="{ 'is-active': currFocus == '新建部署' }"
+                        >新建部署</router-link
+                      >
                     </li>
 
                     <li @click="focus('所有部署')">
-                      <router-link to="/devops/alldep" :class="{'is-active':currFocus=='所有部署'}">所有部署</router-link>
+                      <router-link
+                        to="/devops/alldep"
+                        :class="{ 'is-active': currFocus == '所有部署' }"
+                        >所有部署</router-link
+                      >
                     </li>
                   </ul>
                 </li>
               </ul>
-              <p class="menu-label" v-if="$store.getters.userInfo.group<=1">Configuration</p>
-              <ul class="menu-list" v-if="$store.getters.userInfo.group<=1">
+              <p class="menu-label" v-if="$store.getters.userInfo.group <= 1">
+                Configuration
+              </p>
+              <ul class="menu-list" v-if="$store.getters.userInfo.group <= 1">
                 <li>
                   <a>项目配置</a>
                   <ul>
                     <li @click="focus('机器配置')">
-                      <router-link to="/devops/macini" :class="{'is-active':currFocus=='机器配置'}">机器配置</router-link>
+                      <router-link
+                        to="/devops/macini"
+                        :class="{ 'is-active': currFocus == '机器配置' }"
+                        >机器配置</router-link
+                      >
                     </li>
                     <li @click="focus('部署配置')">
-                      <router-link to="/devops/depini" :class="{'is-active':currFocus=='部署配置'}">部署配置</router-link>
+                      <router-link
+                        to="/devops/depini"
+                        :class="{ 'is-active': currFocus == '部署配置' }"
+                        >部署配置</router-link
+                      >
                     </li>
                     <li @click="focus('开发配置')">
-                      <router-link to="/devops/devini" :class="{'is-active':currFocus=='开发配置'}">开发配置</router-link>
+                      <router-link
+                        to="/devops/devini"
+                        :class="{ 'is-active': currFocus == '开发配置' }"
+                        >开发配置</router-link
+                      >
                     </li>
                   </ul>
                 </li>
               </ul>
-              <p class="menu-label" v-if="$store.getters.userInfo.group<=1">Management</p>
-              <ul class="menu-list" v-if="$store.getters.userInfo.group<=1">
+              <p class="menu-label" v-if="$store.getters.userInfo.group <= 1">
+                Management
+              </p>
+              <ul class="menu-list" v-if="$store.getters.userInfo.group <= 1">
                 <li>
                   <a>成员管理</a>
                   <ul>
                     <li @click="focus('所有成员')">
                       <router-link
                         to="/devops/manageuser"
-                        :class="{'is-active':currFocus=='所有成员'}"
-                      >所有成员</router-link>
+                        :class="{ 'is-active': currFocus == '所有成员' }"
+                        >所有成员</router-link
+                      >
                     </li>
                   </ul>
                 </li>
@@ -79,21 +113,24 @@
                     <li @click="focus('DataView')">
                       <router-link
                         to="/devops/dbview"
-                        :class="{'is-active':currFocus=='DataView'}"
-                        v-if="$store.getters.userInfo.group<=1"
-                      >数据视图</router-link>
+                        :class="{ 'is-active': currFocus == 'DataView' }"
+                        v-if="$store.getters.userInfo.group <= 1"
+                        >数据视图</router-link
+                      >
                     </li>
                     <li @click="focus('DevTools')">
                       <router-link
                         to="/devops/devtools"
-                        :class="{'is-active':currFocus=='DevTools'}"
-                      >开发工具</router-link>
+                        :class="{ 'is-active': currFocus == 'DevTools' }"
+                        >开发工具</router-link
+                      >
                     </li>
                     <li @click="focus('Issue')">
                       <router-link
                         to="/devops/issue"
-                        :class="{'is-active':currFocus=='Issue'}"
-                      >Issue</router-link>
+                        :class="{ 'is-active': currFocus == 'Issue' }"
+                        >Issue</router-link
+                      >
                     </li>
                   </ul>
                 </li>
@@ -102,8 +139,8 @@
           </div>
         </div>
         <div class="column" id="devopsBody" ref="devopsBody">
-          <div id="mask" v-if="this.$store.state.DevOpsMask!=0"></div>
-          <div id="loading" v-if="this.$store.state.DevOpsMask!=0">
+          <div id="mask" v-if="this.$store.state.DevOpsMask != 0"></div>
+          <div id="loading" v-if="this.$store.state.DevOpsMask != 0">
             <div class="loading3">
               <div class="circle circle1">
                 <span></span>
@@ -133,7 +170,7 @@
 </template>
 
 <script>
-import Login from "@/pages/Login.vue";
+const Login = () => import("@/pages/Login.vue");
 export default {
   name: "DevOps",
   data: function () {

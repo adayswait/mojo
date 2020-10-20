@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import NoRights from "@/pages/ErrorPage/NoRights.vue";
+const NoRights = () => import("@/pages/ErrorPage/NoRights.vue");
 export default {
   components: {
     NoRights,

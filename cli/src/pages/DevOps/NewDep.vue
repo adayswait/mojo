@@ -2,21 +2,40 @@
   <div class="box">
     <div class="columns">
       <div class="column is-2">
-        <input class="input has-text-centered" type="text" value="上线单标题" disabled />
+        <input
+          class="input has-text-centered"
+          type="text"
+          value="上线单标题"
+          disabled
+        />
       </div>
       <div class="column is-4">
-        <input class="input is-primary" type="text" v-model="depTitle" placeholder="请输入此上线单标题" />
+        <input
+          class="input is-primary"
+          type="text"
+          v-model="depTitle"
+          placeholder="请输入此上线单标题"
+        />
       </div>
     </div>
     <div class="columns">
       <div class="column is-2">
-        <input class="input has-text-centered" type="text" value="服务类型" disabled />
+        <input
+          class="input has-text-centered"
+          type="text"
+          value="服务类型"
+          disabled
+        />
       </div>
       <div class="column is-4">
         <div class="dropdown is-hoverable">
           <div class="dropdown-trigger">
-            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-              {{currServerType||"点击选择服务类型"}}
+            <button
+              class="button"
+              aria-haspopup="true"
+              aria-controls="dropdown-menu"
+            >
+              {{ currServerType || "点击选择服务类型" }}
               <span class="icon is-small">
                 <i class="fas fa-angle-down" aria-hidden="true"></i>
               </span>
@@ -27,9 +46,10 @@
               <tr v-for="t in depTypeList" :key="t">
                 <a
                   class="dropdown-item"
-                  :class="{'is-active':t==currServerType}"
+                  :class="{ 'is-active': t == currServerType }"
                   @click="changeServerType(t)"
-                >{{t}}</a>
+                  >{{ t }}</a
+                >
               </tr>
             </div>
           </div>
@@ -38,10 +58,19 @@
     </div>
     <div class="columns">
       <div class="column is-2">
-        <input class="input has-text-centered" type="text" value="版本提交时间" disabled />
+        <input
+          class="input has-text-centered"
+          type="text"
+          value="版本提交时间"
+          disabled
+        />
       </div>
       <div class="column is-3">
-        <date-picker v-model="versionTimeRange" range :lang="lang"></date-picker>
+        <date-picker
+          v-model="versionTimeRange"
+          range
+          :lang="lang"
+        ></date-picker>
         <span class="tag is-dark is-small">默认最新15条</span>
       </div>
     </div>
@@ -50,11 +79,15 @@
         <a
           class="button is-primary is-fullwidth"
           @click="updateSvnLog(true)"
-          :class="{'is-loading':isLoading}"
-        >刷新版本</a>
+          :class="{ 'is-loading': isLoading }"
+          >刷新版本</a
+        >
       </div>
       <div class="column">
-        <div class="dropdown" :class="{'is-hoverable':versionMap[currServerType]}">
+        <div
+          class="dropdown"
+          :class="{ 'is-hoverable': versionMap[currServerType] }"
+        >
           <div class="dropdown-trigger">
             <button
               class="button"
@@ -62,7 +95,7 @@
               aria-controls="dropdown-menu"
               @click="showVersion"
             >
-              {{currVersion||"点击选择待发布版本"}}
+              {{ currVersion || "点击选择待发布版本" }}
               <span class="icon is-small">
                 <i class="fas fa-angle-down" aria-hidden="true"></i>
               </span>
@@ -73,9 +106,10 @@
               <tr v-for="version in versionList" :key="version">
                 <a
                   class="dropdown-item"
-                  :class="{'is-active':currVersion===version}"
+                  :class="{ 'is-active': currVersion === version }"
                   @click="selectVersion(version)"
-                >{{version}}</a>
+                  >{{ version }}</a
+                >
               </tr>
             </div>
           </div>
@@ -87,8 +121,8 @@
         <div class="box">
           <div class="content">
             <h4>版本信息</h4>
-            <tr v-for="(msg,i) in currMessage" :key="i">
-              <p>{{msg}}</p>
+            <tr v-for="(msg, i) in currMessage" :key="i">
+              <p>{{ msg }}</p>
             </tr>
           </div>
         </div>
@@ -98,21 +132,31 @@
       <div class="column">
         <div class="control">
           <label class="radio">
-            <input type="radio" name="answer" :checked="depRadio==1" @click="changeRadio(1)" />
+            <input
+              type="radio"
+              name="answer"
+              :checked="depRadio == 1"
+              @click="changeRadio(1)"
+            />
             全服上线
           </label>
           <label class="radio">
-            <input type="radio" name="answer" :checked="depRadio==2" @click="changeRadio(2)" />
+            <input
+              type="radio"
+              name="answer"
+              :checked="depRadio == 2"
+              @click="changeRadio(2)"
+            />
             自定义上线
           </label>
         </div>
       </div>
     </div>
-    <div class="columns" v-if="depRadio==2">
+    <div class="columns" v-if="depRadio == 2">
       <div class="column is-12">
-        <label class="checkbox" v-for="(k,i) in depRadioList" :key="i">
+        <label class="checkbox" v-for="(k, i) in depRadioList" :key="i">
           <input type="checkbox" v-model="checkedDepRadioList" :value="k" />
-          {{k}}
+          {{ k }}
         </label>
       </div>
     </div>
@@ -121,7 +165,11 @@
         <a class="button is-primary is-fullwidth" @click="submit">提交上线单</a>
       </div>
       <div class="column is-3">
-        <a class="button is-primary is-fullwidth is-warning" @click="submitNewest">一键提交最新版</a>
+        <a
+          class="button is-primary is-fullwidth is-warning"
+          @click="submitNewest"
+          >一键提交最新版</a
+        >
       </div>
     </div>
   </div>
@@ -184,7 +232,6 @@ export default {
         return this.$store.commit("warn", `请先选择服务类型`);
       }
       let svnStartTime, svnEndTime;
-      window.console.log(this.versionTimeRange);
       const reg = /^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))$|^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))\s((?:[0-1]?[0-9]{1}|2[0-3])):([0-5]?[0-9]{1}):([0-5]?[0-9]{1})$|^([0-9]{4})-((?:0[1-9]|[1-9]|1[1-2]))-((?:(?:0[1-9]|[1-9])|1[0-9]|2[0-9]|3[0-1]))\s((?:[0-1]?[0-9]{1}|2[0-3])):([0-5]?[0-9]{1}):([0-5]?[0-9]{1})\.?(\d{3})+$/;
       if (this.versionTimeRange && this.versionTimeRange.length == 2) {
         svnStartTime = this.format("yyyy-MM-dd", this.versionTimeRange[0]);

@@ -1,21 +1,24 @@
 <template>
   <div class="box">
-    <NoRights v-if="!($store.getters.userInfo.group<=1)" />
-    <div v-if="$store.getters.userInfo.group<=1">
+    <NoRights v-if="!($store.getters.userInfo.group <= 1)" />
+    <div v-if="$store.getters.userInfo.group <= 1">
       <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-          <li v-if="this.depth>=0">
+          <li v-if="this.depth >= 0">
             <a @click="setDepth(0)">ROOT</a>
           </li>
-          <li v-if="this.depth>=1">
-            <a href="#">表 {{this.breadcrumbPath[1]}}</a>
+          <li v-if="this.depth >= 1">
+            <a href="#">表 {{ this.breadcrumbPath[1] }}</a>
           </li>
-          <li v-if="this.depth>=2">
-            <a href="#">键 {{this.breadcrumbPath[2]}}</a>
+          <li v-if="this.depth >= 2">
+            <a href="#">键 {{ this.breadcrumbPath[2] }}</a>
           </li>
         </ul>
       </nav>
-      <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==0">
+      <table
+        class="table is-striped is-fullwidth has-text-centered"
+        v-if="this.depth == 0"
+      >
         <thead>
           <tr>
             <th>
@@ -36,14 +39,25 @@
                 id="opsbtn"
                 class="button is-primary is-vcentered is-small"
                 @click="viewTable(item)"
-              >查看</button>
-              <button id="opsbtn" class="button is-danger is-small" @click="deleteTable(item)">删除</button>
+              >
+                查看
+              </button>
+              <button
+                id="opsbtn"
+                class="button is-danger is-small"
+                @click="deleteTable(item)"
+              >
+                删除
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <table class="table is-striped is-fullwidth has-text-centered" v-if="this.depth==1">
+      <table
+        class="table is-striped is-fullwidth has-text-centered"
+        v-if="this.depth == 1"
+      >
         <thead>
           <tr>
             <th>
@@ -53,25 +67,37 @@
               <abbr title="值">值</abbr>
             </th>
             <th>
-              <a class="button is-small is-rounded is-success is-vcentered" @click="newKv">新建</a>
+              <a
+                class="button is-small is-rounded is-success is-vcentered"
+                @click="newKv"
+                >新建</a
+              >
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="k in this.keyValueList" :key="k[0]">
-            <td style="width:20%">
+            <td style="width: 20%">
               <input class="input" type="text" v-model="k[0]" />
             </td>
             <td>
               <input class="input is-info" type="text" v-model="k[1]" />
             </td>
-            <td style="width:20%">
+            <td style="width: 20%">
               <button
                 id="opsbtn"
                 class="button is-primary is-vcentered is-small"
                 @click="changeKey(k)"
-              >修改</button>
-              <button id="opsbtn" class="button is-danger is-small" @click="deleteKey(k)">删除</button>
+              >
+                修改
+              </button>
+              <button
+                id="opsbtn"
+                class="button is-danger is-small"
+                @click="deleteKey(k)"
+              >
+                删除
+              </button>
             </td>
           </tr>
         </tbody>
@@ -81,7 +107,7 @@
 </template>
 
 <script>
-import NoRights from "@/pages/ErrorPage/NoRights.vue";
+const NoRights = () => import("@/pages/ErrorPage/NoRights.vue");
 export default {
   components: {
     NoRights,
