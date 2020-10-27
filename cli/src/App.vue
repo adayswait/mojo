@@ -10,7 +10,7 @@
 </template>
 <script>
 const Header = () => import("@/pages/Header.vue");
-const Notification = () => "@/pages/Notification.vue";
+const Notification = () => import("@/pages/Notification.vue");
 export default {
   components: {
     Header,
