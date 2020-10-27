@@ -1,8 +1,13 @@
 <template>
-<div>
-  <iframe title="GM239" width="100%" :height="iframeHeight" src="http://10.1.1.239">
-  </iframe>
-</div>
+  <div>
+    <iframe
+      title="GM239"
+      width="100%"
+      :height="iframeHeight"
+      :src="`http://s.61.com/?ip=123.206.181.31&port=9999&log=true&showPP=false`"
+    >
+    </iframe>
+  </div>
 </template>
 
 <script>

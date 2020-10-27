@@ -28,7 +28,7 @@ const DevDoc = () => import('@/pages/IFrame/DevDoc.vue')
 const TaomeeDoc = () => import('@/pages/IFrame/TaomeeDoc.vue')
 const Visitor = () => import("@/pages/Visitor.vue")
 const BreakDep = () => import("@/pages/Visitor/BreakDep.vue")
-const Accounting = () => import("@/pages/Visitor/Accounting.vue")
+// const Accounting = () => import("@/pages/Visitor/Accounting.vue")
 const Data = () => import("@/pages/Data.vue")
 const e404 = () => import('@/pages/E404.vue')
 const UsrInfo = () => import('@/pages/UsrInfo.vue')
@@ -115,10 +115,10 @@ const router = new Router({
                     path: "breakdep",
                     component: BreakDep
                 },
-                {
-                    path: "accounting",
-                    component: Accounting
-                },
+                // {
+                //     path: "accounting",
+                //     component: Accounting
+                // },
             ]
         },
         {

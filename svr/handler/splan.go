@@ -19,37 +19,69 @@ import (
 	"time"
 )
 
-var onlineHotUpdate = "pveBoss.json;pveDrop.json;pveEvent.json;festivalCarnivalReward.json;item.json;petEgg.json;" +
-	"petEvo.json;petFight.json;dropUnit.json;petLearnSkill.json;prizePool.json;eventManage.json;pet.json;exp.json;" +
-	"petToken.json;petSkillLvUp.json;lottery.json;activityTask.json;mapMonster.json;evoType.json;obtainGaiya.json;" +
-	"timeTravel.json;extremeChallenge.json;itemElemType.json;extremeLimit.json;fightSkills.json;shop.json;" +
-	"battleshop.json;laddershop.json;mysteriousShop.json;startrekshop.json;shopmanage.json;buyEnergy.json;" +
-	"releaseShop.json;expMechine.json;teamFight.json;monthSign.json;petCollect.json;seerQuiz.json;kxPackage.json;" +
-	"eventBossChallenge.json;eventPetAnaysis.json;activityExchange.json;achieve.json;military.json;treasureHunt.json;" +
-	"treasureWish.json;dailyTask.json;activityPoint.json;mainTask.json;mainTaskData.json;dailyDelegateTask.json;" +
-	"teamDonate.json;teamShop.json;teamShopPackage.json;teamProductionItems.json;teamTask.json;teamTech.json;" +
-	"petImprovement.json;improvementTime.json;encourage.json;weekSign.json;firstRecharge.json;getPhysical.json;" +
-	"suit.json;itemExchange.json;pvpLevel.json;equip.json;plantDescription.json;pvePlanet.json;pveSPT.json;" +
-	"features.json;eggExchange.json;title.json;mapItem.json;geneRecombine.json;vipPrivilege.json;starTrekBuy.json;" +
-	"pvePlanetBuy.json;vipLevelAward.json;vipWeekAward.json;monthCardFix.json;additive_attribute.json;" +
-	"natureRandom.json;petClass.json;talent.json;carnival.json;teamDonate.json;featureRandom.json;talentRandom.json;" +
-	"sevenPackage.json;buyCoin.json;petTest.json;starTrek.json;rankList.json;sns.json;invite.json;medalCondition.json;" +
-	"medal.json;fightBoss.json;braveTower.json;coolDown.json;springFestivalBag.json;dailyPayEvent.json;partyBoss.json;" +
-	"studyPoint.json;elemTypes.json;fightRelation.json;mainPetTraining.json;leadAwaken.json;springRedbags.json;" +
-	"darkArena.json;activation.json;activityWeeklyStory.json;activityPetExplore.json;attr.json;newInvention.json;" +
-	"activityPetTalent.json;superPetFight.json;eventBossBottom.json;extraDrop.json;petSkin.json;skinBuy.json;" +
-	"puniChallenge.json;skillRune.json;activityTimeLimit.json;shopMass.json;shopConsole.json;childrensDayRecharge.json;" +
-	"shopPackage.json;newcomerPetCollect.json;activityCard.json;newPrizePool.json;newLottery.json;battleLadder.json;" +
-	"roomUnit.json;castPvp.json;activityTaskReset.json;battleCondition.json;mapBossChallenge.json;mapBossBottom.json;" +
-	"mapBossRank.json;petTrain.json;VIPshop.json;activityLuckdraw.json;activityPetStory.json;rechargeBenefits.json;" +
-	"battlePass.json;battlePassTask.json;payPrizeBrandNew.json;firstPrizePool.json;dropExchange.json;checkIn.json;" +
-	"costPack.json;touchEvent.json;monthPet.json;pushPresent.json;activityPool.json;activityPoolFloor.json;" +
-	"activityLuckFloor.json;activityFreeLuckydraw.json;randomMonster.json;holidayShop.json;payEquipEvent.json;" +
-	"activityRank.json;petExchange.json;activityMission.json;enchantingDrop.json;enchantingLuckdraw.json;" +
-	"enchanting.json;petKingSeason.json;petKingRank.json;auxiliaryTaskReset;battleTypeBuff.json;" +
-	"battleAnswer.json;activityMaze.json;risisContractTask.json;activityAffect.json;nonoSkin.json;discountShop.json"
-
-var battleHotUpdate = "fightSkills.json;fightAffects.json;fightRelation.json;elemTypes.json;fightFactors.json"
+var onlineHotUpdate = "VIPshop.json;achieve.json;activation.json;" +
+	"activityAffect.json;activityCard.json;activityExchange.json" +
+	"activityFreeLuckydraw.json;activityFusionItem.json;" +
+	"activityLuckFloor.json;activityLuckdraw.json;activityMail.json;" +
+	"activityMaze.json;activityMission.json;activityPetExplore.json;" +
+	"activityPetStory.json;activityPetTalent.json;activityPoint.json;" +
+	"activityPool.json;activityPoolFloor.json;activityRank.json;" +
+	"activitySpecialAffect.json;activityTask.json;activityTaskReset.json;" +
+	"activityTimeLimit.json;activityWeeklyStory.json;additive_attribute.json;" +
+	"affectBuff.json;africanChieftain.json;auxiliaryTaskReset.json;" +
+	"battleAnswer.json;battleCondition.json;battleLadder.json;" +
+	"battlePass.json;battlePassTask.json;battleTypeBuff.json;battleshop.json;" +
+	"braveTower.json;buildEvent.json;buyCoin.json;buyEnergy.json;" +
+	"carnival.json;castPvp.json;checkIn.json;childrensDayRecharge.json;" +
+	"climbTower.json;collect.json;coolDown.json;costPack.json;" +
+	"dailyDelegateTask.json;dailyDiscount.json;dailyPayEvent.json;" +
+	"dailyTask.json;darkArena.json;discountShop.json;dropExchange.json;" +
+	"dropUnit.json;eggExchange.json;eggRank.json;elementChallenge.json;" +
+	"eliteStar.json;enchanting.json;enchantingDrop.json;" +
+	"enchantingLuckdraw.json;encourage.json;equip.json;eventBossBottom.json;" +
+	"eventBossChallenge.json;eventManage.json;eventPetAnaysis.json;" +
+	"eventTower.json;evoType.json;exp.json;expMechine.json;extraDrop.json;" +
+	"extremeChallenge.json;featureRandom.json;featureRandom.json;" +
+	"features.json;festivalCarnivalReward.json;fightAxis.json;fightBoss.json;" +
+	"firstPrizePool.json;firstRecharge.json;gachaShop.json;" +
+	"galaxyDescription.json;geneRecombine.json;holidayShop.json;item.json;" +
+	"itemElemType.json;itemExchange.json;itemProduction.json;items.json;" +
+	"kxPackage.json;laddershop.json;leadAwaken.json;lightAndDark.json;" +
+	"lottery.json;mainPetTraining.json;mainTask.json;mainTaskData.json;" +
+	"maintenanceCost.json;mapBossBottom.json;mapBossChallenge.json;" +
+	"mapBossRank.json;mapItem.json;mapMonster.json;medal.json;" +
+	"medalCondition.json;medalShine.json;military.json;mineralCollector.json;" +
+	"mirrorChallenge.json;module.json;monthPet.json;multiExchange.json;" +
+	"nationalPackage.json;natureRandom.json;newInvention.json;newLottery.json;" +
+	"newPrizePool.json;newPrizePool_2.json;newcomerPetCollect.json;" +
+	"nonoSkin.json;obtainGaiya.json;obtainZafiro.json;partyBoss.json;" +
+	"payEquipEvent.json;payPrize.json;payPrizeBrandNew.json;" +
+	"payPrizeConfig.json;payPrizeNew.json;payPrizeTreasure.json;petClass.json;" +
+	"petCollect.json;petCollect.json;petEgg.json;petEvo.json;petExchange.json;" +
+	"petFight.json;petGiftReq.json;petHire.json;petImprovement.json;" +
+	"petKingRank.json;petKingSeason.json;petLearnSkill.json;petNatureReq.json;" +
+	"petProperty.json;petSkillLvUp.json;petSkin.json;petTest.json;" +
+	"petToken.json;petTrain.json;petbook.json;planetExplorePrize.json;" +
+	"planetRankPrize.json;plantDescription.json;prizePool.json;" +
+	"puniChallenge.json;pushPresent.json;pveBoss.json;pveDrop.json;" +
+	"pveEvent.json;pvePlanet.json;pvePlanetBuy.json;pvePlanetRank.json;" +
+	"pveSPT.json;pvpLevel.json;pvpLevel.json;pvpWeeklyList.json;" +
+	"rabbitTest.json;randomEvent.json;randomMonster.json;randomPetFight.json;" +
+	"rankList.json;rechargeBenefits.json;redPointConfig.json;releaseShop.json;" +
+	"riddle.json;risisContractTask.json;rogerPackage.json;" +
+	"rogerPackagePrize.json;roomMaterial.json;roomUnit.json;roomUnitPool.json;" +
+	"route.json;seerQuiz.json;serverName.json;sevenPackage.json;shop.json;" +
+	"shopConsole.json;shopMass.json;shopPackage.json;shopmanage.json;" +
+	"skillRune.json;skinBuy.json;sns.json;springFestivalBag.json;" +
+	"springRedbags.json;starLevelPackage.json;starTrek.json;starTrekBuy.json;" +
+	"startrekshop.json;studyPoint.json;suit.json;superPetFight.json;" +
+	"talent.json;talentRandom.json;teamBossFight.json;" +
+	"teamBossFightReward.json;teamDonate.json;teamFight.json;teamInfo.json;" +
+	"teamProductionItems.json;teamShop.json;teamShopPackage.json;" +
+	"teamTask.json;teamTech.json;timeTravel.json;tips.json;title.json;" +
+	"touchEvent.json;treasureHunt.json;treasureMap.json;treasureWish.json;" +
+	"turntable.json;vipForeverGift.json;vipLevelAward.json;vipPrivilege.json;" +
+	"vipWeekAward.json;weekSign.json;wishingTree.json;"
 
 var splanTimeLocker = ""
 var splanTimeLockerRWlock = &sync.RWMutex{}

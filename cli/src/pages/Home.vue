@@ -47,10 +47,10 @@
           <div class="tile is-8 is-parent" id="card">
             <!-- :to="{path:'/iframe/basic',query:{srcurl:'http://10.1.1.239'}}" -->
             <router-link to="/iframe/gm239" class="tile is-child box" id="card_gm239">
-              <p class="title">内网GM</p>
+              <p class="title">s.61.com</p>
               <div class="content">
                 <p>
-                  <strong>内网QA服</strong>
+                  <strong>白名单直接进入, 打印日志</strong>
                 </p>
               </div>
             </router-link>

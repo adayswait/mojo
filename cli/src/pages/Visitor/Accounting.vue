@@ -125,7 +125,10 @@
                   <!-- <button class="button is-warning is-small is-vcentered">
                     修改
                   </button> -->
-                  <button class="button is-danger is-small is-vcentered">
+                  <button
+                    class="button is-danger is-small is-vcentered"
+                    @click="deleteBill(kv[0])"
+                  >
                     删除
                   </button>
                 </td>
@@ -350,6 +353,10 @@ export default {
           value: JSON.stringify(data),
         });
       }
+      for (let i = 0; i < this.CURRDATA.length; i++) {
+        this.CURRDATA[i] = [];
+      }
+      await this.getAllBills();
     },
     async getAllBills() {
       const ret = await this.$mojoapi.get(
@@ -359,7 +366,15 @@ export default {
       for (let i = 0; i < ret.data.length; i += 2) {
         data.push([ret.data[i], JSON.parse(ret.data[i + 1])]);
       }
+      data.sort((a, b) => {
+        return parseInt(b[0]) - parseInt(a[0]);
+      });
       this.allBills = data;
+      this.changeCurrChart(this.currChart);
+    },
+    async deleteBill(id) {
+      await this.$mojoapi.del(`/web/db/${this.accountingBucketName}/${id}`);
+      await this.getAllBills();
     },
   },
   mounted() {
