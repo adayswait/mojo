@@ -83,6 +83,8 @@ var onlineHotUpdate = "VIPshop.json;achieve.json;activation.json;" +
 	"turntable.json;vipForeverGift.json;vipLevelAward.json;vipPrivilege.json;" +
 	"vipWeekAward.json;weekSign.json;wishingTree.json;"
 
+var battleHotUpdate = "fightSkills.json;fightAffects.json;fightRelation.json;elemTypes.json;fightFactors.json"
+
 var splanTimeLocker = ""
 var splanTimeLockerRWlock = &sync.RWMutex{}
 
