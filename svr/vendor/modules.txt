@@ -1,4 +1,4 @@
-# github.com/andybalholm/brotli v1.0.0
+# github.com/andybalholm/brotli v1.0.4
 github.com/andybalholm/brotli
 # github.com/boltdb/bolt v1.3.1
 ## explicit
@@ -43,7 +43,7 @@ github.com/google/goterm/term
 # github.com/google/uuid v1.1.2
 ## explicit
 github.com/google/uuid
-# github.com/klauspost/compress v1.11.0
+# github.com/klauspost/compress v1.15.0
 github.com/klauspost/compress/flate
 github.com/klauspost/compress/gzip
 github.com/klauspost/compress/zlib
@@ -57,26 +57,26 @@ github.com/savsgio/gotils
 github.com/tinylib/msgp/msgp
 # github.com/valyala/bytebufferpool v1.0.0
 github.com/valyala/bytebufferpool
-# github.com/valyala/fasthttp v1.16.0
+# github.com/valyala/fasthttp v1.34.0
 ## explicit
 github.com/valyala/fasthttp
 github.com/valyala/fasthttp/fasthttputil
 github.com/valyala/fasthttp/reuseport
 github.com/valyala/fasthttp/stackless
-# github.com/valyala/tcplisten v0.0.0-20161114210144-ceec8f93295a
+# github.com/valyala/tcplisten v1.0.0
 github.com/valyala/tcplisten
-# golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+# golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 ## explicit
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/chacha20
 golang.org/x/crypto/curve25519
+golang.org/x/crypto/curve25519/internal/field
 golang.org/x/crypto/ed25519
-golang.org/x/crypto/ed25519/internal/edwards25519
+golang.org/x/crypto/internal/poly1305
 golang.org/x/crypto/internal/subtle
-golang.org/x/crypto/poly1305
 golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
-# golang.org/x/sys v0.0.0-20200909081042-eff7692f9009
+# golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
